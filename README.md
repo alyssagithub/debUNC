@@ -2,5 +2,5 @@
 like sUNC and UNC but better
 # Loadstring
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/alyssagithub/debUNC/refs/heads/main/debUNC.luau"))()
+loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.luau"))()
 ```
