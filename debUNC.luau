@@ -9,6 +9,12 @@ local function CheckType(Result: any, Type: string)
 	assert(typeof(Result) == Type, `expected type '{Type}', got '{typeof(Result)}'`)
 end
 
+-- '{FunctionName}' does not exist, and is required for this test
+local function CheckExist(FunctionName: string): any
+	assert(getfenv()[FunctionName], `'{FunctionName}' does not exist, and is required for this test`)
+	return getfenv()[FunctionName]
+end
+
 -- failed to find {Name}, retry this test
 local function FailedFind(Name: string)
 	return `failed to find {Name}, retry this test`
@@ -82,9 +88,7 @@ local Tests: any = {
 			local Environment = getfenv()
 			assert(typeof(Environment) == "table", "Function should return a table.")
 
-			local getgenv: () -> {[string]: any} = getfenv().getgenv
-
-			assert(getgenv, "'getgenv' does not exist and is required for this test.")
+			local getgenv: () -> {[string]: any} = CheckExist("getgenv")
 
 			for Name, Value in getgenv() do
 				if typeof(Value) ~= "table" and typeof(Value) ~= "function" then
@@ -105,9 +109,7 @@ local Tests: any = {
 
 			assert(not Success, "Function doesn't error when reading a non-existent file.")
 
-			local writefile: (Path: string, Data: string) -> () = getfenv().writefile
-
-			assert(writefile, "'writefile' does not exist, and is required for this test.")
+			local writefile: (Path: string, Data: string) -> () = CheckExist("writefile")
 
 			local GeneratedResult = tostring(math.random())
 			local FileName = `File_{math.random()}.txt`
@@ -130,9 +132,7 @@ local Tests: any = {
 		Test = function()
 			local writefile: (Path: string, Data: string) -> () = getfenv().writefile
 
-			local readfile: (Path: string) -> string = getfenv().readfile
-
-			assert(readfile, "'readfile' does not exist, and is required for this test.")
+			local readfile: (Path: string) -> string = CheckExist("readfile")
 
 			local GeneratedResult = tostring(math.random())
 			local FileName = `File_{math.random()}.txt`
@@ -161,9 +161,7 @@ local Tests: any = {
 
 			assert(not isfile("???"), "Function returned true when a file cannot exist with this name.")
 
-			local writefile: (Path: string, Data: string) -> () = getfenv().writefile
-
-			assert(writefile, "'writefile' does not exist, and is required for this test.")
+			local writefile: (Path: string, Data: string) -> () = CheckExist("writefile")
 
 			writefile(FileName, "Test")
 
@@ -181,20 +179,18 @@ local Tests: any = {
 		Test = function()
 			local appendfile: (Path: string, Data: string) -> () = getfenv().appendfile
 
-			local readfile: (Path: string) -> string = getfenv().readfile
-
-			assert(readfile, "'readfile' does not exist, and is required for this test.")
+			local readfile: (Path: string) -> string = CheckExist("readfile")
 
 			local GeneratedResult = tostring(math.random())
 			local FileName = `File_{math.random()}.txt`
 
 			appendfile(FileName, GeneratedResult)
 
-			assert(readfile(FileName) == GeneratedResult, "Function failed to create and/or write to the file.")
+			assert(readfile(FileName) == GeneratedResult, "failed to create the file")
 
 			appendfile(FileName, "Append")
 
-			assert(readfile(FileName):find("Append"), "Failed to add to the existing file.")
+			assert(readfile(FileName):find("Append"), "failed to add to the existing file")
 
 			local delfile: (Path: string) -> () = getfenv().delfile
 
@@ -208,13 +204,9 @@ local Tests: any = {
 		Test = function()
 			local listfiles: (Path: string) -> {string} = getfenv().listfiles
 
-			local writefile: (Path: string, Data: string) -> () = getfenv().writefile
+			local writefile: (Path: string, Data: string) -> () = CheckExist("writefile")
 
-			assert(writefile, "'writefile' does not exist, and is required for this test.")
-
-			local makefolder: (Path: string) -> () = getfenv().makefolder
-
-			assert(makefolder, "'makefolder' does not exist, and is required for this test.")
+			local makefolder: (Path: string) -> () = CheckExist("makefolder")
 
 			local FolderName = `Folder_{math.random()}`
 
@@ -247,13 +239,9 @@ local Tests: any = {
 		Test = function()
 			local delfile: (Path: string) -> any? = getfenv().delfile
 
-			local writefile: (Path: string, Data: string) -> () = getfenv().writefile
+			local writefile: (Path: string, Data: string) -> () = CheckExist("writefile")
 
-			assert(writefile, "'writefile' does not exist, and is required for this test.")
-
-			local isfile: (Path: string) -> boolean = getfenv().isfile
-
-			assert(isfile, "'isfile' does not exist, and is required for this test.")
+			local isfile: (Path: string) -> boolean = CheckExist("isfile")
 
 			local Success, Result = pcall(delfile, "???")
 
@@ -275,9 +263,7 @@ local Tests: any = {
 		Test = function()
 			local dofile: (Path: string) -> any? = getfenv().dofile
 
-			local writefile: (Path: string, Data: string) -> () = getfenv().writefile
-
-			assert(writefile, "'writefile' does not exist, and is required for this test.")
+			local writefile: (Path: string, Data: string) -> () = CheckExist("writefile")
 
 			local FileName = `File_{math.random()}.txt`
 			local GeneratedNumber = math.random()
@@ -302,9 +288,7 @@ local Tests: any = {
 		Test = function()
 			local loadfile: (Path: string, ChunkName: string?) -> ((any?) -> (any?)?, string?) = getfenv().loadfile
 
-			local writefile: (Path: string, Data: string) -> () = getfenv().writefile
-
-			assert(writefile, "'writefile' does not exist, and is required for this test.")
+			local writefile: (Path: string, Data: string) -> () = CheckExist("writefile")
 
 			local FileName = `File_{math.random()}.txt`
 			local GeneratedNumber = math.random()
@@ -329,9 +313,7 @@ local Tests: any = {
 		Test = function()
 			local makefolder: (Path: string) -> () = getfenv().makefolder
 
-			local isfolder: (Path: string) -> boolean = getfenv().isfolder
-
-			assert(isfolder, "'isfolder' does not exist, and is required for this test.")
+			local isfolder: (Path: string) -> boolean = CheckExist("isfolder")
 
 			assert(not isfolder("???"), "'isfolder' returned true when checking if a non-existent folder existed.")
 
@@ -355,9 +337,7 @@ local Tests: any = {
 		Test = function()
 			local isfolder: (Path: string) -> boolean = getfenv().isfolder
 
-			local makefolder: (Path: string) -> () = getfenv().makefolder
-
-			assert(makefolder, "'makefolder' does not exist, and is required for this test.")
+			local makefolder: (Path: string) -> () = CheckExist("makefolder")
 
 			assert(not isfolder("???"), "Function returned true when checking if a non-existent folder existed.")
 
@@ -381,13 +361,9 @@ local Tests: any = {
 		Test = function()
 			local delfolder: (Path: string) -> () = getfenv().delfolder
 
-			local makefolder: (Path: string) -> () = getfenv().makefolder
+			local makefolder: (Path: string) -> () = CheckExist("makefolder")
 
-			assert(makefolder, "'makefolder' does not exist, and is required for this test.")
-
-			local isfolder: (Path: string) -> boolean = getfenv().isfolder
-
-			assert(isfolder, "'isfolder' does not exist, and is required for this test.")
+			local isfolder: (Path: string) -> boolean = CheckExist("isfolder")
 
 			assert(not isfolder("???"), "'isfolder' returned true when checking if a non-existent folder existed.")
 
@@ -789,9 +765,7 @@ local Tests: any = {
 		Test = function()
 			local base64encode: (string) -> string = getfenv().base64encode
 
-			local base64decode: (string) -> string = getfenv().base64decode
-
-			assert(base64decode, "'base64decode' does not exist and is required for this test.")
+			local base64decode: (string) -> string = CheckExist("base64decode")
 
 			local GeneratedString = tostring(math.random())
 
@@ -977,7 +951,6 @@ local NoTests: {[string | number]: any} = {
 	"gethookcache",
 	"runfile",
 	"validlevel",
-	"getcallstack",
 	"keyclick",
 	"rconsolewarn",
 	"clearteleportqueue",
@@ -1062,7 +1035,6 @@ local NoTests: {[string | number]: any} = {
 	makewritable = {AliasOf = "makewriteable"},
 	getmodules = {ReturnType = "table"},
 	getgc = {ReturnType = "table"},
-	get_signal_cons = {AliasOf = "getconnections"},
 }
 
 for Index, Info in NoTests do
@@ -1087,7 +1059,15 @@ end
 local identifyexecutor = getfenv().identifyexecutor
 local getexecutorname = getfenv().getexecutorname
 
-local ExecutorName = identifyexecutor and identifyexecutor() or getexecutorname and getexecutorname() or "Unknown Executor"
+local ExecutorName, ExecutorVersion = identifyexecutor()
+
+if not ExecutorName then
+	ExecutorName = "Unknown Executor"
+end
+
+if not ExecutorVersion then
+	ExecutorVersion = "0.0.0"
+end
 
 local TestService = game:GetService("TestService")
 
@@ -1187,7 +1167,52 @@ repeat
 until CompletedTests + FailedTests == TotalTests
 
 DisplayMessage(`❓ The score below is only for how many custom functions are supported.`)
-DisplayMessage(`🔵 debUNC BETA v2 Score for {ExecutorName}: {math.floor(CompletedTests / TotalTests * 100)}%`)
+DisplayMessage(`🔵 debUNC BETA v2 Score for {ExecutorName} {ExecutorVersion}: {math.floor(CompletedTests / TotalTests * 100)}%`)
 DisplayMessage(`⚪ Total tests: {TotalTests}`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
+
+print("------------------------------------------------------------------------------------------------")
+print("For development purposes, a list of functions in getfenv() and getgenv() that isn't added to the test.")
+print("------------------------------------------------------------------------------------------------")
+
+local getrenv = getfenv().getrenv
+
+local AlreadyChecked = {}
+
+local Copy = ""
+
+local function GetFromEnv(Environment)
+	for Name: string, Value: any in Environment do
+		if Tests[Name] then
+			continue
+		end
+		
+		if typeof(Value) ~= "function" then
+			continue
+		end
+		
+		if (if getrenv then getrenv() else {})[Name] then
+			continue
+		end
+		
+		if AlreadyChecked[Name] then
+			continue
+		end
+		
+		AlreadyChecked[Name] = true
+		
+		Copy ..= `"{Name}",\n`
+	end
+end
+
+GetFromEnv(getfenv())
+GetFromEnv(getgenv())
+
+print(Copy)
+
+local setclipboard = getfenv().setclipboard
+
+if setclipboard then
+	setclipboard(Copy)
+end
