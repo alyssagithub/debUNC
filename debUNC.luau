@@ -932,7 +932,6 @@ local NoTests: {[string | number]: any} = {
 	"isexecutorclosure",
 	"rconsolehide",
 	"getinstancecache",
-	"get_process_identifier",
 	"rconsoleinfo",
 	"get_comm_channel",
 	"isvalidlevel",
@@ -1215,4 +1214,5 @@ local setclipboard = getfenv().setclipboard
 
 if setclipboard then
 	setclipboard(Copy)
+	print("^ Copied to your clipboard! ^")
 end
