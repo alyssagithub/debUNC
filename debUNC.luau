@@ -117,14 +117,14 @@ local Tests: any = {
 			writefile(FileName, GeneratedResult)
 
 			local Result = readfile(FileName)
-
-			assert(Result == GeneratedResult, "Test file did not return what was written into it.")
-
+			
 			local delfile: (Path: string) -> () = getfenv().delfile
 
 			if delfile then
 				delfile(FileName)
 			end
+
+			assert(Result == GeneratedResult, "Test file did not return what was written into it.")
 		end
 	},
 
@@ -140,16 +140,16 @@ local Tests: any = {
 			writefile(FileName, GeneratedResult)
 
 			local Result = readfile(FileName)
-
-			assert(typeof(Result) == "string", "'readfile' failed to read the file, cannot continue test.")
-
-			assert(Result == GeneratedResult, "'writefile' did not write to the file.")
-
+			
 			local delfile: (Path: string) -> () = getfenv().delfile
 
 			if delfile then
 				delfile(FileName)
 			end
+
+			assert(typeof(Result) == "string", "'readfile' failed to read the file, cannot continue test.")
+
+			assert(Result == GeneratedResult, "'writefile' did not write to the file.")
 		end
 	},
 
@@ -164,14 +164,16 @@ local Tests: any = {
 			local writefile: (Path: string, Data: string) -> () = CheckExist("writefile")
 
 			writefile(FileName, "Test")
-
-			assert(isfile(FileName), "Function returned false after a file of the same name was written to.")
-
+			
+			local Exists = isfile(FileName)
+			
 			local delfile: (Path: string) -> () = getfenv().delfile
 
 			if delfile then
 				delfile(FileName)
 			end
+
+			assert(Exists, "Function returned false after a file of the same name was written to.")
 		end
 	},
 
@@ -189,14 +191,16 @@ local Tests: any = {
 			assert(readfile(FileName) == GeneratedResult, "failed to create the file")
 
 			appendfile(FileName, "Append")
-
-			assert(readfile(FileName):find("Append"), "failed to add to the existing file")
-
+			
+			local HasAppend = readfile(FileName):find("Append")
+			
 			local delfile: (Path: string) -> () = getfenv().delfile
 
 			if delfile then
 				delfile(FileName)
 			end
+
+			assert(HasAppend, "failed to add to the existing file")
 		end
 	},
 
@@ -224,14 +228,14 @@ local Tests: any = {
 			writefile(FileName, GeneratedResult)
 
 			local Result = listfiles(FolderName)
-
-			assert(Result[1] == FileName, "Function did not find the written file.")
-
+			
 			local delfolder: (Path: string) -> () = getfenv().delfolder
 
 			if delfolder then
 				delfolder(FolderName)
 			end
+
+			assert(Result[1] == FileName, "Function did not find the written file.")
 		end
 	},
 
@@ -740,7 +744,7 @@ local Tests: any = {
 				end
 			end
 
-			local FPSCap = 5 --math.floor(HighestFPS / 6)
+			local FPSCap = math.floor(HighestFPS / 6)
 
 			setfpscap(FPSCap)
 
@@ -1034,6 +1038,9 @@ local NoTests: {[string | number]: any} = {
 	makewritable = {AliasOf = "makewriteable"},
 	getmodules = {ReturnType = "table"},
 	getgc = {ReturnType = "table"},
+	consoleinfo = {AliasOf = "rconsoleinfo"},
+	consoleerr = {AliasOf = "rconsoleerr"},
+	consolewarn = {AliasOf = "rconsolewarn"},
 }
 
 for Index, Info in NoTests do
