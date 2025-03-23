@@ -422,8 +422,12 @@ local Tests: any = {
 	isluau = {
 		Test = function()
 			local isluau: () -> boolean = getfenv().isluau
-
-			assert(isluau() == (_VERSION == "Luau"), `expected result: {(_VERSION == "Luau")}, got: {isluau()}`)
+			
+			local ThreadIsLuau = isluau()
+			
+			local VersionIsLuau = _VERSION == "Luau"
+			
+			CheckResult(ThreadIsLuau, VersionIsLuau)
 		end,
 		ReturnType = "boolean"
 	},
