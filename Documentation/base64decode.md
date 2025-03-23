@@ -1,6 +1,7 @@
 # base64decode
 Decodes a string that is encoded in Base64
 ```lua
+-- base64decode: (Encoded: string) -> string
 local Encoded = "SGVsbG8gd29ybGQh"
 local Decoded = base64decode(Encoded)
 print(Decoded) --> Hello world!
