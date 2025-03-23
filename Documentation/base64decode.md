@@ -9,6 +9,7 @@ print(Decoded) --> Hello world!
 | base64_decode |
 | :- |
 | **base64.decode** |
+| **crypt.base64decode** |
 # Parameters
 | Encoded: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The encoded string to decode.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;|
 | :-------- | :------- |
