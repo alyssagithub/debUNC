@@ -1000,6 +1000,11 @@ local NoTests: {[string | number]: any} = {
 	"replicatesignal",
 	"getsenv",
 	"getmenv",
+	"cansignalreplicate",
+	"getreplicablesignals",
+	"getlocaldrawobjects",
+	"getdrawobjects",
+	getthreadstack = {AliasOf = "getstack"},
 	identifyexecutor = {ReturnType = "string"},
 	gethwid = {ReturnType = "string"},
 	replaceclosure = {AliasOf = "hookfunction"},
@@ -1055,7 +1060,7 @@ for Index, Info in NoTests do
 	end
 end
 
-local getgenv: () -> {[string]: any} = getfenv().getgenv
+local getgenv: () -> {[string]: any} = getfenv().getgenv or function() return {} end
 
 if getgenv().OriginalFunctions then
 	for Name, Function in getgenv().OriginalFunctions do
@@ -1066,7 +1071,8 @@ if getgenv().OriginalFunctions then
 		getfenv()[Name] = nil
 	end
 end
-local identifyexecutor = getfenv().identifyexecutor
+
+local identifyexecutor = getfenv().identifyexecutor or function() return "Unknown Executor", "0.0.0" end
 local getexecutorname = getfenv().getexecutorname
 
 local ExecutorName, ExecutorVersion = identifyexecutor()
