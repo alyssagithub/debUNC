@@ -1,5 +1,5 @@
 # base64decode: (Encoded: string) -> string
-Decodes a string that is encoded in Base64
+Decodes a string that is encoded in Base64.
 ```lua
 print(base64decode("SGVsbG8gd29ybGQh")) --> Hello world!
 ```
