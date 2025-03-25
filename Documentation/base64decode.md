@@ -1,9 +1,7 @@
 # base64decode: (Encoded: string) -> string
 Decodes a string that is encoded in Base64
 ```lua
-local Encoded = "SGVsbG8gd29ybGQh"
-local Decoded = base64decode(Encoded)
-print(Decoded) --> Hello world!
+print(base64decode("SGVsbG8gd29ybGQh")) --> Hello world!
 ```
 # Aliases
 | Library | Name |
