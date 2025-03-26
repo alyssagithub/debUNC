@@ -836,7 +836,7 @@ local Tests: any = {
 			
 			assert(isscriptable(game, "SimulationRadius") == false, "game.SimulationRadius is a hidden property, and isn't scriptable")
 			
-			assert(isscriptable(game, "a") == nil, "game.a is not a valid property")
+			assert(isscriptable(game, "a") == false, "game.a is not a valid property")
 		end,
 	},
 }
