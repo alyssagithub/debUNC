@@ -1004,9 +1004,19 @@ local NoTests: {[string | number]: any} = {
 	"getreplicablesignals",
 	"getlocaldrawobjects",
 	"getdrawobjects",
-	getthreadstack = {AliasOf = "getstack"},
+	
+	-- Short Tests
 	identifyexecutor = {ReturnType = "string"},
 	gethwid = {ReturnType = "string"},
+	getreg = {ReturnType = "table"},
+	gethui = {ReturnType = "Instance"},
+	isrbxactive = {ReturnType = "boolean"},
+	iswindowactive = {ReturnType = "boolean"},
+	getmodules = {ReturnType = "table"},
+	getgc = {ReturnType = "table"},
+	
+	-- Aliases
+	getthreadstack = {AliasOf = "getstack"},
 	replaceclosure = {AliasOf = "hookfunction"},
 	getexecutorname = {AliasOf = "identifyexecutor"},
 	setidentity = {AliasOf = "setthreadidentity"},
@@ -1040,16 +1050,11 @@ local NoTests: {[string | number]: any} = {
 	get_thread_context = {AliasOf = "getthreadidentity"},
 	toclipboard = {AliasOf = "setclipboard"},
 	saveplace = {AliasOf = "saveinstance"},
-	getreg = {ReturnType = "table"},
-	gethui = {ReturnType = "Instance"},
-	isrbxactive = {ReturnType = "boolean"},
-	iswindowactive = {ReturnType = "boolean"},
 	makewritable = {AliasOf = "makewriteable"},
-	getmodules = {ReturnType = "table"},
-	getgc = {ReturnType = "table"},
 	consoleinfo = {AliasOf = "rconsoleinfo"},
 	consoleerr = {AliasOf = "rconsoleerr"},
 	consolewarn = {AliasOf = "rconsolewarn"},
+	get_actors = {AliasOf = "getactors"},
 }
 
 for Index, Info in NoTests do
@@ -1134,9 +1139,13 @@ end
 local TotalTests = 0
 local CompletedTests = 0
 local FailedTests = 0
+local CompletedAliases = 0
+local FailedAliases = 0
 
 for Name: string, Info in Tests do
-	TotalTests += 1
+	if not Info.AliasOf then
+		TotalTests += 1
+	end
 	
 	task.spawn(function()
 		local Success, Result = pcall(function()
@@ -1157,23 +1166,40 @@ for Name: string, Info in Tests do
 			end
 		end)
 		
+		local Emoji = ""
+		
+		if Success then
+			if Info.AliasOf then
+				Emoji = "⚪"
+				CompletedAliases += 1
+			else
+				Emoji = "🟢"
+				CompletedTests += 1
+			end
+		else
+			if Info.AliasOf then
+				Emoji = "⚫"
+				FailedAliases += 1
+			else
+				Emoji = "🔴"
+				FailedTests += 1
+			end
+		end
+		
 		if Info.AliasOf then
 			Name ..= ` ({Info.AliasOf})`
 		end
-
+		
 		if Success then
-			CompletedTests += 1
-			print(`🟢 {Name}`)
+			print(`{Emoji} {Name}`)
 		else
-			FailedTests += 1
-			
 			Result = Result:gsub(".+:%d+: ", "")
 			
 			if HideNonExistentFunctions and Result == "doesn't exist" then
 				return
 			end
 			
-			warn(`🔴 {Name}: {Result}`)
+			warn(`{Emoji} {Name}: {Result}`)
 		end
 	end)
 end
@@ -1184,9 +1210,11 @@ until CompletedTests + FailedTests == TotalTests
 
 DisplayMessage(`❓ The score below is only for how many custom functions are supported.`)
 DisplayMessage(`🔵 debUNC BETA v2 Score for {ExecutorName} {ExecutorVersion}: {math.floor(CompletedTests / TotalTests * 100)}%`)
-DisplayMessage(`⚪ Total tests: {TotalTests}`)
+DisplayMessage(`🟣 Total tests: {TotalTests}`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
+DisplayMessage(`⚪ Completed Aliases: {CompletedAliases}`)
+DisplayMessage(`⚫ Failed Aliases: {FailedAliases}`)
 
 print("------------------------------------------------------------------------------------------------")
 print("For development purposes, a list of functions in getfenv() and getgenv() that isn't added to the test.")
