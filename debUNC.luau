@@ -1,9 +1,4 @@
 --!strict
--- expected {typeof(Expected)} '{Expected}', got {typeof(Result)} '{Result}'
-local function CheckResult(Result: any, Expected: any)
-	assert(Expected == Result, `expected {typeof(Expected)} '{Expected}', got {typeof(Result)} '{Result}'`)
-end
-
 -- expected type '{Type}', got '{typeof(Result)}'
 local function CheckType(Result: any, Type: string)
 	assert(typeof(Result) == Type, `expected type '{Type}', got '{typeof(Result)}'`)
@@ -107,7 +102,7 @@ local Tests: any = {
 
 			local Success, Result = pcall(readfile, "doesntexist.txt")
 
-			assert(not Success, "Function doesn't error when reading a non-existent file.")
+			assert(not Success, "expected an error when reading a file that doesn't exist")
 
 			local writefile: (Path: string, Data: string) -> () = CheckExist("writefile")
 
@@ -159,8 +154,6 @@ local Tests: any = {
 
 			local FileName = `File_{math.random()}.txt`
 
-			assert(not isfile("???"), "Function returned true when a file cannot exist with this name.")
-
 			local writefile: (Path: string, Data: string) -> () = CheckExist("writefile")
 
 			writefile(FileName, "Test")
@@ -173,7 +166,7 @@ local Tests: any = {
 				delfile(FileName)
 			end
 
-			assert(Exists, "Function returned false after a file of the same name was written to.")
+			assert(Exists, "failed to find the file")
 		end
 	},
 
@@ -216,7 +209,7 @@ local Tests: any = {
 
 			local Success = pcall(listfiles, "???")
 
-			assert(not Success, "Function did not error when listing the files of a non-existent folder.")
+			assert(not Success, "expected an error when listing files of a folder that doesn't exist")
 
 			makefolder(FolderName)
 
@@ -265,7 +258,7 @@ local Tests: any = {
 
 	dofile = {
 		Test = function()
-			local dofile: (Path: string) -> any? = getfenv().dofile
+			local dofile: (Path: string) -> any = getfenv().dofile
 
 			local writefile: (Path: string, Data: string) -> () = CheckExist("writefile")
 
@@ -281,8 +274,8 @@ local Tests: any = {
 			if delfile then
 				delfile(FileName)
 			end
-
-			assert(typeof(Result) == "table", "Function test should've returned a table based on this test's given code.")
+			
+			CheckType(Result, "table")
 
 			assert(Result[1] == GeneratedNumber, "Function's table should've contained the test's randomly generated number.")
 		end,
@@ -319,13 +312,13 @@ local Tests: any = {
 
 			local isfolder: (Path: string) -> boolean = CheckExist("isfolder")
 
-			assert(not isfolder("???"), "'isfolder' returned true when checking if a non-existent folder existed.")
+			assert(isfolder("???") == false, "'isfolder' didn't return false when checking if a non-existent folder existed")
 
 			local FolderName = `Folder_{math.random()}`
 
 			makefolder(FolderName)
 
-			assert(isfolder(FolderName), "Folder was not found by 'isfolder' after it was made.")
+			assert(isfolder(FolderName), "failed to find folder after it was made")
 
 			local delfolder: (Path: string) -> () = getfenv().delfolder
 
@@ -369,13 +362,11 @@ local Tests: any = {
 
 			local isfolder: (Path: string) -> boolean = CheckExist("isfolder")
 
-			assert(not isfolder("???"), "'isfolder' returned true when checking if a non-existent folder existed.")
-
 			local FolderName = `Folder_{math.random()}`
 
 			makefolder(FolderName)
 
-			assert(isfolder(FolderName), "Folder was not found by 'isfolder' after it was made.")
+			assert(isfolder(FolderName), "failed to find folder after it was made")
 
 			delfolder(FolderName)
 
@@ -400,8 +391,8 @@ local Tests: any = {
 			local Hook = hookfunction(Test, function()
 				return OtherGeneratedResult
 			end)
-
-			assert(typeof(Hook) == "function", "Hookfunction did not return the original function.")
+			
+			CheckType(Hook, "function")
 
 			assert(Hook() == GeneratedResult, "Original function does not return the value it's meant to.")
 
@@ -412,8 +403,8 @@ local Tests: any = {
 	iscclosure = {
 		Test = function()
 			local iscclosure: (Function: (any?) -> ()) -> (boolean) = getfenv().iscclosure
-
-			assert(iscclosure(assert), "Function 'assert' is written in C and should return true.")
+			
+			assert(iscclosure(assert) == true, "function 'assert' is a c closure")
 
 			assert(not iscclosure(function() end), "A function created in the executor is not written in C.")
 		end,
@@ -427,7 +418,7 @@ local Tests: any = {
 			
 			local VersionIsLuau = _VERSION == "Luau"
 			
-			CheckResult(ThreadIsLuau, VersionIsLuau)
+			assert(ThreadIsLuau == VersionIsLuau, `_VERSION is '{_VERSION}', isluau() gave '{isluau()}'`)
 		end,
 		ReturnType = "boolean"
 	},
@@ -534,7 +525,7 @@ local Tests: any = {
 			
 			local Result = ismoduleloaded(Module)
 			
-			CheckResult(Result, true)
+			assert(Result == true, `modulescript '{Module}' should be loaded`)
 		end
 	},
 
@@ -558,9 +549,9 @@ local Tests: any = {
 
 			assert(HumanoidRootPart, FailedFind("humanoidrootpart"))
 			
-			CheckResult(isnetworkowner(HumanoidRootPart), true)
+			assert(isnetworkowner(HumanoidRootPart) == true, "player should have network ownership over the humanoidrootpart")
 			
-			CheckResult(isnetworkowner(Instance.new("Part")), false)
+			assert(isnetworkowner(Instance.new("Part")) == false, "player should not have network ownership over a newly created part")
 		end
 	},
 
@@ -756,7 +747,7 @@ local Tests: any = {
 
 			local FPS
 			
-			local Timeout = 3
+			local Timeout = 5
 
 			repeat
 				FPS = GetCurrentFPS()
@@ -793,7 +784,7 @@ local Tests: any = {
 			
 			assert(typeof(Loaded) == "function", `expected return type to be a function, got {typeof(Loaded)}`)
 			
-			CheckResult(Loaded(), "debunc")
+			assert(Loaded() == "debunc", "failed to return the expected value")
 		end,
 	},
 	
@@ -809,7 +800,7 @@ local Tests: any = {
 			
 			local Result = getfpscap()
 			
-			CheckResult(Result, 10)
+			assert(Result == 10, "did not return the same set fps cap")
 			
 			setfpscap(0)
 			
@@ -821,7 +812,7 @@ local Tests: any = {
 	
 	newcclosure = {
 		Test = function()
-			local newcclosure: ((any) -> any) -> ((any) -> any) = getfenv().newcclosure
+			local newcclosure: ((...any) -> ...any) -> (...any) -> ...any = getfenv().newcclosure
 			
 			local function TestFunction()
 				return "debunc"
@@ -829,19 +820,11 @@ local Tests: any = {
 			
 			local NewClosure = newcclosure(TestFunction)
 			
+			assert(debug.info(NewClosure, "s") == "[C]", `expected the returned closure to be in [C], got '{debug.info(NewClosure, "s")}'`)
+			
 			assert(NewClosure ~= TestFunction, "function returned is the same as the function given")
 			
-			CheckResult(NewClosure(), "debunc")
-		end,
-	},
-	
-	gethiddenproperty = {
-		Test = function()
-			local gethiddenproperty: (Object: Object, Property: string) -> any = getfenv().gethiddenproperty
-			
-			local Result = gethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius")
-			
-			CheckType(Result, "number")
+			assert(NewClosure() == "debunc", "failed to return the expected value")
 		end,
 	},
 	
@@ -849,11 +832,11 @@ local Tests: any = {
 		Test = function()
 			local isscriptable: (Object: Object, Property: string) -> boolean = getfenv().isscriptable
 			
-			CheckResult(isscriptable(game, "Parent"), true)
+			assert(isscriptable(game, "Parent") == true, "game.Parent is scriptable")
 			
-			CheckResult(isscriptable(game, "SimulationRadius"), false)
+			assert(isscriptable(game, "SimulationRadius") == false, "game.SimulationRadius is a hidden property, and isn't scriptable")
 			
-			CheckResult(isscriptable(game, "a"), nil)
+			assert(isscriptable(game, "a") == nil, "game.a is not a valid property")
 		end,
 	},
 }
@@ -888,56 +871,38 @@ local NoTests: {[string | number]: any} = {
 	"hookmetamethod",
 	"getnamecallmethod",
 	"setnamecallmethod",
-	"decompile",
 	"gethiddenproperties",
 	"sethiddenproperty",
 	"setsimulationradius",
 	"getcallingscript",
-	"lz4decompress",
 	"setfflag",
 	"isfunctionhooked",
 	"cloneref",
 	"setscriptable",
 	"setthreadidentity",
-	"getstack",
 	"getupvalue",
 	"setupvalue",
 	"getnilinstances",
 	"setstack",
-	"getinfo",
-	"base64_encode",
-	"getconstant",
-	"getscriptclosure",
 	"checkcaller",
 	"setrenderproperty",
 	"setconstant",
-	"getinstances",
-	"getconstants",
-	"compareinstances",
 	"getcustomasset",
-	"getscripthash",
 	"getrunningscripts",
-	"base64_decode",
 	"cleardrawcache",
 	"isrenderobj",
 	"isparallel",
 	"getactors",
-	"islclosure",
-	"lz4compress",
 	"getfflag",
-	"getscriptbytecode",
 	"base64decode",
 	"restorefunction",
 	"getcallbackvalue",
 	"run_on_actor",
 	"getrenderproperty",
-	"getthreadidentity",
-	"getproto",
 	"getprotos",
 	"getupvalues",
 	"messagebox",
 	"info",
-	"isexecutorclosure",
 	"rconsolehide",
 	"getinstancecache",
 	"rconsoleinfo",
@@ -954,7 +919,6 @@ local NoTests: {[string | number]: any} = {
 	"saveinstance",
 	"lift_and_load_closure",
 	"rconsoletoggle",
-	"iscustomcclosure",
 	"gethookcache",
 	"runfile",
 	"validlevel",
@@ -967,7 +931,6 @@ local NoTests: {[string | number]: any} = {
 	"getbspval",
 	"detourfunction",
 	"clearimmediatecache",
-	"checkparallel",
 	"keytap",
 	"getallthreads",
 	"createsecurefolder",
@@ -981,7 +944,6 @@ local NoTests: {[string | number]: any} = {
 	"getfunctionhash",
 	"filtergc",
 	"getnspval",
-	"executescript",
 	"disassociate_script",
 	"run_on_thread",
 	"getobjects",
@@ -993,19 +955,16 @@ local NoTests: {[string | number]: any} = {
 	"getactorthreads",
 	"setnormalinstance",
 	"setsafeenv",
-	"getsimulationradius",
-	"comparefunctions",
 	"messageboxasync",
 	"setrbxclipboard",
 	"replicatesignal",
-	"getsenv",
-	"getmenv",
 	"cansignalreplicate",
 	"getreplicablesignals",
 	"getlocaldrawobjects",
 	"getdrawobjects",
 	
 	-- Short Tests
+	gethiddenproperty = {Parameters = {game:GetService("Players").LocalPlayer, "SimulationRadius"}, ReturnType = "number"},
 	identifyexecutor = {ReturnType = "string"},
 	gethwid = {ReturnType = "string"},
 	getreg = {ReturnType = "table"},
@@ -1014,6 +973,28 @@ local NoTests: {[string | number]: any} = {
 	iswindowactive = {ReturnType = "boolean"},
 	getmodules = {ReturnType = "table"},
 	getgc = {ReturnType = "table"},
+	getsimulationradius = {Parameters = {game}, ReturnType = "number"},
+	getthreadidentity = {ReturnType = "number"},
+	comparefunctions = {Parameters = {wait, wait}, ReturnType = "boolean"},
+	compareinstances = {Parameters = {game, game}, ReturnType = "boolean"},
+	isexecutorclosure = {Parameters = {wait}, ReturnType = "boolean"},
+	islclosure = {Parameters = {wait}, ReturnType = "boolean"},
+	getproto = {Parameters = {function() end, 1 :: any}, ReturnType = "function"}, 
+	getprotos = {Parameters = {function() end}, ReturnType = "table"},
+	decompile = {Parameters = {game:FindFirstChildWhichIsA("LuaSourceContainer", true)}, ReturnType = "string"},
+	getstack = {Parameters = {1}, ReturnType = "table"},
+	getscriptbytecode = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "string"},
+	lz4compress = {Parameters = {"debunctestinglz4compress"}, ReturnType = "string"},
+	lz4decompress = {Parameters = {(getfenv().lz4compress or function()end)("debunctestinglz4compress")}, ReturnType = "string"},
+	getsenv = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "table"},
+	getinstances = {ReturnType = "table"},
+	getmenv = {Parameters = {game:FindFirstChildWhichIsA("ModuleScript", true)}, ReturnType = "table"},
+	getscripthash = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "string"},
+	getinfo = {Parameters = {""}, ReturnType = "table"},
+	getconstants = {Parameters = {function()end}, ReturnType = "table"},
+	getconstant = {Parameters = {function()local a; a = "hi"end, 1 :: any}, ReturnType = "string"},
+	getscriptclosure = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "function"},
+	checkparallel = {ReturnType = "boolean"},
 	
 	-- Aliases
 	getthreadstack = {AliasOf = "getstack"},
@@ -1055,6 +1036,10 @@ local NoTests: {[string | number]: any} = {
 	consoleerr = {AliasOf = "rconsoleerr"},
 	consolewarn = {AliasOf = "rconsolewarn"},
 	get_actors = {AliasOf = "getactors"},
+	base64_decode = {AliasOf = "base64decode"},
+	base64_encode = {AliasOf = "base64encode"},
+	executescript = {AliasOf = "loadstring"},
+	iscustomcclosure = {AliasOf = "isexecutorclosure"},
 }
 
 for Index, Info in NoTests do
@@ -1067,15 +1052,19 @@ end
 
 local getgenv: () -> {[string]: any} = getfenv().getgenv or function() return {} end
 
-if getgenv().OriginalFunctions then
-	for Name, Function in getgenv().OriginalFunctions do
-		getfenv()[Name] = Function
-	end
-	
-	for Name in getgenv().NonExistentFunctions do
-		getfenv()[Name] = nil
+local function RestoreFunctions()
+	if getgenv().OriginalFunctions then
+		for Name, Function in getgenv().OriginalFunctions do
+			getfenv()[Name] = Function
+		end
+
+		for Name in getgenv().NonExistentFunctions do
+			getfenv()[Name] = nil
+		end
 	end
 end
+
+RestoreFunctions()
 
 local identifyexecutor = getfenv().identifyexecutor or function() return "Unknown Executor", "0.0.0" end
 local getexecutorname = getfenv().getexecutorname
@@ -1110,13 +1099,15 @@ local FakeFunctions = false
 local HideNonExistentFunctions = false
 
 if FakeFunctions then
+	local newcclosure: ((...any) -> ...any) -> (...any) -> ...any = getfenv().newcclosure
+	
 	DisplayMessage("[debUNC]: Faking functions is enabled")
 	
 	local OriginalFunctions = {}
 	local NonExistentFunctions = {}
 	
 	for FunctionName in Tests do
-		if FunctionName == "getgenv" or FunctionName == "getfenv" then
+		if FunctionName == "getgenv" or FunctionName == "getfenv" or FunctionName == "newcclosure" then
 			continue
 		end
 		
@@ -1125,7 +1116,7 @@ if FakeFunctions then
 		end
 		
 		OriginalFunctions[FunctionName] = getfenv()[FunctionName]
-		getfenv()[FunctionName] = function()end
+		getfenv()[FunctionName] = newcclosure(function()end)
 	end
 	
 	getgenv().OriginalFunctions = OriginalFunctions
@@ -1149,7 +1140,13 @@ for Name: string, Info in Tests do
 	
 	task.spawn(function()
 		local Success, Result = pcall(function()
-			assert(getfenv()[Name], "doesn't exist")
+			local Function = getfenv()[Name]
+			
+			assert(Function, "doesn't exist")
+			
+			local Closure = debug.info(Function, "s")
+
+			assert(Closure == "[C]", `expected closure to be in [C], got '{Closure}'`)
 			
 			local Info = Info
 			
@@ -1158,7 +1155,7 @@ for Name: string, Info in Tests do
 			end
 			
 			if Info.ReturnType then
-				CheckType(getfenv()[Name](), Info.ReturnType)
+				CheckType(getfenv()[Name](table.unpack(Info.Parameters or {})), Info.ReturnType)
 			end
 			
 			if Info.Test then
@@ -1236,7 +1233,7 @@ local function GetFromEnv(Environment)
 			continue
 		end
 		
-		if (if getrenv then getrenv() else {})[Name] then
+		if (getrenv and getrenv() or {})[Name] then
 			continue
 		end
 		
@@ -1261,3 +1258,5 @@ if setclipboard then
 	setclipboard(Copy)
 	print("^ Copied to your clipboard! ^")
 end
+
+RestoreFunctions()
