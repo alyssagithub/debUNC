@@ -899,7 +899,6 @@ local NoTests: {[string | number]: any} = {
 	"getcallbackvalue",
 	"run_on_actor",
 	"getrenderproperty",
-	"getprotos",
 	"getupvalues",
 	"messagebox",
 	"info",
@@ -1043,6 +1042,8 @@ local NoTests: {[string | number]: any} = {
 }
 
 for Index, Info in NoTests do
+	assert(not Tests[Index] and not Tests[Info], `A test for {Index} or {Info} already exists.`)
+	
 	if typeof(Index) == "string" then
 		Tests[Index] = Info
 	else
