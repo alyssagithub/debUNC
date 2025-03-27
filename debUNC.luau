@@ -41,9 +41,11 @@ local Tests: any = {
 				"shared",
 				"workspace"
 			}
+			
+			local Environment = getrenv()
 
 			for _, Global: string in ExpectedGlobals do
-				assert(getrenv()[Global] ~= nil, `missing '{Global}'`)
+				assert(Environment[Global] ~= nil, `missing '{Global}'`)
 			end
 		end,
 		ReturnType = "table"
@@ -52,9 +54,11 @@ local Tests: any = {
 	getgenv = {
 		Test = function()
 			local getgenv: () -> {[string]: any} = getfenv().getgenv
+			
+			local Environment = getgenv()
 
 			for FunctionName in getfenv() do
-				assert(getgenv()[FunctionName], `missing '{FunctionName}'`)
+				assert(Environment[FunctionName], `missing '{FunctionName}'`)
 			end
 		end,
 		ReturnType = "table",
@@ -1098,6 +1102,7 @@ end
 
 local FakeFunctions = false
 local HideNonExistentFunctions = false
+local GetTests = false
 
 if FakeFunctions then
 	local newcclosure: ((...any) -> ...any) -> (...any) -> ...any = getfenv().newcclosure
@@ -1126,6 +1131,10 @@ end
 
 if HideNonExistentFunctions then
 	DisplayMessage("[debUNC]: Hide non-existent functions is enabled")
+end
+
+if GetTests then
+	DisplayMessage("[debUNC]: Getting all the tests is enabled")
 end
 
 local TotalTests = 0
@@ -1219,27 +1228,30 @@ print("For development purposes, a list of functions in getfenv() and getgenv() 
 print("------------------------------------------------------------------------------------------------")
 
 local getrenv = getfenv().getrenv
+local RobloxEnvironment = getrenv and getrenv() or {}
 
 local AlreadyChecked = {}
 
 local Copy = ""
 
-local function GetFromEnv(Environment)
+local function GetFromEnv(Environment, GetTests: boolean?)
 	for Name: string, Value: any in Environment do
-		if Tests[Name] then
-			continue
-		end
-		
-		if typeof(Value) ~= "function" then
-			continue
-		end
-		
-		if (getrenv and getrenv() or {})[Name] then
-			continue
-		end
-		
-		if AlreadyChecked[Name] then
-			continue
+		if not GetTests then
+			if Tests[Name] then
+				continue
+			end
+
+			if typeof(Value) ~= "function" then
+				continue
+			end
+
+			if RobloxEnvironment[Name] then
+				continue
+			end
+
+			if AlreadyChecked[Name] then
+				continue
+			end
 		end
 		
 		AlreadyChecked[Name] = true
@@ -1248,8 +1260,12 @@ local function GetFromEnv(Environment)
 	end
 end
 
-GetFromEnv(getfenv())
-GetFromEnv(getgenv())
+if GetTests then
+	GetFromEnv(Tests, true)
+else
+	GetFromEnv(getfenv())
+	GetFromEnv(getgenv())
+end
 
 print(Copy)
 
