@@ -847,12 +847,12 @@ local Tests: any = {
 
 local NoTests: {[string | number]: any} = {
 	"firetouchinterest",
-	"rconsoleclear",
-	"rconsolecreate",
-	"rconsoledestroy",
-	"rconsoleinput",
-	"rconsoleprint",
-	"rconsolename",
+	"consoleclear",
+	"consolecreate",
+	"consoledestroy",
+	"consoleinput",
+	"consoleprint",
+	"consolename",
 	"mouse1click",
 	"mouse1press",
 	"mouse1release",
@@ -881,7 +881,6 @@ local NoTests: {[string | number]: any} = {
 	"getcallingscript",
 	"setfflag",
 	"isfunctionhooked",
-	"cloneref",
 	"setscriptable",
 	"setthreadidentity",
 	"getupvalue",
@@ -891,7 +890,7 @@ local NoTests: {[string | number]: any} = {
 	"checkcaller",
 	"setrenderproperty",
 	"setconstant",
-	"getcustomasset",
+	"getasset",
 	"getrunningscripts",
 	"cleardrawcache",
 	"isrenderobj",
@@ -901,43 +900,42 @@ local NoTests: {[string | number]: any} = {
 	"base64decode",
 	"restorefunction",
 	"getcallbackvalue",
-	"run_on_actor",
+	"runonactor",
 	"getrenderproperty",
 	"getupvalues",
 	"messagebox",
 	"info",
-	"rconsolehide",
+	"consolehide",
 	"getinstancecache",
-	"rconsoleinfo",
-	"get_comm_channel",
+	"consoleinfo",
+	"getcommchannel",
 	"isvalidlevel",
 	"getproperties",
 	"dbg",
 	"getcallbackmember",
-	"lift_closure",
-	"rconsoletop",
+	"liftclosure",
+	"consoletop",
 	"getscriptfromthread",
-	"rconsolehidden",
-	"create_comm_channel",
+	"consolehidden",
+	"createcommchannel",
 	"saveinstance",
-	"lift_and_load_closure",
-	"rconsoletoggle",
+	"liftandloadclosure",
+	"consoletoggle",
 	"gethookcache",
 	"runfile",
 	"validlevel",
 	"keyclick",
-	"rconsolewarn",
+	"consolewarn",
 	"clearteleportqueue",
 	"makewriteable",
-	"rconsoleshow",
-	"rconsoleerr",
+	"consoleshow",
+	"consoleerr",
 	"getbspval",
 	"detourfunction",
 	"clearimmediatecache",
 	"keytap",
-	"getallthreads",
+	"getthreads",
 	"createsecurefolder",
-	"replacefunction",
 	"getrendersteppedlist",
 	"issecuredinstance",
 	"inparallel",
@@ -947,18 +945,17 @@ local NoTests: {[string | number]: any} = {
 	"getfunctionhash",
 	"filtergc",
 	"getnspval",
-	"disassociate_script",
-	"run_on_thread",
+	"disassociatescript",
+	"runonthread",
 	"getobjects",
 	"setsecureinstance",
 	"getthreadobject",
 	"getsafeenv",
 	"getunionassetid",
-	"getpcd",
+	"getphysconfigdata",
 	"getactorthreads",
 	"setnormalinstance",
 	"setsafeenv",
-	"messageboxasync",
 	"setrbxclipboard",
 	"replicatesignal",
 	"cansignalreplicate",
@@ -970,7 +967,7 @@ local NoTests: {[string | number]: any} = {
 	gethiddenproperty = {Parameters = {game:GetService("Players").LocalPlayer, "SimulationRadius"}, ReturnType = "number"},
 	identifyexecutor = {ReturnType = "string"},
 	gethwid = {ReturnType = "string"},
-	getreg = {ReturnType = "table"},
+	getregistry = {ReturnType = "table"},
 	gethui = {ReturnType = "Instance"},
 	isrbxactive = {ReturnType = "boolean"},
 	iswindowactive = {ReturnType = "boolean"},
@@ -985,7 +982,6 @@ local NoTests: {[string | number]: any} = {
 	getproto = {Parameters = {function() end, 1 :: any}, ReturnType = "function"}, 
 	getprotos = {Parameters = {function() end}, ReturnType = "table"},
 	decompile = {Parameters = {game:FindFirstChildWhichIsA("LuaSourceContainer", true)}, ReturnType = "string"},
-	getstack = {Parameters = {1}, ReturnType = "table"},
 	getscriptbytecode = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "string"},
 	lz4compress = {Parameters = {"debunctestinglz4compress"}, ReturnType = "string"},
 	lz4decompress = {Parameters = {(getfenv().lz4compress or function()end)("debunctestinglz4compress")}, ReturnType = "string"},
@@ -998,51 +994,7 @@ local NoTests: {[string | number]: any} = {
 	getconstant = {Parameters = {function()local a; a = "hi"end, 1 :: any}, ReturnType = "string"},
 	getscriptclosure = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "function"},
 	checkparallel = {ReturnType = "boolean"},
-	
-	-- Aliases
-	getthreadstack = {AliasOf = "getstack"},
-	replaceclosure = {AliasOf = "hookfunction"},
-	getexecutorname = {AliasOf = "identifyexecutor"},
-	setidentity = {AliasOf = "setthreadidentity"},
-	setthreadcontext = {AliasOf = "setthreadidentity"},
-	set_thread_identity = {AliasOf = "setthreadidentity"},
-	set_thread_context = {AliasOf = "setthreadidentity"},
-	dumpstring = {AliasOf = "getscriptbytecode"},
-	isgameactive = {AliasOf = "isrbxactive"},
-	getscriptfunction = {AliasOf = "getscriptclosure"},
-	queue_on_teleport = {AliasOf = "queueonteleport"},
-	queueteleport = {AliasOf = "queueonteleport"},
-	http_request = {AliasOf = "request"},
-	consoledestroy = {AliasOf = "rconsoledestroy"},
-	get_hidden_gui = {AliasOf = "gethui"},
-	consoleclear = {AliasOf = "rconsoleclear"},
-	gethiddenprop = {AliasOf = "gethiddenproperty"},
-	consoleinput = {AliasOf = "rconsoleinput"},
-	consolecreate = {AliasOf = "rconsolecreate"},
-	consoleprint = {AliasOf = "rconsoleprint"},
-	getinstancelist = {AliasOf = "getinstances"},
-	getregistry = {AliasOf = "getreg"},
-	clear_teleport_queue = {AliasOf = "clearteleportqueue"},
-	rconsolesettitle = {AliasOf = "rconsolename"},
-	consolesettitle = {AliasOf = "rconsolename"},
-	consolename = {AliasOf = "rconsolename"},
-	checkclosure = {AliasOf = "isexecutorclosure"},
-	isourclosure = {AliasOf = "isexecutorclosure"},
-	getidentity = {AliasOf = "getthreadidentity"},
-	getthreadcontext = {AliasOf = "getthreadidentity"},
-	get_thread_identity = {AliasOf = "getthreadidentity"},
-	get_thread_context = {AliasOf = "getthreadidentity"},
-	toclipboard = {AliasOf = "setclipboard"},
-	saveplace = {AliasOf = "saveinstance"},
-	makewritable = {AliasOf = "makewriteable"},
-	consoleinfo = {AliasOf = "rconsoleinfo"},
-	consoleerr = {AliasOf = "rconsoleerr"},
-	consolewarn = {AliasOf = "rconsolewarn"},
-	get_actors = {AliasOf = "getactors"},
-	base64_decode = {AliasOf = "base64decode"},
-	base64_encode = {AliasOf = "base64encode"},
-	executescript = {AliasOf = "loadstring"},
-	iscustomcclosure = {AliasOf = "isexecutorclosure"},
+	cloneref = {Parameters = {game}, ReturnType = "Instance"},
 }
 
 for Index, Info in NoTests do
@@ -1100,11 +1052,22 @@ local function DisplayMessage(MessageToDisplay)
 	DisplayFunction(MessageToDisplay)
 end
 
-local FakeFunctions = false
-local HideNonExistentFunctions = false
-local GetTests = false
+local Settings: {[string]: boolean} = {
+	FakeFunctions = false,
+	HideNonExistentFunctions = false,
+	GetTests = false,
+	GetUnaddedFunctions = false
+}
 
-if FakeFunctions then
+for Name: string, Enabled: boolean in Settings do
+	local Saved = getgenv()[Name]
+	
+	if Saved then
+		Settings[Name] = Saved
+	end
+end
+
+if Settings.FakeFunctions then
 	local newcclosure: ((...any) -> ...any) -> (...any) -> ...any = getfenv().newcclosure
 	
 	DisplayMessage("[debUNC]: Faking functions is enabled")
@@ -1129,24 +1092,20 @@ if FakeFunctions then
 	getgenv().NonExistentFunctions = NonExistentFunctions
 end
 
-if HideNonExistentFunctions then
+if Settings.HideNonExistentFunctions then
 	DisplayMessage("[debUNC]: Hide non-existent functions is enabled")
 end
 
-if GetTests then
+if Settings.GetTests then
 	DisplayMessage("[debUNC]: Getting all the tests is enabled")
 end
 
 local TotalTests = 0
 local CompletedTests = 0
 local FailedTests = 0
-local CompletedAliases = 0
-local FailedAliases = 0
 
 for Name: string, Info in Tests do
-	if not Info.AliasOf then
-		TotalTests += 1
-	end
+	TotalTests += 1
 	
 	task.spawn(function()
 		local Success, Result = pcall(function()
@@ -1160,10 +1119,6 @@ for Name: string, Info in Tests do
 			
 			local Info = Info
 			
-			if Info.AliasOf then
-				Info = Tests[Info.AliasOf]
-			end
-			
 			if Info.ReturnType then
 				CheckType(getfenv()[Name](table.unpack(Info.Parameters or {})), Info.ReturnType)
 			end
@@ -1173,40 +1128,19 @@ for Name: string, Info in Tests do
 			end
 		end)
 		
-		local Emoji = ""
-		
 		if Success then
-			if Info.AliasOf then
-				Emoji = "⚪"
-				CompletedAliases += 1
-			else
-				Emoji = "🟢"
-				CompletedTests += 1
-			end
+			CompletedTests += 1
+			print(`🟢 {Name}`)
 		else
-			if Info.AliasOf then
-				Emoji = "⚫"
-				FailedAliases += 1
-			else
-				Emoji = "🔴"
-				FailedTests += 1
-			end
-		end
-		
-		if Info.AliasOf then
-			Name ..= ` ({Info.AliasOf})`
-		end
-		
-		if Success then
-			print(`{Emoji} {Name}`)
-		else
+			FailedTests += 1
+			
 			Result = Result:gsub(".+:%d+: ", "")
 			
-			if HideNonExistentFunctions and Result == "doesn't exist" then
+			if Settings.HideNonExistentFunctions and Result == "doesn't exist" then
 				return
 			end
 			
-			warn(`{Emoji} {Name}: {Result}`)
+			warn(`🔴 {Name}: {Result}`)
 		end
 	end)
 end
@@ -1220,12 +1154,32 @@ DisplayMessage(`🔵 debUNC BETA v2 Score for {ExecutorName} {ExecutorVersion}: 
 DisplayMessage(`🟣 Total tests: {TotalTests}`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
-DisplayMessage(`⚪ Completed Aliases: {CompletedAliases}`)
-DisplayMessage(`⚫ Failed Aliases: {FailedAliases}`)
 
-print("------------------------------------------------------------------------------------------------")
+local function Divider()
+	print("---------------------------------------------------------------------------------------------------------")
+end
+
+Divider()
+
+print("debUNC getgenv() Settings:")
+
+Divider()
+
+for Name: string, Enabled: boolean in Settings do
+	print(`{Name}: {Enabled}`)
+end
+
+Divider()
+
+RestoreFunctions()
+
+if not Settings.GetUnaddedFunctions and not Settings.GetTests then
+	return
+end
+
 print("For development purposes, a list of functions in getfenv() and getgenv() that isn't added to the test.")
-print("------------------------------------------------------------------------------------------------")
+
+Divider()
 
 local getrenv = getfenv().getrenv
 local RobloxEnvironment = getrenv and getrenv() or {}
@@ -1260,7 +1214,7 @@ local function GetFromEnv(Environment, GetTests: boolean?)
 	end
 end
 
-if GetTests then
+if Settings.GetTests then
 	GetFromEnv(Tests, true)
 else
 	GetFromEnv(getfenv())
@@ -1269,11 +1223,13 @@ end
 
 print(Copy)
 
+Divider()
+
 local setclipboard = getfenv().setclipboard
 
 if setclipboard then
 	setclipboard(Copy)
 	print("^ Copied to your clipboard! ^")
+	
+	Divider()
 end
-
-RestoreFunctions()
