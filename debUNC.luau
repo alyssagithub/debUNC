@@ -1022,13 +1022,14 @@ local Settings: {[string]: boolean} = {
 	FakeFunctions = false,
 	HideNonExistentFunctions = false,
 	GetTests = false,
-	GetUnaddedFunctions = false
+	GetUnaddedFunctions = false,
+	MultithreadTests = true,
 }
 
 for Name: string, Enabled: boolean in Settings do
 	local Saved = getgenv()[Name]
 	
-	if Saved then
+	if Saved ~= nil then
 		Settings[Name] = Saved
 	end
 end
@@ -1073,42 +1074,48 @@ local FailedTests = 0
 for Name: string, Info in Tests do
 	TotalTests += 1
 	
-	task.spawn(function()
+	local function RunTest()
 		local Success, Result = pcall(function()
 			local Function = getfenv()[Name]
-			
+
 			assert(Function, "doesn't exist")
-			
+
 			local Closure = debug.info(Function, "s")
 
 			assert(Closure == "[C]", `expected closure to be in [C], got '{Closure}'`)
-			
+
 			local Info = Info
-			
+
 			if Info.ReturnType then
 				CheckType(getfenv()[Name](table.unpack(Info.Parameters or {})), Info.ReturnType)
 			end
-			
+
 			if Info.Test then
 				return Info.Test()
 			end
 		end)
-		
+
 		if Success then
 			CompletedTests += 1
 			print(`🟢 {Name}`)
 		else
 			FailedTests += 1
-			
+
 			Result = Result:gsub(".+:%d+: ", "")
-			
+
 			if Settings.HideNonExistentFunctions and Result == "doesn't exist" then
 				return
 			end
-			
+
 			warn(`🔴 {Name}: {Result}`)
 		end
-	end)
+	end
+	
+	if Settings.MultithreadTests then
+		task.spawn(RunTest)
+	else
+		RunTest()
+	end
 end
 
 repeat
