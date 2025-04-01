@@ -1081,6 +1081,8 @@ for Name: string, Info in Tests do
 			local Function = getfenv()[Name]
 
 			assert(Function, "doesn't exist")
+			
+			assert(debug and debug.info, "'debug.info' does not exist and is required for all tests")
 
 			local Closure = debug.info(Function, "s")
 
