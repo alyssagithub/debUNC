@@ -1069,6 +1069,8 @@ if Settings.GetTests then
 	DisplayMessage("[debUNC]: Getting all the tests is enabled")
 end
 
+local getrenv = getfenv().getrenv
+
 local TotalTests = 0
 local CompletedTests = 0
 local FailedTests = 0
@@ -1081,6 +1083,12 @@ for Name: string, Info in Tests do
 			local Function = getfenv()[Name]
 
 			assert(Function, "doesn't exist")
+			
+			local debug = debug
+			
+			if getrenv then
+				debug = getrenv().debug
+			end
 			
 			assert(debug and debug.info, "'debug.info' does not exist and is required for all tests")
 
@@ -1158,7 +1166,6 @@ print("For development purposes, a list of functions in getfenv() and getgenv() 
 
 Divider()
 
-local getrenv = getfenv().getrenv
 local RobloxEnvironment = getrenv and getrenv() or {}
 
 local AlreadyChecked = {}
