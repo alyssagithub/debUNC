@@ -927,6 +927,8 @@ local NoTests: {[string | number]: any} = {
 	"cansignalreplicate",
 	"getreplicablesignals",
 	"getdrawobjects",
+	"rawset",
+	"rawget",
 	
 	-- Short Tests
 	gethiddenproperty = {Parameters = {game:GetService("Players").LocalPlayer, "SimulationRadius"}, ReturnType = "number"},
