@@ -924,7 +924,7 @@ local NoTests: {[string | number]: any} = {
 	getrawmetatable = {Parameters = {game}, ReturnType = "table"},
 	ismoduleloaded = {Parameters = {game:FindFirstChildWhichIsA("ModuleScript", true)}, ReturnType = "boolean"},
 	isnetworkowner = {Parameters = {game:GetService("Players").LocalPlayer.Character.HumanoidRootPart}, ReturnType = "boolean"},
-	getfflag = {Parameters = {"DFIntMaxFrameBufferSize"}, ReturnType = "number"},
+	getfflag = {Parameters = {"MaxFrameBufferSize"}, ReturnType = "string"},
 }
 
 for Index, Info in NoTests do
@@ -1051,8 +1051,6 @@ local function FindFirstFunction(Name: string): any
 end
 
 for Name: string, Info in Tests do
-	TotalTests += 1
-	
 	local function RunTest()
 		local Success, Result = pcall(function()
 			local Function = FindFirstFunction(Name)
@@ -1097,6 +1095,8 @@ for Name: string, Info in Tests do
 				FailedTests += 1
 			end
 		end
+		
+		TotalTests += 1
 	end
 	
 	if Settings.MultithreadTests then
@@ -1106,9 +1106,19 @@ for Name: string, Info in Tests do
 	end
 end
 
+local function GetAllTests()
+	local AllTests = 0
+	
+	for _ in Tests do
+		AllTests += 1
+	end
+	
+	return AllTests
+end
+
 repeat
 	task.wait()
-until CompletedTests + FailedTests + MissingFunctions == TotalTests
+until TotalTests == GetAllTests()
 
 DisplayMessage(`❓ The score below is only for how many custom functions are supported.`)
 DisplayMessage(`🔵 debUNC BETA v2 Score for {ExecutorName} {ExecutorVersion}: {math.floor(CompletedTests / TotalTests * 100)}%`)
@@ -1139,7 +1149,7 @@ if not Settings.GetUnaddedFunctions and not Settings.GetTests then
 	return
 end
 
-print("For development purposes, a list of functions and libraries in getfenv() and getgenv() that isn't added to the test.")
+print("A list of functions and libraries in getfenv() and getgenv() that isn't added to the test.")
 
 Divider()
 
