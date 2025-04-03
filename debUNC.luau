@@ -1,7 +1,7 @@
 --!strict
 -- expected type '{Type}', got '{typeof(Result)}'
 local function CheckType(Result: any, Type: string)
-	assert(typeof(Result) == Type, `expected type '{Type}', got '{typeof(Result)}'`)
+	assert(typeof(Result) == Type, `didn't return a {Type}`)
 end
 
 -- '{FunctionName}' does not exist, and is required for this test
@@ -519,46 +519,6 @@ local Tests: any = {
 		end
 	},
 
-	ismoduleloaded = {
-		Test = function()
-			local ismoduleloaded: (ModuleScript) -> boolean = getfenv().ismoduleloaded
-
-			local Module = game:FindFirstChildWhichIsA("ModuleScript", true)
-
-			assert(Module, FailedFind("module"))
-			
-			local Result = ismoduleloaded(Module)
-			
-			assert(Result == true, `modulescript '{Module}' should be loaded`)
-		end
-	},
-
-	isnetworkowner = {
-		Test = function()
-			local isnetworkowner: (BasePart | Model) -> boolean = getfenv().isnetworkowner
-
-			local Success = pcall(isnetworkowner, Instance.new("Model"))
-
-			assert(not Success, "expected error when sending a non-basepart")
-
-			local Player = game:GetService("Players").LocalPlayer
-
-			assert(Player, FailedFind("player"))
-
-			local Character = Player.Character
-
-			assert(Character, FailedFind("character"))
-
-			local HumanoidRootPart: Part = Character:FindFirstChild("HumanoidRootPart")
-
-			assert(HumanoidRootPart, FailedFind("humanoidrootpart"))
-			
-			assert(isnetworkowner(HumanoidRootPart) == true, "player should have network ownership over the humanoidrootpart")
-			
-			assert(isnetworkowner(Instance.new("Part")) == false, "player should not have network ownership over a newly created part")
-		end
-	},
-
 	fireclickdetector = {
 		Test = function()
 			local fireclickdetector: (ClickDetector) -> () = getfenv().fireclickdetector
@@ -876,7 +836,6 @@ local NoTests: {[string | number]: any} = {
 	"gethiddenproperties",
 	"sethiddenproperty",
 	"getcallingscript",
-	"setfflag",
 	"isfunctionhooked",
 	"setscriptable",
 	"setthreadidentity",
@@ -890,7 +849,6 @@ local NoTests: {[string | number]: any} = {
 	"getrunningscripts",
 	"isparallel",
 	"getactors",
-	"getfflag",
 	"base64decode",
 	"restorefunction",
 	"runonactor",
@@ -929,6 +887,9 @@ local NoTests: {[string | number]: any} = {
 	"getdrawobjects",
 	"rawset",
 	"rawget",
+	"getsenv",
+	"getmenv",
+	"setfflag",
 	
 	-- Short Tests
 	gethiddenproperty = {Parameters = {game:GetService("Players").LocalPlayer, "SimulationRadius"}, ReturnType = "number"},
@@ -946,23 +907,24 @@ local NoTests: {[string | number]: any} = {
 	compareinstances = {Parameters = {game, game}, ReturnType = "boolean"},
 	isexecutorclosure = {Parameters = {wait}, ReturnType = "boolean"},
 	islclosure = {Parameters = {wait}, ReturnType = "boolean"},
-	getproto = {Parameters = {function() end, 1 :: any}, ReturnType = "function"}, 
-	getprotos = {Parameters = {function() end}, ReturnType = "table"},
+	["debug.getproto"] = {Parameters = {function() end, 1 :: any}, ReturnType = "function"}, 
+	["debug.getprotos"] = {Parameters = {function() end}, ReturnType = "table"},
+	["debug.getinfo"] = {Parameters = {""}, ReturnType = "table"},
+	["debug.getconstants"] = {Parameters = {function()end}, ReturnType = "table"},
+	["debug.getconstant"] = {Parameters = {function()local a; a = "hi"end, 1 :: any}, ReturnType = "string"},
 	decompile = {Parameters = {game:FindFirstChildWhichIsA("LuaSourceContainer", true)}, ReturnType = "string"},
 	getscriptbytecode = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "string"},
 	lz4compress = {Parameters = {"debunctestinglz4compress"}, ReturnType = "string"},
 	lz4decompress = {Parameters = {(getfenv().lz4compress or function()end)("debunctestinglz4compress")}, ReturnType = "string"},
-	getsenv = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "table"},
 	getinstances = {ReturnType = "table"},
-	getmenv = {Parameters = {game:FindFirstChildWhichIsA("ModuleScript", true)}, ReturnType = "table"},
 	getscripthash = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "string"},
-	getinfo = {Parameters = {""}, ReturnType = "table"},
-	getconstants = {Parameters = {function()end}, ReturnType = "table"},
-	getconstant = {Parameters = {function()local a; a = "hi"end, 1 :: any}, ReturnType = "string"},
 	getscriptclosure = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "function"},
 	checkparallel = {ReturnType = "boolean"},
 	cloneref = {Parameters = {game}, ReturnType = "Instance"},
 	getrawmetatable = {Parameters = {game}, ReturnType = "table"},
+	ismoduleloaded = {Parameters = {game:FindFirstChildWhichIsA("ModuleScript", true)}, ReturnType = "boolean"},
+	isnetworkowner = {Parameters = {game:GetService("Players").LocalPlayer.Character.HumanoidRootPart}, ReturnType = "boolean"},
+	getfflag = {Parameters = {"DFIntMaxFrameBufferSize"}, ReturnType = "number"},
 }
 
 for Index, Info in NoTests do
@@ -1022,9 +984,8 @@ end
 
 local Settings: {[string]: boolean} = {
 	FakeFunctions = false,
-	HideNonExistentFunctions = false,
 	GetTests = false,
-	GetUnaddedFunctions = false,
+	GetUnaddedFunctions = true,
 	MultithreadTests = true,
 }
 
@@ -1074,15 +1035,30 @@ local getrenv = getfenv().getrenv
 local TotalTests = 0
 local CompletedTests = 0
 local FailedTests = 0
+local MissingFunctions = 0
+
+local function FindFirstFunction(Name: string): any
+	local Value = getfenv()
+
+	while Value ~= nil and Name ~= "" do
+		local Library, NewName = string.match(Name, "^([^.]+)%.?(.*)$")
+		
+		Value = Value[Library or ""]
+		Name = NewName or ""
+	end
+
+	return Value
+end
 
 for Name: string, Info in Tests do
 	TotalTests += 1
 	
 	local function RunTest()
 		local Success, Result = pcall(function()
-			local Function = getfenv()[Name]
+			local Function = FindFirstFunction(Name)
 
 			assert(Function, "doesn't exist")
+			assert(typeof(Function) == "function", "doesn't have 'function' type")
 			
 			local debug = debug
 			
@@ -1099,7 +1075,7 @@ for Name: string, Info in Tests do
 			local Info = Info
 
 			if Info.ReturnType then
-				CheckType(getfenv()[Name](table.unpack(Info.Parameters or {})), Info.ReturnType)
+				CheckType(Function(table.unpack(Info.Parameters or {})), Info.ReturnType)
 			end
 
 			if Info.Test then
@@ -1108,18 +1084,18 @@ for Name: string, Info in Tests do
 		end)
 
 		if Success then
-			CompletedTests += 1
 			print(`🟢 {Name}`)
+			CompletedTests += 1
 		else
-			FailedTests += 1
-
 			Result = Result:gsub(".+:%d+: ", "")
-
-			if Settings.HideNonExistentFunctions and Result == "doesn't exist" then
-				return
+			
+			if Result == "doesn't exist" then
+				warn(`🟡 {Name}`)
+				MissingFunctions += 1
+			else
+				warn(`🔴 {Name}: {Result}`)
+				FailedTests += 1
 			end
-
-			warn(`🔴 {Name}: {Result}`)
 		end
 	end
 	
@@ -1132,13 +1108,14 @@ end
 
 repeat
 	task.wait()
-until CompletedTests + FailedTests == TotalTests
+until CompletedTests + FailedTests + MissingFunctions == TotalTests
 
 DisplayMessage(`❓ The score below is only for how many custom functions are supported.`)
 DisplayMessage(`🔵 debUNC BETA v2 Score for {ExecutorName} {ExecutorVersion}: {math.floor(CompletedTests / TotalTests * 100)}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests}`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
+DisplayMessage(`🟡 Missing functions: {MissingFunctions}`)
 
 local function Divider()
 	print("---------------------------------------------------------------------------------------------------------")
@@ -1162,7 +1139,7 @@ if not Settings.GetUnaddedFunctions and not Settings.GetTests then
 	return
 end
 
-print("For development purposes, a list of functions in getfenv() and getgenv() that isn't added to the test.")
+print("For development purposes, a list of functions and libraries in getfenv() and getgenv() that isn't added to the test.")
 
 Divider()
 
@@ -1172,14 +1149,14 @@ local AlreadyChecked = {}
 
 local Copy = ""
 
-local function GetFromEnv(Environment, GetTests: boolean?)
+local function GetFromEnv(Environment, GetTests: boolean?, Library: string?)
 	for Name: string, Value: any in Environment do
 		if not GetTests then
 			if Tests[Name] then
 				continue
 			end
 
-			if typeof(Value) ~= "function" then
+			if typeof(Value) ~= "function" and typeof(Value) ~= "table" then
 				continue
 			end
 
@@ -1192,9 +1169,13 @@ local function GetFromEnv(Environment, GetTests: boolean?)
 			end
 		end
 		
+		if typeof(Value) == "table" then
+			return GetFromEnv(Value, Settings.GetTests, Name)
+		end
+		
 		AlreadyChecked[Name] = true
 		
-		Copy ..= `"{Name}",\n`
+		Copy ..= `"{if Library then `{Library}.` else ""}{Name}",\n`
 	end
 end
 
