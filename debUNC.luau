@@ -1,6 +1,6 @@
 --!strict
 -- expected type '{Type}', got '{typeof(Result)}'
-local function CheckType(Result: any, Type: string)
+local function CheckReturnType(Result: any, Type: string)
 	assert(typeof(Result) == Type, `didn't return a {Type}`)
 end
 
@@ -74,7 +74,7 @@ local Tests: any = {
 
 			local ThreadEnvironment = gettenv(task.spawn(function() end))
 			
-			CheckType(ThreadEnvironment, "table")
+			CheckReturnType(ThreadEnvironment, "table")
 
 			for FunctionName in ThreadEnvironment do
 				assert(getfenv()[FunctionName], `Function does not contain all values in getfenv(). Missing value: {FunctionName}`)
@@ -279,7 +279,7 @@ local Tests: any = {
 				delfile(FileName)
 			end
 			
-			CheckType(Result, "table")
+			CheckReturnType(Result, "table")
 
 			assert(Result[1] == GeneratedNumber, "Function's table should've contained the test's randomly generated number.")
 		end,
@@ -396,7 +396,7 @@ local Tests: any = {
 				return OtherGeneratedResult
 			end)
 			
-			CheckType(Hook, "function")
+			CheckReturnType(Hook, "function")
 
 			assert(Hook() == GeneratedResult, "Original function does not return the value it's meant to.")
 
@@ -478,7 +478,7 @@ local Tests: any = {
 				Method = "GET"
 			})
 			
-			CheckType(Result, "table")
+			CheckReturnType(Result, "table")
 
 			local Body = Result.Body
 
@@ -486,7 +486,7 @@ local Tests: any = {
 
 			local Decoded = game:GetService("HttpService"):JSONDecode(Body)
 			
-			CheckType(Decoded, "table")
+			CheckReturnType(Decoded, "table")
 
 			local DecodedHeaders = Decoded.headers
 
@@ -1075,7 +1075,7 @@ for Name: string, Info in Tests do
 			local Info = Info
 
 			if Info.ReturnType then
-				CheckType(Function(table.unpack(Info.Parameters or {})), Info.ReturnType)
+				CheckReturnType(Function(table.unpack(Info.Parameters or {})), Info.ReturnType)
 			end
 
 			if Info.Test then
