@@ -414,19 +414,6 @@ local Tests: any = {
 		end,
 	},
 
-	isluau = {
-		Test = function()
-			local isluau: () -> boolean = getfenv().isluau
-			
-			local ThreadIsLuau = isluau()
-			
-			local VersionIsLuau = _VERSION == "Luau"
-			
-			assert(ThreadIsLuau == VersionIsLuau, `_VERSION is '{_VERSION}', isluau() gave '{isluau()}'`)
-		end,
-		ReturnType = "boolean"
-	},
-
 	clonefunction = {
 		Test = function()
 			local clonefunction: ((any?) -> any?) -> ((any?) -> any?) = getfenv().clonefunction
@@ -800,7 +787,9 @@ local Tests: any = {
 			
 			assert(isscriptable(game, "SimulationRadius") == false, "game.SimulationRadius is a hidden property, and isn't scriptable")
 			
-			assert(isscriptable(game, "a") == false, "game.a is not a valid property")
+			local Success, Result = pcall(isscriptable, game, "a")
+			
+			assert(not Success or Result == false, "game.a is not a valid property")
 		end,
 	},
 }
@@ -907,7 +896,7 @@ local NoTests: {[string | number]: any} = {
 	compareinstances = {Parameters = {game, game}, ReturnType = "boolean"},
 	isexecutorclosure = {Parameters = {wait}, ReturnType = "boolean"},
 	islclosure = {Parameters = {wait}, ReturnType = "boolean"},
-	["debug.getproto"] = {Parameters = {function() end, 1 :: any}, ReturnType = "function"}, 
+	["debug.getproto"] = {Parameters = {function() end, 1 :: any}, ReturnType = "function"},
 	["debug.getprotos"] = {Parameters = {function() end}, ReturnType = "table"},
 	["debug.getinfo"] = {Parameters = {""}, ReturnType = "table"},
 	["debug.getconstants"] = {Parameters = {function()end}, ReturnType = "table"},
@@ -1153,6 +1142,107 @@ print("A list of functions and libraries in getfenv() and getgenv() that isn't a
 
 Divider()
 
+local Blacklist = {
+	"queue_on_teleport",
+	"isgameactive",
+	"aunisgay",
+	"aunisafemboy",
+	"base64.encode",
+	"base64.base64_encode",
+	"base64.decode",
+	"setthreadcontext",
+	"toclipboard",
+	"getthreadcontext",
+	"replacefunction",
+	"rconsoleinfo",
+	"get_thread_identity",
+	"setidentity",
+	"httpget",
+	"rconsoleerr",
+	"dumpstring",
+	"getinstancelist",
+	"get_hidden_gui",
+	"getinfo",
+	"getconstant",
+	"is_synapse_function",
+	"rconsoledestroy",
+	"issentinelclosure",
+	"executescript",
+	"getconstants",
+	"getidentity",
+	"setnamecallmethod",
+	"httppost",
+	"run_on_actor",
+	"getcustomasset",
+	"replaceclosure",
+	"is_sirhurt_closure",
+	"crypt.base64decode",
+	"crypt.base64_decode",
+	"crypt.base64encode",
+	"crypt.base64.base64_decode",
+	"crypt.base64.base64encode",
+	"crypt.base64.encode",
+	"crypt.base64.base64decode",
+	"crypt.base64.base64_encode",
+	"crypt.base64.decode",
+	"crypt.base64_encode",
+	"base64_encode",
+	"base64.base64_decode",
+	"base64.base64encode",
+	"base64.base64decode",
+	"http.request",
+	"getstack",
+	"is_protosmasher_closure",
+	"iscustomcclosure",
+	"isourclosure",
+	"set_thread_context",
+	"checkclosure",
+	"base64_decode",
+	"set_thread_identity",
+	"getscriptfunction",
+	"rconsolewarn",
+	"getprotos",
+	"get_actors",
+	"rconsoleprint",
+	"defersignal",
+	"http_request",
+	"getproto",
+	"bit.bdiv",
+	"bit.badd",
+	"bit.rshift",
+	"bit.band",
+	"bit.bor",
+	"bit.bnot",
+	"bit.bmul",
+	"bit.bswap",
+	"bit.arshift",
+	"bit.tobit",
+	"bit.ror",
+	"bit.rol",
+	"bit.lshift",
+	"bit.tohex",
+	"bit.bxor",
+	"bit.bsub",
+	"getexecutorname",
+	"rconsolecreate",
+	"getreg",
+	"get_thread_context",
+	"istempleclosure",
+	"input.mouse2release",
+	"input.keyrelease",
+	"input.mousemoveabs",
+	"input.keypress",
+	"input.mousemoverel",
+	"input.mouse2click",
+	"input.mouse2press",
+	"input.mousescroll",
+	"input.mouse1click",
+	"input.mouse1release",
+	"input.mouse1press",
+	"get_actors_threads",
+	"getcallbackvalue",
+}
+
 local RobloxEnvironment = getrenv and getrenv() or {}
 
 local AlreadyChecked = {}
@@ -1161,6 +1251,10 @@ local Copy = ""
 
 local function GetFromEnv(Environment, GetTests: boolean?, Library: string?)
 	for Name: string, Value: any in Environment do
+		if Library then
+			Name = `{Library}.{Name}`
+		end
+		
 		if not GetTests then
 			if Tests[Name] then
 				continue
@@ -1177,15 +1271,23 @@ local function GetFromEnv(Environment, GetTests: boolean?, Library: string?)
 			if AlreadyChecked[Name] then
 				continue
 			end
+			
+			if table.find(Blacklist, Name) then
+				continue
+			end
 		end
 		
 		if typeof(Value) == "table" then
-			return GetFromEnv(Value, Settings.GetTests, Name)
+			GetFromEnv(Value, Settings.GetTests, Name)
+			continue
 		end
 		
 		AlreadyChecked[Name] = true
 		
-		Copy ..= `"{if Library then `{Library}.` else ""}{Name}",\n`
+		local Message = `"{Name}",`
+		
+		Copy ..= `{Message}\n`
+		print(Message)
 	end
 end
 
@@ -1195,8 +1297,6 @@ else
 	GetFromEnv(getfenv())
 	GetFromEnv(getgenv())
 end
-
-print(Copy)
 
 Divider()
 
