@@ -386,6 +386,19 @@ local Tests: any = {
 			assert(Hook() == GeneratedResult, "Original function does not return the value it's meant to.")
 
 			assert(Test() == OtherGeneratedResult, "Hooked function does not return the value it's meant to.")
+			
+			--TODO:
+			-- lclosure -> cclosure
+			-- lclosure -> newcclosure
+			-- lclosure -> lclosure (current test)
+			
+			-- cclosure -> lclosure
+			-- cclosure -> newcclosure
+			-- cclosure -> cclosure
+			
+			-- newcclosure -> lclosure
+			-- newcclosure -> cclosure
+			-- newcclosure -> newcclosure
 		end
 	},
 
