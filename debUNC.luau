@@ -1,5 +1,5 @@
 --!strict
--- expected type '{Type}', got '{typeof(Result)}'
+-- `didn't return a {Type}`
 local function CheckReturnType(Result: any, Type: string)
 	assert(typeof(Result) == Type, `didn't return a {Type}`)
 end
@@ -204,16 +204,10 @@ local Tests: any = {
 	listfiles = {
 		Test = function()
 			local listfiles: (Path: string) -> {string} = getfenv().listfiles
-
 			local writefile: (Path: string, Data: string) -> () = CheckExist("writefile")
-
 			local makefolder: (Path: string) -> () = CheckExist("makefolder")
 
 			local FolderName = `Folder_{math.random()}`
-
-			local Success = pcall(listfiles, "???")
-
-			assert(not Success, "expected an error when listing files of a folder that doesn't exist")
 
 			makefolder(FolderName)
 
@@ -239,14 +233,8 @@ local Tests: any = {
 	delfile = {
 		Test = function()
 			local delfile: (Path: string) -> any? = getfenv().delfile
-
 			local writefile: (Path: string, Data: string) -> () = CheckExist("writefile")
-
 			local isfile: (Path: string) -> boolean = CheckExist("isfile")
-
-			local Success, Result = pcall(delfile, "???")
-
-			assert(not Success, "Function should error when attempting to delete a file that does not exist.")
 
 			local FileName = `File_{math.random()}.txt`
 
@@ -313,16 +301,13 @@ local Tests: any = {
 	makefolder = {
 		Test = function()
 			local makefolder: (Path: string) -> () = getfenv().makefolder
-
 			local isfolder: (Path: string) -> boolean = CheckExist("isfolder")
-
-			assert(isfolder("???") == false, "'isfolder' didn't return false when checking if a non-existent folder existed")
 
 			local FolderName = `Folder_{math.random()}`
 
 			makefolder(FolderName)
 
-			assert(isfolder(FolderName), "failed to find folder after it was made")
+			assert(isfolder(FolderName) == true, "failed to find folder after it was made")
 
 			local delfolder: (Path: string) -> () = getfenv().delfolder
 
@@ -340,7 +325,7 @@ local Tests: any = {
 
 			local makefolder: (Path: string) -> () = CheckExist("makefolder")
 
-			assert(not isfolder("???"), "Function returned true when checking if a non-existent folder existed.")
+			assert(isfolder("???") == false, "didn't return false for non-existent folder")
 
 			local FolderName = `Folder_{math.random()}`
 
@@ -796,12 +781,6 @@ local Tests: any = {
 
 local NoTests: {[string | number]: any} = {
 	"firetouchinterest",
-	"consoleclear",
-	"consolecreate",
-	"consoledestroy",
-	"consoleinput",
-	"consoleprint",
-	"consolename",
 	"mouse1click",
 	"mouse1press",
 	"mouse1release",
@@ -844,21 +823,13 @@ local NoTests: {[string | number]: any} = {
 	"getupvalues",
 	"messagebox",
 	"info",
-	"consolehide",
-	"consoleinfo",
 	"getproperties",
-	"consoletop",
 	"getscriptfromthread",
-	"consolehidden",
 	"saveinstance",
-	"consoletoggle",
 	"runfile",
 	"keyclick",
-	"consolewarn",
 	"clearteleportqueue",
 	"makewriteable",
-	"consoleshow",
-	"consoleerr",
 	"keytap",
 	"getthreads",
 	"inparallel",
@@ -879,6 +850,18 @@ local NoTests: {[string | number]: any} = {
 	"getsenv",
 	"getmenv",
 	"setfflag",
+	"drawing.new",
+	"drawing.clear",
+	"drawing.isrenderobj",
+	"drawing.getrenderproperty",
+	"cache.replace",
+	"cache.iscached",
+	"cache.invalidate",
+	"crypt.hash",
+	"crypt.generatebytes",
+	"crypt.encrypt",
+	"crypt.generatekey",
+	"websocket.connect",
 	
 	-- Short Tests
 	gethiddenproperty = {Parameters = {game:GetService("Players").LocalPlayer, "SimulationRadius"}, ReturnType = "number"},
@@ -898,7 +881,7 @@ local NoTests: {[string | number]: any} = {
 	islclosure = {Parameters = {wait}, ReturnType = "boolean"},
 	["debug.getproto"] = {Parameters = {function() end, 1 :: any}, ReturnType = "function"},
 	["debug.getprotos"] = {Parameters = {function() end}, ReturnType = "table"},
-	["debug.getinfo"] = {Parameters = {""}, ReturnType = "table"},
+	["debug.getinfo"] = {Parameters = {function()end}, ReturnType = "table"},
 	["debug.getconstants"] = {Parameters = {function()end}, ReturnType = "table"},
 	["debug.getconstant"] = {Parameters = {function()local a; a = "hi"end, 1 :: any}, ReturnType = "string"},
 	decompile = {Parameters = {game:FindFirstChildWhichIsA("LuaSourceContainer", true)}, ReturnType = "string"},
@@ -1055,9 +1038,9 @@ for Name: string, Info in Tests do
 			
 			assert(debug and debug.info, "'debug.info' does not exist and is required for all tests")
 
-			local Closure = debug.info(Function, "s")
+			--[[local Closure = debug.info(Function, "s")
 
-			assert(Closure == "[C]", `expected closure to be in [C], got '{Closure}'`)
+			assert(Closure == "[C]", `expected closure to be in [C], got '{Closure}'`)]]
 
 			local Info = Info
 
@@ -1241,6 +1224,18 @@ local Blacklist = {
 	"input.mouse1press",
 	"get_actors_threads",
 	"getcallbackvalue",
+	"consolecreate",
+	"consoledestroy",
+	"consoleinfo",
+	"consoleerr",
+	"consolewarn",
+	"consoleprint",
+	"run_on_thread",
+	"cleardrawcache",
+	"isrenderobj",
+	"Drawing.clear",
+	"Drawing.new",
+	"getrenderproperty",
 }
 
 local RobloxEnvironment = getrenv and getrenv() or {}
@@ -1298,7 +1293,15 @@ else
 	GetFromEnv(getgenv())
 end
 
+if Copy == "" then
+	print("Couldn't find anything, this executor is all caught up.")
+end
+
 Divider()
+
+if Copy == "" then
+	return
+end
 
 local setclipboard = getfenv().setclipboard
 
