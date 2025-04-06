@@ -1,5 +1,5 @@
 --!strict
--- `didn't return a {Type}`
+-- didn't return a {Type}
 local function CheckReturnType(Result: any, Type: string)
 	assert(typeof(Result) == Type, `didn't return a {Type}`)
 end
