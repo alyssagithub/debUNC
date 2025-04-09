@@ -367,38 +367,109 @@ local Tests: any = {
 
 	hookfunction = {
 		Test = function()
-			local hookfunction: (FunctionToHook: () -> (), Hook: () -> ()) -> (() -> ()) = getfenv().hookfunction
-
-			local GeneratedResult = math.random()
-
-			local function Test()
-				return GeneratedResult
+			local hookfunction: (FunctionToHook: (...any) -> (...any), Hook: () -> ()) -> () -> () = getfenv().hookfunction
+			local newcclosure: ((...any) -> ...any) -> (...any) -> ...any = getfenv().newcclosure
+			
+			local function CheckTest(Result: any, Expected: any, Test: string?)
+				assert(Result == Expected, `{Test or Expected} didn't return the expected value`)
 			end
-
-			local OtherGeneratedResult = math.random() + 1
-
-			local Hook = hookfunction(Test, function()
-				return OtherGeneratedResult
+			
+			local function CheckTestType(Result: any, ExpectedType: string, Test: string)
+				assert(typeof(Result) == ExpectedType, `{Test} didn't return the expected value`)
+			end
+			
+			local function LClosureOriginal(): any
+				return "lclosureoriginal"
+			end
+			
+			-- lclosures
+			local Test = "lclosure -> lclosure"
+			
+			local Original = hookfunction(LClosureOriginal, function()
+				return Test
 			end)
 			
-			CheckReturnType(Hook, "function")
-
-			assert(Hook() == GeneratedResult, "Original function does not return the value it's meant to.")
-
-			assert(Test() == OtherGeneratedResult, "Hooked function does not return the value it's meant to.")
+			CheckReturnType(Original, "function")
 			
-			--TODO:
-			-- lclosure -> cclosure
-			-- lclosure -> newcclosure
-			-- lclosure -> lclosure (current test)
+			CheckTest(LClosureOriginal(), Test)
 			
-			-- cclosure -> lclosure
-			-- cclosure -> newcclosure
-			-- cclosure -> cclosure
+			local Test = "lclosure -> cclosure"
 			
-			-- newcclosure -> lclosure
-			-- newcclosure -> cclosure
-			-- newcclosure -> newcclosure
+			hookfunction(LClosureOriginal, os.time)
+			
+			CheckTestType(LClosureOriginal(), "number", Test)
+			
+			if newcclosure then
+				local Test = "lclosure -> newcclosure"
+				
+				hookfunction(LClosureOriginal, newcclosure(function()
+					return Test
+				end))
+				
+				CheckTest(LClosureOriginal(), Test)
+			end
+			
+			-- cclosures
+			local Test = "cclosure -> lclosure"
+			
+			local Original = hookfunction(os.time, function()
+				return Test
+			end)
+			
+			CheckTest(os.time(), Test)
+			
+			hookfunction(os.time, Original) -- restore function
+			
+			local Test = "cclosure -> cclosure"
+			
+			local Original = hookfunction(string.rep, tick)
+			
+			CheckTestType(string.rep("a", 1), "number", Test)
+			
+			hookfunction(string.rep, Original) -- restore function
+			
+			if newcclosure then
+				local Test = "cclosure -> newcclosure"
+				
+				local Original = hookfunction(os.time, newcclosure(function()
+					return Test
+				end))
+				
+				CheckTest(os.time(), Test)
+				
+				hookfunction(os.time, Original) -- restore function
+			end
+			
+			-- newcclosures
+			if not newcclosure then
+				return
+			end
+			
+			local NewCClosureOriginal = newcclosure(function()
+				return "newcclosureoriginal"
+			end)
+			
+			local Test = "newcclosure -> lclosure"
+			
+			hookfunction(NewCClosureOriginal, function()
+				return Test
+			end)
+			
+			CheckTest(NewCClosureOriginal(), Test)
+			
+			local Test = "newcclosure -> cclosure"
+			
+			hookfunction(NewCClosureOriginal, time)
+			
+			CheckTestType(NewCClosureOriginal(), "number", Test)
+			
+			local Test = "newcclosure -> newcclosure"
+			
+			hookfunction(NewCClosureOriginal, newcclosure(function()
+				return Test
+			end))
+			
+			CheckTest(NewCClosureOriginal(), Test)
 		end
 	},
 
@@ -877,7 +948,6 @@ local NoTests: {[string | number]: any} = {
 	"websocket.connect",
 	"printf",
 	
-	
 	-- Short Tests
 	gethiddenproperty = {Parameters = {game:GetService("Players").LocalPlayer, "SimulationRadius"}, ReturnType = "number"},
 	identifyexecutor = {ReturnType = "string"},
@@ -935,6 +1005,8 @@ local function RestoreFunctions()
 		for Name in getgenv().NonExistentFunctions do
 			getfenv()[Name] = nil
 		end
+		
+		getgenv().OriginalFunctions = nil
 	end
 end
 
@@ -1329,6 +1401,8 @@ local Blacklist = {
 	"isdir",
 	"consolesettitle",
 	"deletefolder",
+	"WebSocket.New",
+	"WebSocket.new",
 }
 
 local RobloxEnvironment = getrenv and getrenv() or {}
