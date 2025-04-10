@@ -368,108 +368,61 @@ local Tests: any = {
 	hookfunction = {
 		Test = function()
 			local hookfunction: (FunctionToHook: (...any) -> (...any), Hook: () -> ()) -> () -> () = getfenv().hookfunction
-			local newcclosure: ((...any) -> ...any) -> (...any) -> ...any = getfenv().newcclosure
+			local newcclosure: (((...any) -> ...any) -> (...any) -> ...any)? = getfenv().newcclosure
 			
-			local function CheckTest(Result: any, Expected: any, Test: string?)
-				assert(Result == Expected, `{Test or Expected} didn't return the expected value`)
+			local function HookTest(FunctionToHook, Hook: (...any) -> ...any, ...)
+				local Original = hookfunction(FunctionToHook, Hook)
+				
+				local Test = Hook()
+				
+				assert(FunctionToHook(...) == Test, `{Test} didn't return the expected value`)
+				
+				hookfunction(FunctionToHook, Original) -- restorefunction
 			end
 			
-			local function CheckTestType(Result: any, ExpectedType: string, Test: string)
-				assert(typeof(Result) == ExpectedType, `{Test} didn't return the expected value`)
-			end
+			--lclosures
 			
-			local function LClosureOriginal(): any
-				return "lclosureoriginal"
-			end
-			
-			-- lclosures
-			local Test = "lclosure -> lclosure"
-			
-			local Original = hookfunction(LClosureOriginal, function()
-				return Test
+			HookTest(function()end, function()
+				return "lclosure -> lclosure"
 			end)
 			
-			CheckReturnType(Original, "function")
-			
-			CheckTest(LClosureOriginal(), Test)
-			
-			local Test = "lclosure -> cclosure"
-			
-			hookfunction(LClosureOriginal, os.time)
-			
-			CheckTestType(LClosureOriginal(), "number", Test)
+			HookTest(function()end, string.upper, "lclosure -> cclosure")
 			
 			if newcclosure then
-				local Test = "lclosure -> newcclosure"
-				
-				hookfunction(LClosureOriginal, newcclosure(function()
-					return Test
+				HookTest(function()end, newcclosure(function()
+					return "lclosure -> newcclosure"
 				end))
-				
-				CheckTest(LClosureOriginal(), Test)
 			end
 			
-			-- cclosures
-			local Test = "cclosure -> lclosure"
+			--cclosures
 			
-			local Original = hookfunction(os.time, function()
-				return Test
+			HookTest(string.upper, function()
+				return "cclosure -> lclosure"
 			end)
 			
-			CheckTest(os.time(), Test)
-			
-			hookfunction(os.time, Original) -- restore function
-			
-			local Test = "cclosure -> cclosure"
-			
-			local Original = hookfunction(string.rep, tick)
-			
-			CheckTestType(string.rep("a", 1), "number", Test)
-			
-			hookfunction(string.rep, Original) -- restore function
+			HookTest(string.lower, string.upper, "cclosure -> cclosure")
 			
 			if newcclosure then
-				local Test = "cclosure -> newcclosure"
-				
-				local Original = hookfunction(os.time, newcclosure(function()
-					return Test
+				HookTest(string.lower, newcclosure(function()
+					return "cclosure -> newcclosure"
 				end))
-				
-				CheckTest(os.time(), Test)
-				
-				hookfunction(os.time, Original) -- restore function
 			end
 			
-			-- newcclosures
+			--newcclosures
+			
 			if not newcclosure then
 				return
 			end
 			
-			local NewCClosureOriginal = newcclosure(function()
-				return "newcclosureoriginal"
+			HookTest(newcclosure(function()end), function()
+				return "newcclosure -> lclosure"
 			end)
 			
-			local Test = "newcclosure -> lclosure"
+			HookTest(newcclosure(function()end), string.upper, "newcclosure -> cclosure")
 			
-			hookfunction(NewCClosureOriginal, function()
-				return Test
-			end)
-			
-			CheckTest(NewCClosureOriginal(), Test)
-			
-			local Test = "newcclosure -> cclosure"
-			
-			hookfunction(NewCClosureOriginal, time)
-			
-			CheckTestType(NewCClosureOriginal(), "number", Test)
-			
-			local Test = "newcclosure -> newcclosure"
-			
-			hookfunction(NewCClosureOriginal, newcclosure(function()
-				return Test
+			HookTest(newcclosure(function()end), newcclosure(function()
+				return "newcclosure -> newcclosure"
 			end))
-			
-			CheckTest(NewCClosureOriginal(), Test)
 		end
 	},
 
@@ -861,10 +814,59 @@ local Tests: any = {
 			assert(not Success or Result == false, "game.a is not a valid property")
 		end,
 	},
+	
+	firetouchinterest = {
+		Test = function()
+			local firetouchinterest: (FireTouch: BasePart, WithPart: BasePart, Ended: number) -> () = getfenv().firetouchinterest
+			
+			local FireTouch = Instance.new("Part")
+			local WithPart = Instance.new("Part")
+			
+			FireTouch.Parent = workspace
+			WithPart.Parent = workspace
+			
+			local Complete = false
+			
+			FireTouch.Touched:Connect(function(Part)
+				if WithPart == Part then
+					Complete = true
+				end
+			end)
+			
+			firetouchinterest(FireTouch, WithPart, 0)
+			firetouchinterest(FireTouch, WithPart, 1)
+			
+			local Start = tick()
+			
+			repeat
+				task.wait()
+			until Complete or tick() - Start >= 5
+			
+			FireTouch:Destroy()
+			WithPart:Destroy()
+			
+			assert(Complete, "failed to fire the touched event within 5 seconds")
+		end,
+	},
+	
+	hookmetamethod = {
+		Test = function()
+			local hookmetamethod: (Metatable: any, Metamethod: string, Hook: (...any) -> ...any) -> (...any) -> ...any = getfenv().hookmetamethod
+			
+			local Metatable = setmetatable({}, {__index = function()end})
+			
+			local Original = hookmetamethod(Metatable, "__index", function() -- hookfunction(getrawmetatable(Metatable).__index, function())
+				return "debUNC"
+			end)
+			
+			CheckReturnType(Original, "function")
+			
+			assert(Metatable.yay == "debUNC", "indexing the metatable failed to return the hooked value")
+		end,
+	},
 }
 
 local NoTests: {[string | number]: any} = {
-	"firetouchinterest",
 	"mouse1click",
 	"mouse1press",
 	"mouse1release",
@@ -878,59 +880,27 @@ local NoTests: {[string | number]: any} = {
 	"keyrelease",
 	"setclipboard",
 	"queueonteleport",
-	"isreadonly",
 	"setreadonly",
-	"makereadonly",
 	"setrawmetatable",
-	"isnewcclosure",
-	"hookmetamethod",
 	"getnamecallmethod",
-	"gethiddenproperties",
 	"sethiddenproperty",
 	"getcallingscript",
-	"isfunctionhooked",
 	"setscriptable",
 	"setthreadidentity",
-	"getupvalue",
-	"setupvalue",
-	"getnilinstances",
 	"setstack",
-	"checkcaller",
 	"setrenderproperty",
-	"setconstant",
-	"getrunningscripts",
-	"isparallel",
-	"getactors",
-	"base64decode",
 	"restorefunction",
 	"runonactor",
-	"getupvalues",
 	"messagebox",
-	"info",
-	"getproperties",
-	"getscriptfromthread",
 	"saveinstance",
-	"runfile",
 	"keyclick",
 	"clearteleportqueue",
 	"makewriteable",
 	"keytap",
-	"getthreads",
-	"inparallel",
-	"checkpressedkey",
-	"iskeydown",
-	"getfunctionhash",
 	"filtergc",
 	"runonthread",
-	"getobjects",
-	"getactorthreads",
 	"setrbxclipboard",
 	"replicatesignal",
-	"cansignalreplicate",
-	"getreplicablesignals",
-	"getdrawobjects",
-	"rawset",
-	"rawget",
 	"getsenv",
 	"getmenv",
 	"setfflag",
@@ -938,6 +908,7 @@ local NoTests: {[string | number]: any} = {
 	"drawing.clear",
 	"drawing.isrenderobj",
 	"drawing.getrenderproperty",
+	"drawing.getdrawobjects",
 	"cache.replace",
 	"cache.iscached",
 	"cache.invalidate",
@@ -946,7 +917,6 @@ local NoTests: {[string | number]: any} = {
 	"crypt.encrypt",
 	"crypt.generatekey",
 	"websocket.connect",
-	"printf",
 	
 	-- Short Tests
 	gethiddenproperty = {Parameters = {game:GetService("Players").LocalPlayer, "SimulationRadius"}, ReturnType = "number"},
@@ -982,6 +952,23 @@ local NoTests: {[string | number]: any} = {
 	ismoduleloaded = {Parameters = {game:FindFirstChildWhichIsA("ModuleScript", true)}, ReturnType = "boolean"},
 	isnetworkowner = {Parameters = {game:GetService("Players").LocalPlayer.Character.HumanoidRootPart}, ReturnType = "boolean"},
 	getfflag = {Parameters = {"MaxFrameBufferSize"}, ReturnType = "string"},
+	isnewcclosure = {Parameters = {function()end}, ReturnType = "boolean"},
+	iskeydown = {Parameters = {"f"}, ReturnType = "boolean"},
+	isreadonly = {Parameters = {{}}, ReturnType = "boolean"},
+	isfunctionhooked = {Parameters = {function()end}, ReturnType = "boolean"},
+	getnilinstances = {ReturnType = "table"},
+	gethiddenproperties = {Parameters = {game}, ReturnType = "table"},
+	checkcaller = {ReturnType = "boolean"},
+	getrunningscripts = {ReturnType = "table"},
+	isparallel = {ReturnType = "boolean"},
+	getactors = {ReturnType = "table"},
+	base64decode = {Parameters = {"ZGVidW5j"}, ReturnType = "string"},
+	getproperties = {Parameters = {game}, ReturnType = "table"},
+	getscriptfromthread = {Parameters = {task.spawn(function()end)}, ReturnType = "Instance"},
+	getthreads = {ReturnType = "table"},
+	getfunctionhash = {Parameters = {function()end}, ReturnType = "string"},
+	getobjects = {ReturnType = "table"},
+	getactorthreads = {ReturnType = "table"},
 }
 
 for Index, Info in NoTests do
@@ -1117,17 +1104,9 @@ for Name: string, Info in Tests do
 			assert(Function, "doesn't exist")
 			assert(typeof(Function) == "function", "doesn't have 'function' type")
 			
-			local debug = debug
-			
-			if getrenv then
-				debug = getrenv().debug
-			end
+			local debug = (getrenv and getrenv() and getrenv().debug) or debug
 			
 			assert(debug and debug.info, "'debug.info' does not exist and is required for all tests")
-
-			--[[local Closure = debug.info(Function, "s")
-
-			assert(Closure == "[C]", `expected closure to be in [C], got '{Closure}'`)]]
 
 			local Info = Info
 
