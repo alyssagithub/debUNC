@@ -373,7 +373,7 @@ local Tests: any = {
 			local function HookTest(FunctionToHook, Hook: (...any) -> ...any, ...)
 				local Original = hookfunction(FunctionToHook, Hook)
 				
-				local Test = Hook()
+				local Test = Hook(...)
 				
 				assert(FunctionToHook(...) == Test, `{Test} didn't return the expected value`)
 				
@@ -917,12 +917,18 @@ local NoTests: {[string | number]: any} = {
 	"crypt.encrypt",
 	"crypt.generatekey",
 	"websocket.connect",
+	"debug.getstack",
+	"debug.getupvalues",
+	"debug.getupvalue",
+	"debug.setstack",
+	"debug.setupvalue",
+	"debug.setconstant",
 	
 	-- Short Tests
 	gethiddenproperty = {Parameters = {game:GetService("Players").LocalPlayer, "SimulationRadius"}, ReturnType = "number"},
 	identifyexecutor = {ReturnType = "string"},
 	gethwid = {ReturnType = "string"},
-	getregistry = {ReturnType = "table"},
+	["debug.getregistry"] = {ReturnType = "table"},
 	gethui = {ReturnType = "Instance"},
 	isrbxactive = {ReturnType = "boolean"},
 	iswindowactive = {ReturnType = "boolean"},
@@ -950,7 +956,7 @@ local NoTests: {[string | number]: any} = {
 	cloneref = {Parameters = {game}, ReturnType = "Instance"},
 	getrawmetatable = {Parameters = {game}, ReturnType = "table"},
 	ismoduleloaded = {Parameters = {game:FindFirstChildWhichIsA("ModuleScript", true)}, ReturnType = "boolean"},
-	isnetworkowner = {Parameters = {game:GetService("Players").LocalPlayer.Character.HumanoidRootPart}, ReturnType = "boolean"},
+	--isnetworkowner = {Parameters = {game:GetService("Players").LocalPlayer.Character.HumanoidRootPart}, ReturnType = "boolean"}, -- crashes velo
 	getfflag = {Parameters = {"MaxFrameBufferSize"}, ReturnType = "string"},
 	isnewcclosure = {Parameters = {function()end}, ReturnType = "boolean"},
 	iskeydown = {Parameters = {"f"}, ReturnType = "boolean"},
@@ -964,10 +970,8 @@ local NoTests: {[string | number]: any} = {
 	getactors = {ReturnType = "table"},
 	base64decode = {Parameters = {"ZGVidW5j"}, ReturnType = "string"},
 	getproperties = {Parameters = {game}, ReturnType = "table"},
-	getscriptfromthread = {Parameters = {task.spawn(function()end)}, ReturnType = "Instance"},
 	getthreads = {ReturnType = "table"},
 	getfunctionhash = {Parameters = {function()end}, ReturnType = "string"},
-	getobjects = {ReturnType = "table"},
 	getactorthreads = {ReturnType = "table"},
 }
 
@@ -1033,6 +1037,7 @@ local Settings: {[string]: boolean} = {
 	GetTests = false,
 	GetUnaddedFunctions = true,
 	MultithreadTests = true,
+	ShowErrorLines = false,
 }
 
 for Name: string, Enabled: boolean in Settings do
@@ -1083,8 +1088,8 @@ local CompletedTests = 0
 local FailedTests = 0
 local MissingFunctions = 0
 
-local function FindFirstFunction(Name: string): any
-	local Value = getfenv()
+local function FindFirstFunction(Name: string, Environment: {[string]: any}?): any
+	local Value = Environment or getfenv()
 
 	while Value ~= nil and Name ~= "" do
 		local Library, NewName = string.match(Name, "^([^.]+)%.?(.*)$")
@@ -1123,9 +1128,11 @@ for Name: string, Info in Tests do
 			print(`🟢 {Name}`)
 			CompletedTests += 1
 		else
-			Result = Result:gsub(".+:%d+: ", "")
+			if not Settings.ShowErrorLines then
+				Result = Result:gsub(".+:%d+: ", "")
+			end
 			
-			if Result == "doesn't exist" then
+			if Result:match("doesn't exist") then
 				warn(`🟡 {Name}`)
 				MissingFunctions += 1
 			else
@@ -1382,6 +1389,17 @@ local Blacklist = {
 	"deletefolder",
 	"WebSocket.New",
 	"WebSocket.new",
+	"cansignalreplicate",
+	"inparallel",
+	"getupvalue",
+	"setupvalue",
+	"makereadonly",
+	"getupvalues",
+	"getscriptfromthread",
+	"setconstant",
+	"isnetworkowner",
+	"getobjects",
+	"getregistry",
 }
 
 local RobloxEnvironment = getrenv and getrenv() or {}
@@ -1405,7 +1423,7 @@ local function GetFromEnv(Environment, GetTests: boolean?, Library: string?)
 				continue
 			end
 
-			if RobloxEnvironment[Name] then
+			if not RobloxEnvironment[Name] and FindFirstFunction(Name, RobloxEnvironment) then
 				continue
 			end
 
