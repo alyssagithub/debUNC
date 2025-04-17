@@ -488,6 +488,8 @@ local Tests: any = {
 			})
 			
 			CheckReturnType(Result, "table")
+			
+			assert(Result.StatusMessage == "OK", `failed to request, StatusMessage: {Result.StatusMessage}, StatusCode: {Result.StatusCode}`)
 
 			local Body = Result.Body
 
@@ -872,6 +874,42 @@ local Tests: any = {
 			assert(Metatable.yay == "debUNC", "indexing the metatable failed to return the hooked value")
 		end,
 	},
+	
+	["WebSocket.connect"] = {
+		Test = function() -- skidded from unc
+			local connect: (WebSocket: string) -> {[any]: any} = getfenv().WebSocket.connect
+			
+			local WebSocket = connect("ws://echo.websocket.events")
+			
+			CheckReturnType(WebSocket, "userdata")
+			
+			assert(typeof(WebSocket.Send) == "function", "missing 'Send' function")
+			
+			assert(typeof(WebSocket.Close) == "function", "missing 'Close' function")
+			
+			assert(typeof(WebSocket.OnMessage) == "RBXScriptSignal", "missing 'OnMessage' RBXScriptSignal")
+			
+			assert(typeof(WebSocket.OnClose) == "RBXScriptSignal", "missing 'OnClose' RBXScriptSignal")
+			
+			local Messaged = false
+			
+			WebSocket.OnMessage:Once(function()
+				Messaged = true
+			end)
+			
+			WebSocket:Send("debUNC")
+			
+			local Start = tick()
+			
+			repeat
+				task.wait()
+			until Messaged or tick() - Start >= 5
+			
+			WebSocket:Close()
+			
+			assert(Messaged, "failed to receive message within 5 seconds")
+		end,
+	}
 }
 
 local NoTests: {[string | number]: any} = {
@@ -899,12 +937,7 @@ local NoTests: {[string | number]: any} = {
 	"setrenderproperty",
 	"restorefunction",
 	"runonactor",
-	"messagebox",
-	"saveinstance",
-	"keyclick",
-	"clearteleportqueue",
 	"makewriteable",
-	"keytap",
 	"filtergc",
 	"runonthread",
 	"setrbxclipboard",
@@ -912,11 +945,10 @@ local NoTests: {[string | number]: any} = {
 	"getsenv",
 	"getmenv",
 	"setfflag",
-	"drawing.new",
-	"drawing.clear",
-	"drawing.isrenderobj",
-	"drawing.getrenderproperty",
-	"drawing.getdrawobjects",
+	"Drawing.new",
+	"isrenderobj",
+	"getrenderproperty",
+	"cleardrawcache",
 	"cache.replace",
 	"cache.iscached",
 	"cache.invalidate",
@@ -924,13 +956,18 @@ local NoTests: {[string | number]: any} = {
 	"crypt.generatebytes",
 	"crypt.encrypt",
 	"crypt.generatekey",
-	"websocket.connect",
 	"debug.getstack",
 	"debug.getupvalues",
 	"debug.getupvalue",
 	"debug.setstack",
 	"debug.setupvalue",
 	"debug.setconstant",
+	"rconsoleinfo",
+	"rconsoleerr",
+	"rconsoledestroy",
+	"rconsolewarn",
+	"rconsoleprint",
+	"rconsolecreate",
 	
 	-- Short Tests
 	gethiddenproperty = {Parameters = {game:GetService("Players").LocalPlayer, "SimulationRadius"}, ReturnType = "number"},
@@ -940,9 +977,7 @@ local NoTests: {[string | number]: any} = {
 	gethui = {ReturnType = "Instance"},
 	isrbxactive = {ReturnType = "boolean"},
 	iswindowactive = {ReturnType = "boolean"},
-	getmodules = {ReturnType = "table"},
 	getgc = {ReturnType = "table"},
-	getsimulationradius = {Parameters = {game}, ReturnType = "number"},
 	getthreadidentity = {ReturnType = "number"},
 	comparefunctions = {Parameters = {wait, wait}, ReturnType = "boolean"},
 	compareinstances = {Parameters = {game, game}, ReturnType = "boolean"},
@@ -964,21 +999,21 @@ local NoTests: {[string | number]: any} = {
 	cloneref = {Parameters = {game}, ReturnType = "Instance"},
 	getrawmetatable = {Parameters = {game}, ReturnType = "table"},
 	ismoduleloaded = {Parameters = {game:FindFirstChildWhichIsA("ModuleScript", true)}, ReturnType = "boolean"},
-	--isnetworkowner = {Parameters = {game:GetService("Players").LocalPlayer.Character.HumanoidRootPart}, ReturnType = "boolean"}, -- crashes velo
+	isnetworkowner = {
+		Parameters = {game:GetService("Players").LocalPlayer.Character.HumanoidRootPart}, 
+		ReturnType = "boolean", 
+		DisabledFor = {"Velocity"}
+	},
 	getfflag = {Parameters = {"MaxFrameBufferSize"}, ReturnType = "string"},
 	isnewcclosure = {Parameters = {function()end}, ReturnType = "boolean"},
-	iskeydown = {Parameters = {"f"}, ReturnType = "boolean"},
 	isreadonly = {Parameters = {{}}, ReturnType = "boolean"},
 	isfunctionhooked = {Parameters = {function()end}, ReturnType = "boolean"},
 	getnilinstances = {ReturnType = "table"},
-	gethiddenproperties = {Parameters = {game}, ReturnType = "table"},
 	checkcaller = {ReturnType = "boolean"},
 	getrunningscripts = {ReturnType = "table"},
 	isparallel = {ReturnType = "boolean"},
 	getactors = {ReturnType = "table"},
 	base64decode = {Parameters = {"ZGVidW5j"}, ReturnType = "string"},
-	getproperties = {Parameters = {game}, ReturnType = "table"},
-	getthreads = {ReturnType = "table"},
 	getfunctionhash = {Parameters = {function()end}, ReturnType = "string"},
 	getactorthreads = {ReturnType = "table"},
 }
@@ -1122,6 +1157,12 @@ for Name: string, Info in Tests do
 			assert(debug and debug.info, "'debug.info' does not exist and is required for all tests")
 
 			local Info = Info
+			
+			do
+				local DisabledFor = Info.DisabledFor
+				
+				assert(not DisabledFor or not table.find(DisabledFor, ExecutorName), `disabled for this executor, most likely due to crashes`)
+			end
 
 			if Info.ReturnType then
 				CheckReturnType(Function(table.unpack(Info.Parameters or {})), Info.ReturnType)
@@ -1209,68 +1250,84 @@ Divider()
 local Blacklist = {
 	"aunisgay",
 	"aunisafemboy",
+	"consolecreate",
 	"queue_on_teleport",
+	"consoledestroy",
 	"isgameactive",
-	"base64.encode",
-	"base64.base64_encode",
-	"base64.decode",
-	"setthreadcontext",
-	"toclipboard",
-	"getthreadcontext",
-	"replacefunction",
-	"rconsoleinfo",
-	"get_thread_identity",
-	"setidentity",
-	"httpget",
-	"rconsoleerr",
-	"dumpstring",
-	"getinstancelist",
-	"get_hidden_gui",
-	"getinfo",
-	"getconstant",
-	"is_synapse_function",
-	"rconsoledestroy",
-	"issentinelclosure",
-	"executescript",
-	"getconstants",
-	"getidentity",
-	"setnamecallmethod",
-	"httppost",
-	"run_on_actor",
-	"getcustomasset",
-	"replaceclosure",
-	"is_sirhurt_closure",
-	"crypt.base64decode",
-	"crypt.base64_decode",
-	"crypt.base64encode",
 	"crypt.base64.base64_decode",
 	"crypt.base64.base64encode",
 	"crypt.base64.encode",
 	"crypt.base64.base64decode",
 	"crypt.base64.base64_encode",
 	"crypt.base64.decode",
+	"crypt.base64decode",
+	"crypt.base64_decode",
+	"crypt.base64encode",
+	"crypt.decrypt",
 	"crypt.base64_encode",
+	"setthreadcontext",
+	"toclipboard",
+	"getthreadcontext",
+	"replacefunction",
+	"inparallel",
+	"get_thread_identity",
+	"getupvalue",
+	"httpget",
+	"setupvalue",
+	"getregistry",
+	"makereadonly",
+	"dumpstring",
+	"getinstancelist",
+	"getupvalues",
+	"get_hidden_gui",
+	"consoleerr",
+	"getinfo",
+	"consolewarn",
 	"base64_encode",
+	"getconstant",
+	"is_synapse_function",
+	"issentinelclosure",
+	"executescript",
+	"getscriptfromthread",
+	"http.request",
 	"base64.base64_decode",
 	"base64.base64encode",
+	"base64.encode",
 	"base64.base64decode",
-	"http.request",
-	"getstack",
+	"base64.base64_encode",
+	"base64.decode",
+	"setconstant",
+	"getconstants",
+	"run_on_thread",
+	"getobjects",
+	"setnamecallmethod",
+	"consoleprint",
+	"getcustomasset",
+	"replaceclosure",
+	"getprotos",
 	"is_protosmasher_closure",
+	"is_sirhurt_closure",
+	"setidentity",
 	"iscustomcclosure",
 	"isourclosure",
-	"set_thread_context",
 	"checkclosure",
+	"set_thread_context",
 	"base64_decode",
-	"set_thread_identity",
 	"getscriptfunction",
-	"rconsolewarn",
-	"getprotos",
 	"get_actors",
-	"rconsoleprint",
+	"run_on_actor",
+	"WebSocket.New",
+	"WebSocket.new",
+	"WebSocket.Connect",
+	"getidentity",
 	"defersignal",
-	"http_request",
+	"consoleinfo",
+	"getstack",
+	"httppost",
 	"getproto",
+	"http_request",
+	"getexecutorname",
+	"getreg",
 	"bit.bdiv",
 	"bit.badd",
 	"bit.rshift",
@@ -1287,10 +1344,7 @@ local Blacklist = {
 	"bit.tohex",
 	"bit.bxor",
 	"bit.bsub",
-	"getexecutorname",
-	"rconsolecreate",
-	"getreg",
-	"get_thread_context",
+	"set_thread_identity",
 	"istempleclosure",
 	"input.mouse2release",
 	"input.keyrelease",
@@ -1303,111 +1357,9 @@ local Blacklist = {
 	"input.mouse1click",
 	"input.mouse1release",
 	"input.mouse1press",
+	"get_thread_context",
 	"get_actors_threads",
 	"getcallbackvalue",
-	"consolecreate",
-	"consoledestroy",
-	"consoleinfo",
-	"consoleerr",
-	"consolewarn",
-	"consoleprint",
-	"run_on_thread",
-	"cleardrawcache",
-	"isrenderobj",
-	"Drawing.clear",
-	"Drawing.new",
-	"getrenderproperty",
-	"fixorion",
-	"rconsolesettitle",
-	"sirhurt_hub_scrun",
-	"getallthreads",
-	"developerlogfunctioncall",
-	"secureinfo",
-	"printdeveloperlog",
-	"getdeletedactors",
-	"deletefile",
-	"rconsolename",
-	"rightrelease",
-	"fixorionlib",
-	"emulateSolara",
-	"invalidate",
-	"iscached",
-	"leftpress",
-	"rconsoleclear",
-	"sirhurt_run_secure",
-	"rightpress",
-	"disassemble",
-	"leftrelease",
-	"syn.crypt.encrypt",
-	"syn.crypt.base64.encode",
-	"syn.crypt.base64.decode",
-	"syn.crypt.base64decode",
-	"syn.crypt.hash",
-	"syn.crypt.base64encode",
-	"syn.crypt.generatebytes",
-	"syn.crypt.decrypt",
-	"syn.crypt.base64_decode",
-	"syn.crypt.base64_encode",
-	"syn.crypt.generatekey",
-	"syn.is_beta",
-	"syn.queue_on_teleport",
-	"syn.set_thread_identity",
-	"syn.get_thread_identity",
-	"syn.request",
-	"syn.protect_gui",
-	"syn.websocket.connect",
-	"syn.write_clipboard",
-	"getcurrentline",
-	"bit.lrotate",
-	"bit.replace",
-	"bit.byteswap",
-	"bit.extract",
-	"bit.countrz",
-	"bit.rrotate",
-	"bit.btest",
-	"bit.countlz",
-	"isvalidlevel",
-	"validlevel",
-	"get_deleted_actors",
-	"websocket.Connect",
-	"WebSocket.Connect",
-	"WebSocket.connect",
-	"getscriptthread",
-	"isclosurehooked",
-	"replace",
-	"consoleinput",
-	"printconsole",
-	"sirhurt_run_secure_code",
-	"emulateWave",
-	"sirhurt_secure_code",
-	"emulateJJSploit",
-	"makedir",
-	"sirhurt_create_secure_function",
-	"restoreclosure",
-	"consoleclear",
-	"gettreg",
-	"crypt.decrypt",
-	"secureerror",
-	"securewarn",
-	"secureprint",
-	"mousemove",
-	"rconsoleinput",
-	"isdir",
-	"consolesettitle",
-	"deletefolder",
-	"WebSocket.New",
-	"WebSocket.new",
-	"cansignalreplicate",
-	"inparallel",
-	"getupvalue",
-	"setupvalue",
-	"makereadonly",
-	"getupvalues",
-	"getscriptfromthread",
-	"setconstant",
-	"isnetworkowner",
-	"getobjects",
-	"getregistry",
 }
 
 local RobloxEnvironment = getrenv and getrenv() or {}
