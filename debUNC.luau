@@ -620,11 +620,19 @@ local Tests: any = {
 
 			local Module = game:FindFirstChildWhichIsA("ModuleScript", true)
 
-			assert(Module, FailedFind("module"))
+			assert(Module, FailedFind(`ModuleScript '{Module}'`))
 
 			local LoadedModules = getloadedmodules()
+			
+			local require: any = require
+			
+			if not table.find(LoadedModules, Module) then
+				require(Module)
+				
+				LoadedModules = getloadedmodules()
+			end
 
-			assert(table.find(LoadedModules, Module), `failed to find module '{Module}' in table`)
+			assert(table.find(LoadedModules, Module), `failed to find ModuleScript '{Module}' in table`)
 		end,
 		ReturnType = "table"
 	},
@@ -811,7 +819,7 @@ local Tests: any = {
 			
 			local Success, Result = pcall(isscriptable, game, "a")
 			
-			assert(not Success or Result == false, "game.a is not a valid property")
+			assert(not Success or not Result, "game.a is not a valid property")
 		end,
 	},
 	
