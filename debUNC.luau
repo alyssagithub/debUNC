@@ -4,10 +4,25 @@ local function CheckReturnType(Result: any, Type: string)
 	assert(typeof(Result) == Type, `didn't return a {Type}`)
 end
 
+local function FindFirstFunction(Name: string, Environment: {[string]: any}?): any
+	local Value = Environment or getfenv()
+
+	while Value ~= nil and Name ~= "" do
+		local Library, NewName = string.match(Name, "^([^.]+)%.?(.*)$")
+
+		Value = Value[Library or ""]
+		Name = NewName or ""
+	end
+
+	return Value
+end
+
 -- '{FunctionName}' does not exist, and is required for this test
 local function CheckExist(FunctionName: string): any
-	assert(getfenv()[FunctionName], `'{FunctionName}' does not exist, and is required for this test`)
-	return getfenv()[FunctionName]
+	local Function = FindFirstFunction(FunctionName)
+
+	assert(Function, `'{FunctionName}' does not exist, and is required for this test`)
+	return Function
 end
 
 -- failed to find {Name}, retry this test
@@ -876,7 +891,7 @@ local Tests: any = {
 	},
 	
 	["WebSocket.connect"] = {
-		Test = function() -- skidded from unc
+		Test = function()
 			local connect: (WebSocket: string) -> {[any]: any} = getfenv().WebSocket.connect
 			
 			local WebSocket = connect("ws://echo.websocket.events")
@@ -909,7 +924,72 @@ local Tests: any = {
 			
 			assert(Messaged, "failed to receive message within 5 seconds")
 		end,
-	}
+	},
+	
+	["cache.invalidate"] = {
+		Test = function() -- skidded from unc
+			local invalidate = getfenv().cache.invalidate
+			
+			local container = Instance.new("Folder")
+			local part = Instance.new("Part", container)
+			invalidate(container:FindFirstChild("Part"))
+			assert(part ~= container:FindFirstChild("Part"), "Reference `part` could not be invalidated")
+		end,
+	},
+	
+	["cache.iscached"] = {
+		Test = function() -- skidded from unc
+			local iscached = getfenv().cache.iscached
+			local invalidate = CheckExist("cache.invalidate")
+			
+			local part = Instance.new("Part")
+			assert(iscached(part), "Part should be cached")
+			invalidate(part)
+			assert(not iscached(part), "Part should not be cached")
+		end,
+	},
+	
+	["cache.replace"] = {
+		Test = function() -- skidded from unc
+			local replace = getfenv().cache.replace
+			
+			local part = Instance.new("Part") :: Instance
+			local fire = Instance.new("Fire") :: Instance
+			replace(part, fire)
+			assert(part ~= fire, "Part was not replaced with Fire")
+		end,
+	},
+	
+	["cloneref"] = {
+		Test = function() -- skidded from unc
+			local cloneref = getfenv().cloneref
+			
+			local part = Instance.new("Part")
+			local clone = cloneref(part)
+			assert(part ~= clone, "Clone should not be equal to original")
+			clone.Name = "Test"
+			assert(part.Name == "Test", "Clone should have updated the original")
+		end,
+	},
+	
+	["compareinstances"] = {
+		Test = function() -- skidded from unc
+			local compareinstances = getfenv().compareinstances
+			local cloneref = FindFirstFunction("cloneref")
+			
+			local part = Instance.new("Part")
+			local clone = cloneref(part)
+			assert(part ~= clone, "Clone should not be equal to original")
+			assert(compareinstances(part, clone), "Clone should be equal to original when using compareinstances()")
+		end,
+	},
+	
+	["checkcaller"] = {
+		Test = function()
+			-- TODO: make this test check situations where it'd return false
+			assert(getfenv().checkcaller() == true, "should return true when called by the executor")
+		end,
+	},
 }
 
 local NoTests: {[string | number]: any} = {
@@ -949,9 +1029,6 @@ local NoTests: {[string | number]: any} = {
 	"isrenderobj",
 	"getrenderproperty",
 	"cleardrawcache",
-	"cache.replace",
-	"cache.iscached",
-	"cache.invalidate",
 	"crypt.hash",
 	"crypt.generatebytes",
 	"crypt.encrypt",
@@ -980,7 +1057,6 @@ local NoTests: {[string | number]: any} = {
 	getgc = {ReturnType = "table"},
 	getthreadidentity = {ReturnType = "number"},
 	comparefunctions = {Parameters = {wait, wait}, ReturnType = "boolean"},
-	compareinstances = {Parameters = {game, game}, ReturnType = "boolean"},
 	isexecutorclosure = {Parameters = {wait}, ReturnType = "boolean"},
 	islclosure = {Parameters = {wait}, ReturnType = "boolean"},
 	["debug.getproto"] = {Parameters = {function() end, 1 :: any}, ReturnType = "function"},
@@ -996,7 +1072,6 @@ local NoTests: {[string | number]: any} = {
 	getscripthash = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "string"},
 	getscriptclosure = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "function"},
 	checkparallel = {ReturnType = "boolean"},
-	cloneref = {Parameters = {game}, ReturnType = "Instance"},
 	getrawmetatable = {Parameters = {game}, ReturnType = "table"},
 	ismoduleloaded = {Parameters = {game:FindFirstChildWhichIsA("ModuleScript", true)}, ReturnType = "boolean"},
 	isnetworkowner = {
@@ -1009,7 +1084,6 @@ local NoTests: {[string | number]: any} = {
 	isreadonly = {Parameters = {{}}, ReturnType = "boolean"},
 	isfunctionhooked = {Parameters = {function()end}, ReturnType = "boolean"},
 	getnilinstances = {ReturnType = "table"},
-	checkcaller = {ReturnType = "boolean"},
 	getrunningscripts = {ReturnType = "table"},
 	isparallel = {ReturnType = "boolean"},
 	getactors = {ReturnType = "table"},
@@ -1130,19 +1204,6 @@ local TotalTests = 0
 local CompletedTests = 0
 local FailedTests = 0
 local MissingFunctions = 0
-
-local function FindFirstFunction(Name: string, Environment: {[string]: any}?): any
-	local Value = Environment or getfenv()
-
-	while Value ~= nil and Name ~= "" do
-		local Library, NewName = string.match(Name, "^([^.]+)%.?(.*)$")
-		
-		Value = Value[Library or ""]
-		Name = NewName or ""
-	end
-
-	return Value
-end
 
 for Name: string, Info in Tests do
 	local function RunTest()
