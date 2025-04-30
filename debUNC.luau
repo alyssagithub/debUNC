@@ -960,7 +960,7 @@ local Tests: any = {
 		end,
 	},
 	
-	["cloneref"] = {
+	cloneref = {
 		Test = function() -- skidded from unc
 			local cloneref = getfenv().cloneref
 			
@@ -972,7 +972,7 @@ local Tests: any = {
 		end,
 	},
 	
-	["compareinstances"] = {
+	compareinstances = {
 		Test = function() -- skidded from unc
 			local compareinstances = getfenv().compareinstances
 			local cloneref = FindFirstFunction("cloneref")
@@ -984,12 +984,41 @@ local Tests: any = {
 		end,
 	},
 	
-	["checkcaller"] = {
+	checkcaller = {
 		Test = function()
 			-- TODO: make this test check situations where it'd return false
 			assert(getfenv().checkcaller() == true, "should return true when called by the executor")
 		end,
 	},
+	
+	isfunctionhooked = {
+		Test = function()
+			local isfunctionhooked: ((...any?) -> ...any?) -> boolean = getfenv().isfunctionhooked
+			local hookfunction = CheckExist("hookfunction")
+			
+			local function Test()
+				return "debUNC Original"
+			end
+			
+			assert(isfunctionhooked(Test) == false, "an unhooked function should return false")
+			
+			hookfunction(Test, function()
+				return "debUNC Hooked"
+			end)
+			
+			assert(isfunctionhooked(Test) == true, "a hooked function should return true")
+			
+			local restorefunction = getfenv().restorefunction
+			
+			if not restorefunction then
+				return
+			end
+			
+			restorefunction(Test)
+			
+			assert(isfunctionhooked(Test) == false, "a restored hooked function should return false")
+		end,
+	}
 }
 
 local NoTests: {[string | number]: any} = {
@@ -1082,7 +1111,6 @@ local NoTests: {[string | number]: any} = {
 	getfflag = {Parameters = {"MaxFrameBufferSize"}, ReturnType = "string"},
 	isnewcclosure = {Parameters = {function()end}, ReturnType = "boolean"},
 	isreadonly = {Parameters = {{}}, ReturnType = "boolean"},
-	isfunctionhooked = {Parameters = {function()end}, ReturnType = "boolean"},
 	getnilinstances = {ReturnType = "table"},
 	getrunningscripts = {ReturnType = "table"},
 	isparallel = {ReturnType = "boolean"},
