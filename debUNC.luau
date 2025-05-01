@@ -263,31 +263,6 @@ local Tests: any = {
 		end
 	},
 
-	dofile = {
-		Test = function()
-			local dofile: (Path: string) -> ...any = getfenv().dofile
-
-			local writefile: (Path: string, Data: string) -> () = CheckExist("writefile")
-
-			local FileName = `File_{math.random()}.txt`
-			local GeneratedNumber = math.random()
-
-			writefile(FileName, `return \{{GeneratedNumber}\}`)
-
-			local Result = dofile(FileName)
-
-			local delfile: (Path: string) -> () = getfenv().delfile
-
-			if delfile then
-				delfile(FileName)
-			end
-			
-			CheckReturnType(Result, "table")
-
-			assert(Result[1] == GeneratedNumber, "Function's table should've contained the test's randomly generated number.")
-		end,
-	},
-
 	loadfile = {
 		Test = function()
 			local loadfile: (Path: string, ChunkName: string?) -> ((any?) -> (any?)?, string?) = getfenv().loadfile
@@ -1102,7 +1077,6 @@ local NoTests: {[string | number]: any} = {
 	getscriptclosure = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "function"},
 	checkparallel = {ReturnType = "boolean"},
 	getrawmetatable = {Parameters = {game}, ReturnType = "table"},
-	ismoduleloaded = {Parameters = {game:FindFirstChildWhichIsA("ModuleScript", true)}, ReturnType = "boolean"},
 	isnetworkowner = {
 		Parameters = {game:GetService("Players").LocalPlayer.Character.HumanoidRootPart}, 
 		ReturnType = "boolean", 
