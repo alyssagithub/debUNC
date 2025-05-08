@@ -548,7 +548,7 @@ local Tests: any = {
 
 	fireproximityprompt = {
 		Test = function()
-			local fireproximityprompt: (ProximityPrompt) -> () = getfenv().fireproximityprompt
+			local fireproximityprompt: (ProximityPrompt: ProximityPrompt) -> () = getfenv().fireproximityprompt
 
 			local Part = Instance.new("Part")
 			Part.Parent = workspace
@@ -993,7 +993,15 @@ local Tests: any = {
 			
 			assert(isfunctionhooked(Test) == false, "a restored hooked function should return false")
 		end,
-	}
+	},
+	
+	base64decode = {
+		Test = function()
+			local base64decode: (Encoded: string) -> string = getfenv().base64decode
+			
+			assert(base64decode("ZGVidW5j") == "debunc", "failed to decode a string encoded in base64")
+		end,
+	},
 }
 
 local NoTests: {[string | number]: any} = {
@@ -1080,7 +1088,7 @@ local NoTests: {[string | number]: any} = {
 	isnetworkowner = {
 		Parameters = {game:GetService("Players").LocalPlayer.Character.HumanoidRootPart}, 
 		ReturnType = "boolean", 
-		DisabledFor = {"Velocity"}
+		DisabledFor = {"Velocity 1.1.1"}
 	},
 	getfflag = {Parameters = {"MaxFrameBufferSize"}, ReturnType = "string"},
 	isnewcclosure = {Parameters = {function()end}, ReturnType = "boolean"},
@@ -1089,7 +1097,6 @@ local NoTests: {[string | number]: any} = {
 	getrunningscripts = {ReturnType = "table"},
 	isparallel = {ReturnType = "boolean"},
 	getactors = {ReturnType = "table"},
-	base64decode = {Parameters = {"ZGVidW5j"}, ReturnType = "string"},
 	getfunctionhash = {Parameters = {function()end}, ReturnType = "string"},
 	getactorthreads = {ReturnType = "table"},
 }
@@ -1224,7 +1231,7 @@ for Name: string, Info in Tests do
 			do
 				local DisabledFor = Info.DisabledFor
 				
-				assert(not DisabledFor or not table.find(DisabledFor, ExecutorName), `disabled for this executor, most likely due to crashes`)
+				assert(not DisabledFor or not table.find(DisabledFor, `{ExecutorName} {ExecutorVersion}`), `disabled for {ExecutorName} {ExecutorVersion}, most likely due to crashes`)
 			end
 
 			if Info.ReturnType then
