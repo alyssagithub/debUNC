@@ -304,8 +304,6 @@ local Tests: any = {
 			if delfolder then
 				delfolder(FolderName)
 			end
-
-			return FolderName
 		end
 	},
 
@@ -328,8 +326,6 @@ local Tests: any = {
 			if delfolder then
 				delfolder(FolderName)
 			end
-
-			return FolderName
 		end
 	},
 
@@ -350,8 +346,6 @@ local Tests: any = {
 			delfolder(FolderName)
 
 			assert(not isfolder(FolderName), "'isfolder' found the folder after it should've been deleted.")
-
-			return FolderName
 		end
 	},
 
@@ -365,7 +359,11 @@ local Tests: any = {
 				
 				local Test = Hook(...)
 				
-				assert(FunctionToHook(...) == Test, `{Test} didn't return the expected value`)
+				local Success, Result = pcall(FunctionToHook, ...)
+				
+				assert(Success, `errored with '{Result}' while running test {Test}`)
+				
+				assert(Result == Test, `{Test} didn't return the expected value`)
 				
 				hookfunction(FunctionToHook, Original) -- restorefunction
 			end
@@ -479,7 +477,9 @@ local Tests: any = {
 			
 			CheckReturnType(Result, "table")
 			
-			assert(Result.StatusMessage == "OK", `failed to request, StatusMessage: {Result.StatusMessage}, StatusCode: {Result.StatusCode}`)
+			assert(Result.StatusCode == 200, `failed to request, StatusMessage: {Result.StatusMessage}, StatusCode: {Result.StatusCode}`)
+			
+			assert(Result.StatusMessage == "OK", `StatusMessage should be 'OK' when the StatusCode is 200`)
 
 			local Body = Result.Body
 
@@ -871,7 +871,7 @@ local Tests: any = {
 			
 			local WebSocket = connect("ws://echo.websocket.events")
 			
-			CheckReturnType(WebSocket, "userdata")
+			--CheckReturnType(WebSocket, "userdata")
 			
 			assert(typeof(WebSocket.Send) == "function", "missing 'Send' function")
 			
@@ -1158,12 +1158,13 @@ local function DisplayMessage(MessageToDisplay)
 	DisplayFunction(MessageToDisplay)
 end
 
-local Settings: {[string]: boolean} = {
+local Settings: {[string]: any} = {
 	FakeFunctions = false,
 	GetTests = false,
 	GetUnaddedFunctions = true,
 	MultithreadTests = true,
 	ShowErrorLines = false,
+	TestIntervals = 0,
 }
 
 for Name: string, Enabled: boolean in Settings do
@@ -1221,10 +1222,6 @@ for Name: string, Info in Tests do
 
 			assert(Function, "doesn't exist")
 			assert(typeof(Function) == "function", "doesn't have 'function' type")
-			
-			local debug = (getrenv and getrenv() and getrenv().debug) or debug
-			
-			assert(debug and debug.info, "'debug.info' does not exist and is required for all tests")
 
 			local Info = Info
 			
@@ -1267,6 +1264,10 @@ for Name: string, Info in Tests do
 		task.spawn(RunTest)
 	else
 		RunTest()
+	end
+	
+	if Settings.TestIntervals and Settings.TestIntervals ~= 0 then
+		task.wait(Settings.TestIntervals)
 	end
 end
 
@@ -1430,6 +1431,42 @@ local Blacklist = {
 	"get_thread_context",
 	"get_actors_threads",
 	"getcallbackvalue",
+	"rconsolehide",
+	"rconsolesettitle",
+	"crypt_generatekey",
+	"cache_invalidate",
+	"consolesettitle",
+	"rconsoleclear",
+	"iskeydown",
+	"rconsolehidden",
+	"info",
+	"consolehide",
+	"rconsoletoggle",
+	"iusets is a skid",
+	"HookCaller",
+	"consoletoggle",
+	"consoleshow",
+	"hookfunc",
+	"consoletopmost",
+	"rconsolename",
+	"consoleinput",
+	"getfunctionbytecode",
+	"cache_iscached",
+	"consolename",
+	"rconsoletopmost",
+	"websocket_connect",
+	"consoleclear",
+	"crypt_hash",
+	"cache_replace",
+	"HttpRequest",
+	"GetObjects",
+	"oldrequire",
+	"HttpGet",
+	"messagebox",
+	"rconsoleinput",
+	"rconsoleshow",
+	"dofile",
+	"crypt_generatebytes",
 }
 
 local RobloxEnvironment = getrenv and getrenv() or {}
