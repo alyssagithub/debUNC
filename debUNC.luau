@@ -54,7 +54,8 @@ local Tests: any = {
 				"Enum",
 				"game",
 				"shared",
-				"workspace"
+				"_G",
+				"workspace",
 			}
 			
 			local Environment = getrenv()
@@ -197,8 +198,12 @@ local Tests: any = {
 
 			local GeneratedResult = tostring(math.random())
 			local FileName = `File_{math.random()}.txt`
-
-			appendfile(FileName, GeneratedResult)
+			
+			local Success = pcall(appendfile, FileName, GeneratedResult)
+			
+			if not Success then
+				CheckExist("writefile")(FileName, GeneratedResult)
+			end
 
 			assert(readfile(FileName) == GeneratedResult, "failed to create the file")
 
@@ -645,7 +650,11 @@ local Tests: any = {
 
 			local GeneratedValue = math.random()
 
-			NumberValue.Changed:Once(function(Value)
+			NumberValue.Changed:Once(function(Value, OtherValue: any)
+				if typeof(Value) ~= "number" then
+					Value = OtherValue
+				end
+				
 				if GeneratedValue == Value then
 					DidChange = true
 				end
@@ -765,15 +774,13 @@ local Tests: any = {
 		Test = function()
 			local getfpscap: () -> number = getfenv().getfpscap
 			
-			local setfpscap: (FPSCap: number) -> () = getfenv().setfpscap
-			
-			assert(setfpscap, "'setfpscap' doesn't exist and is required for this test")
+			local setfpscap: (FPSCap: number) -> () = CheckExist("setfpscap")
 			
 			setfpscap(10)
 			
 			local Result = getfpscap()
 			
-			assert(Result == 10, "did not return the same set fps cap")
+			assert(Result == 10, `expected value '10', got '{Result}'`)
 			
 			setfpscap(0)
 			
@@ -807,7 +814,9 @@ local Tests: any = {
 			
 			assert(isscriptable(game, "Parent") == true, "game.Parent is scriptable")
 			
-			assert(isscriptable(game, "SimulationRadius") == false, "game.SimulationRadius is a hidden property, and isn't scriptable")
+			local Success, Result = pcall(isscriptable, game, "SimulationRadius")
+			
+			assert(not Success or Result == false, "game.SimulationRadius is a hidden property, and isn't scriptable")
 			
 			local Success, Result = pcall(isscriptable, game, "a")
 			
@@ -1002,6 +1011,83 @@ local Tests: any = {
 			assert(base64decode("ZGVidW5j") == "debunc", "failed to decode a string encoded in base64")
 		end,
 	},
+	
+	setrawmetatable = {
+		Test = function() -- credit to dante for making this
+			local setrawmetatable: (Table: {[any]: any}, Metatable: {[any]: any}) -> () = getfenv().setrawmetatable
+
+			local LockedProxy = newproxy()
+
+			assert(getmetatable(LockedProxy) == nil, "a new proxy shouldn't have a metatable")
+
+			local MainMeta = {
+				__call = function()
+					return "debUNC"
+				end
+			}
+
+			setrawmetatable(LockedProxy, MainMeta)
+
+			assert(getmetatable(LockedProxy) == MainMeta, "the new proxy's metatable was not set to the expected one")
+
+			local Success, Result = pcall(LockedProxy)
+
+			assert(Success, `errored while attempting to call the new proxy, error: {Result}`)
+			assert(Result == "debUNC", "calling the new proxy failed to return the expected value")
+		end,
+	},
+	
+	lz4compress = {
+		Test = function()
+			local lz4compress: (String: string) -> string = getfenv().lz4compress
+			
+			assert(lz4compress("debUNC") == "`debUNC", "failed to compress the string with lz4")
+		end,
+	},
+	
+	lz4decompress = {
+		Test = function()
+			local lz4decompress: (Compressed: string, Allocation: number) -> string = getfenv().lz4decompress
+			
+			local String = "`debUNC"
+			
+			assert(#lz4decompress(String, #String) == 7, "failed to decompress the string with lz4")
+		end,
+	},
+	
+	["debug.getproto"] = {
+		Test = function()
+			local getproto: (Function: (...any?) -> ...any?, Index: number) -> ((...any?) -> ...any?)? = CheckExist("debug.getproto")
+			
+			local Proto = getproto(function()
+				local function b()
+					return "debUNC"
+				end	
+			end, 1)
+			
+			assert(typeof(Proto) == "function", "didn't return a function")
+			
+			assert(Proto() == "debUNC", "calling the proto failed to return the expected value")
+		end,
+	},
+	
+	["debug.getprotos"] = {
+		Test = function()
+			local getprotos: (Function: (...any?) -> ...any?) -> {(...any?) -> ...any?} = CheckExist("debug.getprotos")
+
+			local Protos = getprotos(function()
+				local function b()
+					return "debUNC"
+				end	
+			end)
+			
+			assert(typeof(Protos) == "table", "didn't return a table")
+
+			assert(#Protos == 1, "expected table to be an array with only 1 index")
+			
+			assert(Protos[1]() == "debUNC", "calling the proto within the table failed to return the expected value")
+		end,
+	},
 }
 
 local NoTests: {[string | number]: any} = {
@@ -1019,7 +1105,6 @@ local NoTests: {[string | number]: any} = {
 	"setclipboard",
 	"queueonteleport",
 	"setreadonly",
-	"setrawmetatable",
 	"getnamecallmethod",
 	"sethiddenproperty",
 	"getcallingscript",
@@ -1071,15 +1156,11 @@ local NoTests: {[string | number]: any} = {
 	comparefunctions = {Parameters = {wait, wait}, ReturnType = "boolean"},
 	isexecutorclosure = {Parameters = {wait}, ReturnType = "boolean"},
 	islclosure = {Parameters = {wait}, ReturnType = "boolean"},
-	["debug.getproto"] = {Parameters = {function() end, 1 :: any}, ReturnType = "function"},
-	["debug.getprotos"] = {Parameters = {function() end}, ReturnType = "table"},
 	["debug.getinfo"] = {Parameters = {function()end}, ReturnType = "table"},
 	["debug.getconstants"] = {Parameters = {function()end}, ReturnType = "table"},
 	["debug.getconstant"] = {Parameters = {function()local a; a = "hi"end, 1 :: any}, ReturnType = "string"},
 	decompile = {Parameters = {game:FindFirstChildWhichIsA("LuaSourceContainer", true)}, ReturnType = "string"},
 	getscriptbytecode = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "string"},
-	lz4compress = {Parameters = {"debunctestinglz4compress"}, ReturnType = "string"},
-	lz4decompress = {Parameters = {(getfenv().lz4compress or function()end)("debunctestinglz4compress")}, ReturnType = "string"},
 	getinstances = {ReturnType = "table"},
 	getscripthash = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "string"},
 	getscriptclosure = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "function"},
@@ -1143,6 +1224,8 @@ if not ExecutorVersion then
 end
 
 local TestService = game:GetService("TestService")
+
+local EndTime = 0
 
 local function DisplayMessage(MessageToDisplay)
 	local DisplayFunction: (any?) -> ()
@@ -1216,12 +1299,24 @@ local FailedTests = 0
 local MissingFunctions = 0
 
 for Name: string, Info in Tests do
+	local isfunctionhooked = getfenv().isfunctionhooked
+	
+	if isfunctionhooked then
+		--assert(isfunctionhooked(pcall) == false, "tests cannot run if pcall is hooked")
+		
+		--assert(isfunctionhooked(loadstring) == false, "tests cannot run if loadstring is hooked")
+	end
+	
 	local function RunTest()
-		local Success, Result = pcall(function()
+		local Success, ErrorMessage = pcall(function()
 			local Function = FindFirstFunction(Name)
 
 			assert(Function, "doesn't exist")
 			assert(typeof(Function) == "function", "doesn't have 'function' type")
+			
+			if isfunctionhooked then
+				assert(isfunctionhooked(Function) == false, "function is hooked and cannot be accurately tested")
+			end
 
 			local Info = Info
 			
@@ -1236,7 +1331,7 @@ for Name: string, Info in Tests do
 			end
 
 			if Info.Test then
-				return Info.Test()
+				Info.Test()
 			end
 		end)
 
@@ -1245,14 +1340,14 @@ for Name: string, Info in Tests do
 			CompletedTests += 1
 		else
 			if not Settings.ShowErrorLines then
-				Result = Result:gsub(".+:%d+: ", "")
+				ErrorMessage = ErrorMessage:gsub(".+:%d+: ", "")
 			end
 			
-			if Result:match("doesn't exist") then
+			if ErrorMessage:match("doesn't exist") then
 				warn(`🟡 {Name}`)
 				MissingFunctions += 1
 			else
-				warn(`🔴 {Name}: {Result}`)
+				warn(`🔴 {Name}: {ErrorMessage}`)
 				FailedTests += 1
 			end
 		end
@@ -1281,13 +1376,23 @@ local function GetAllTests()
 	return AllTests
 end
 
+local StartTime = tick()
+
 repeat
 	task.wait()
 until TotalTests == GetAllTests()
 
+local EndTime = tick() - StartTime
+
+local MinimumSeconds = 1
+
+if EndTime < MinimumSeconds then
+	DisplayMessage(`❗❗❗❗ This test is most likely faked as it took less than {MinimumSeconds} second(s). ❗❗❗❗`)
+end
+
 DisplayMessage(`❓ The score below is only for how many custom functions are supported.`)
 DisplayMessage(`🔵 debUNC BETA v2 Score for {ExecutorName} {ExecutorVersion}: {math.floor(CompletedTests / TotalTests * 100)}%`)
-DisplayMessage(`🟣 Total tests: {TotalTests}`)
+DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(EndTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
 DisplayMessage(`🟡 Missing functions: {MissingFunctions}`)
@@ -1467,6 +1572,8 @@ local Blacklist = {
 	"rconsoleshow",
 	"dofile",
 	"crypt_generatebytes",
+	"keyclick",
+	"setcallbackvalue",
 }
 
 local RobloxEnvironment = getrenv and getrenv() or {}
