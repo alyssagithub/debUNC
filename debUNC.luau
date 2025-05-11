@@ -859,18 +859,20 @@ local Tests: any = {
 	},
 	
 	hookmetamethod = {
-		Test = function()
+		Test = function() -- credit to dante for contributing to this
 			local hookmetamethod: (Metatable: any, Metamethod: string, Hook: (...any) -> ...any) -> (...any) -> ...any = getfenv().hookmetamethod
-			
-			local Metatable = setmetatable({}, {__index = function()end})
-			
+
+			local OriginalIndx = function() end
+			local Metatable = setmetatable({}, {__index = OriginalIndx})
+
 			local Original = hookmetamethod(Metatable, "__index", function() -- hookfunction(getrawmetatable(Metatable).__index, function())
 				return "debUNC"
 			end)
-			
+
 			CheckReturnType(Original, "function")
-			
+
 			assert(Metatable.yay == "debUNC", "indexing the metatable failed to return the hooked value")
+			assert(getmetatable(Metatable).__index == OriginalIndx, "function replaced the metamethod's function instead of it's proto")
 		end,
 	},
 	
