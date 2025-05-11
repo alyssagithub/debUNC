@@ -1,4 +1,6 @@
 --!strict
+type Function = (...any?) -> ...any?
+
 -- didn't return a {Type}
 local function CheckReturnType(Result: any, Type: string)
 	assert(typeof(Result) == Type, `didn't return a {Type}`)
@@ -860,12 +862,12 @@ local Tests: any = {
 	
 	hookmetamethod = {
 		Test = function() -- credit to dante for contributing to this
-			local hookmetamethod: (Metatable: any, Metamethod: string, Hook: (...any) -> ...any) -> (...any) -> ...any = getfenv().hookmetamethod
+			local hookmetamethod: (Metatable: any, Metamethod: string, Hook: Function) -> Function = getfenv().hookmetamethod
 
 			local OriginalIndx = function() end
 			local Metatable = setmetatable({}, {__index = OriginalIndx})
 
-			local Original = hookmetamethod(Metatable, "__index", function() -- hookfunction(getrawmetatable(Metatable).__index, function())
+			local Original = hookmetamethod(Metatable, "__index", function()
 				return "debUNC"
 			end)
 
@@ -961,7 +963,7 @@ local Tests: any = {
 	compareinstances = {
 		Test = function() -- skidded from unc
 			local compareinstances = getfenv().compareinstances
-			local cloneref = FindFirstFunction("cloneref")
+			local cloneref = CheckExist("cloneref")
 			
 			local part = Instance.new("Part")
 			local clone = cloneref(part)
@@ -1090,6 +1092,29 @@ local Tests: any = {
 			assert(Protos[1]() == "debUNC", "calling the proto within the table failed to return the expected value")
 		end,
 	},
+	
+	getnamecallmethod = {
+		Test = function() -- credit to dante for making this test
+			local getnamecallmethod: () -> string = getfenv().getnamecallmethod
+
+			local ProxyTest = newproxy(true)
+			local Detected
+
+			getmetatable(ProxyTest).__namecall = function()
+				Detected = getnamecallmethod()
+			end
+
+			local Success, Result = pcall(function()
+				ProxyTest:debUNC()
+			end)
+
+			local OutsideMethod = getnamecallmethod()
+
+			assert(Success, `errored while attempting to call the new proxy with namecall, error: {Result}`)
+			assert(Detected == "debUNC", `getnamecallmethod gave '{Detected}' instead of 'debUNC' inside __namecall`)
+			assert(OutsideMethod == "debUNC", `getnamecallmethod gave '{OutsideMethod}' instead of 'debUNC' outside __namecall`)
+		end,
+	},
 }
 
 local NoTests: {[string | number]: any} = {
@@ -1107,7 +1132,6 @@ local NoTests: {[string | number]: any} = {
 	"setclipboard",
 	"queueonteleport",
 	"setreadonly",
-	"getnamecallmethod",
 	"sethiddenproperty",
 	"getcallingscript",
 	"setscriptable",
@@ -1386,7 +1410,7 @@ until TotalTests == GetAllTests()
 
 local EndTime = tick() - StartTime
 
-local MinimumSeconds = 1
+local MinimumSeconds = 0.1
 
 if EndTime < MinimumSeconds then
 	DisplayMessage(`❗❗❗❗ This test is most likely faked as it took less than {MinimumSeconds} second(s). ❗❗❗❗`)
