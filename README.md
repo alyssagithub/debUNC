@@ -1,4 +1,4 @@
-# debUNC
+# debUNC (debunk Unified Naming Convention)
 like sUNC and UNC but better
 # Loadstring
 ```lua
