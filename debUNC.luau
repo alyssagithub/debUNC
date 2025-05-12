@@ -1392,7 +1392,7 @@ local Settings: {[string]: any} = {
 	GetTests = false,
 	GetUnaddedFunctions = true,
 	MultithreadTests = true,
-	ShowErrorLines = true,
+	ShowErrorLines = false,
 	TestIntervals = 0,
 }
 
