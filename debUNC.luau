@@ -1225,10 +1225,11 @@ local Tests: any = {
 				assert(RandomNumber - GlobalRandom == 5, "returned an unexpected number")
 
 				local NilLocal = table.pack(debug.getstack(2, 2))
-				assert(NilLocal[1] ~= nil, `returned value at index 2: {NilLocal[1]} (expected nil)`)
+				print("debug.getstack(2, 1)", debug.getstack(2, 1))
+				assert(NilLocal[1] == nil, `returned value at index 2: {NilLocal[1]} (expected nil)`)
 				assert(NilLocal.n == 1, `returned {NilLocal.n} values at index 2 (expected 1)`)
 
-				local ActualFunc = debug.getstack(2, 2)
+				local ActualFunc = debug.getstack(2, 3)
 				assert(ActualFunc ~= "upvalue", "Unexpected upvalue detected (RandomGlobal treated as local)")
 				assert(ActualFunc == DumpStack, `Expected DumpStack, but got: {ActualFunc}`)
 
