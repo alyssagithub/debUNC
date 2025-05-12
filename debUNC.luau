@@ -1205,6 +1205,45 @@ local Tests: any = {
 			assert(Died, "didn't die within 5 seconds")
 		end,
 	},
+	
+	["debug.getstack"] = {
+		Test = function() -- credit to dante
+			local debug = getfenv().debug
+			
+			local GlobalRandom = math.random()
+			local RandomGlobal
+
+			local DumpStack
+			DumpStack = function()
+				local Success, Result = pcall(debug.getstack, 3, 0)
+				assert(not Success, `Expected an error, but got: {Result} (argument 0 shouldn't exist)`)
+
+				local RandomNumber = debug.getstack(2, 1)
+
+				assert(type(RandomNumber) == "number", "did not return a number")
+				assert(debug.getstack(2)[1] == RandomNumber, "did not return consistent values")
+				assert(RandomNumber - GlobalRandom == 5, "returned an unexpected number")
+
+				local NilLocal = table.pack(debug.getstack(2, 2))
+				assert(NilLocal[1] ~= nil, `returned value at index 2: {NilLocal[1]} (expected nil)`)
+				assert(NilLocal.n == 1, `returned {NilLocal.n} values at index 2 (expected 1)`)
+
+				local ActualFunc = debug.getstack(2, 2)
+				assert(ActualFunc ~= "upvalue", "Unexpected upvalue detected (RandomGlobal treated as local)")
+				assert(ActualFunc == DumpStack, `Expected DumpStack, but got: {ActualFunc}`)
+
+				local Success2, Result2 = pcall(debug.getstack, 3, 4) -- pcall adds one stack level
+				assert(not Success2, `Expected an error, but got: {Result2} (stack level 4 shouldn't exist)`)
+			end
+
+			(function()
+				local RandomNumber = GlobalRandom + 5
+				local Hidden = nil
+				RandomGlobal = "upvalue"
+				DumpStack()
+			end)()
+		end,
+	}
 }
 
 local NoTests: {[string | number]: any} = {
@@ -1244,7 +1283,6 @@ local NoTests: {[string | number]: any} = {
 	"crypt.generatebytes",
 	"crypt.encrypt",
 	"crypt.generatekey",
-	"debug.getstack",
 	"debug.getupvalues",
 	"debug.getupvalue",
 	"debug.setstack",
@@ -1282,7 +1320,6 @@ local NoTests: {[string | number]: any} = {
 	getrawmetatable = {Parameters = {game}, ReturnType = "table"},
 	getfflag = {Parameters = {"MaxFrameBufferSize"}, ReturnType = "string"},
 	isnewcclosure = {Parameters = {function()end}, ReturnType = "boolean"},
-	isreadonly = {Parameters = {{}}, ReturnType = "boolean"},
 	getnilinstances = {ReturnType = "table"},
 	getrunningscripts = {ReturnType = "table"},
 	isparallel = {ReturnType = "boolean"},
@@ -1355,7 +1392,7 @@ local Settings: {[string]: any} = {
 	GetTests = false,
 	GetUnaddedFunctions = true,
 	MultithreadTests = true,
-	ShowErrorLines = false,
+	ShowErrorLines = true,
 	TestIntervals = 0,
 }
 
@@ -1411,9 +1448,9 @@ for Name: string, Info in Tests do
 	local isfunctionhooked = getfenv().isfunctionhooked
 	
 	if isfunctionhooked then
-		--assert(isfunctionhooked(pcall) == false, "tests cannot run if pcall is hooked")
+		assert(isfunctionhooked(pcall) == false, "tests cannot run if pcall is hooked")
 		
-		--assert(isfunctionhooked(loadstring) == false, "tests cannot run if loadstring is hooked")
+		assert(isfunctionhooked(loadstring) == false, "tests cannot run if loadstring is hooked")
 	end
 	
 	local function RunTest()
@@ -1449,7 +1486,7 @@ for Name: string, Info in Tests do
 			CompletedTests += 1
 		else
 			if not Settings.ShowErrorLines then
-				ErrorMessage = ErrorMessage:gsub(".+:%d+: ", "")
+				ErrorMessage = ErrorMessage:gsub(".*:%d+: ", "")
 			end
 			
 			if ErrorMessage:match("doesn't exist") then
