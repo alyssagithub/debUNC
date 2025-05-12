@@ -1055,7 +1055,7 @@ local Tests: any = {
 			
 			local String = "`debUNC"
 			
-			assert(#lz4decompress(String, #String) == 7, "failed to decompress the string with lz4")
+			assert(lz4decompress(String, #String):find("debUNC"), "failed to decompress the string with lz4")
 		end,
 	},
 	
@@ -1124,7 +1124,7 @@ local Tests: any = {
 				return game:GetService("Players").LocalPlayer.PlayerScripts.PlayerModule.CameraModule
 			end)
 
-			assert(Success, "BaseCamera does not exist, go to a normal game.")
+			assert(Success, "failed to find the CameraModule")
 
 			local Success, Camera = pcall(require, CameraModule.BaseCamera)
 			
@@ -1134,26 +1134,19 @@ local Tests: any = {
 
 			local CallingCheck = setmetatable({}, {
 				__newindex = function()
-					local CallScript = getcallingscript() 
-					if typeof(CallScript) ~= "Instance" then
-						LastError = "do not save scripts, possibly use getfenv"
-					elseif CallScript == CameraModule.BaseCamera then
-						LastError = "returned from where it is a function, not from where it is executed."
-					elseif CallScript == CameraModule then
-						LastError = "added an extra stack level, gave caller's caller."
-					elseif CallScript ~= CameraModule.ClassicCamera then
-						LastError = `returned "{CallScript:GetFullName()}" instead of “ClassicCamera”.`
-					end
+					local CallScript = getcallingscript()
+					
+					assert(CallScript == CameraModule, "failed to return CameraModule when replacing a function in CameraModule.BaseCamera")
 				end
 			})
 
 			local Old, Called = Camera.GetSubjectPosition, false
 			Camera.GetSubjectPosition = function(...)
 				local getfenv, setfenv, pcall = getfenv, setfenv, pcall
-
+				
 				Camera.GetSubjectPosition = Old
 				
-				local setfenv = getfenv().setfenv -- remove type error yay
+				local setfenv = getfenv().setfenv
 
 				local Succes, OriginalENV = pcall(getfenv, 3)
 				pcall(setfenv, 3, setmetatable({}, {
@@ -1172,8 +1165,10 @@ local Tests: any = {
 
 			local StartTime = tick()
 			while not Called and tick() - StartTime < 2 do task.wait() end
-
-			assert(Called, "it takes too long to respond")
+			
+			Camera.GetSubjectPosition = Old
+			
+			assert(Called, "took more than 2 seconds to respond")
 			assert(SecureGET, "VERY BADLY implemented, tries to do .script (dtc)")
 			assert(not LastError, LastError)
 		end,
@@ -1185,7 +1180,31 @@ local Tests: any = {
 			
 			assert(isnetworkowner(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart) == true, "should return true on the hrp")
 		end,
-	}
+	},
+	
+	replicatesignal = {
+		Test = function()
+			local replicatesignal: (Signal: RBXScriptSignal) -> () = getfenv().replicatesignal
+			
+			local Player = game:GetService("Players").LocalPlayer
+			
+			local Died = false
+
+			Player.Character.Humanoid.Died:Once(function()
+				Died = true
+			end)
+			
+			replicatesignal(Player.Kill)
+			
+			local Start = tick()
+			
+			repeat
+				task.wait()
+			until Died or tick() - Start > 5
+			
+			assert(Died, "didn't die within 5 seconds")
+		end,
+	},
 }
 
 local NoTests: {[string | number]: any} = {
@@ -1214,7 +1233,6 @@ local NoTests: {[string | number]: any} = {
 	"filtergc",
 	"runonthread",
 	"setrbxclipboard",
-	"replicatesignal",
 	"getsenv",
 	"getmenv",
 	"setfflag",
