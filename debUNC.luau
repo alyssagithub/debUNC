@@ -1115,6 +1115,77 @@ local Tests: any = {
 			assert(OutsideMethod == "debUNC", `getnamecallmethod gave '{OutsideMethod}' instead of 'debUNC' outside __namecall`)
 		end,
 	},
+	
+	getcallingscript = {
+		Test = function() -- credit to dante
+			local getcallingscript = getfenv().getcallingscript
+			
+			local Success, CameraModule = pcall(function()
+				return game:GetService("Players").LocalPlayer.PlayerScripts.PlayerModule.CameraModule
+			end)
+
+			assert(Success, "BaseCamera does not exist, go to a normal game.")
+
+			local Success, Camera = pcall(require, CameraModule.BaseCamera)
+			
+			assert(Success, `failed to require module, error: {Camera}`)
+
+			local LastError, SecureGET = nil, true
+
+			local CallingCheck = setmetatable({}, {
+				__newindex = function()
+					local CallScript = getcallingscript() 
+					if typeof(CallScript) ~= "Instance" then
+						LastError = "do not save scripts, possibly use getfenv"
+					elseif CallScript == CameraModule.BaseCamera then
+						LastError = "returned from where it is a function, not from where it is executed."
+					elseif CallScript == CameraModule then
+						LastError = "added an extra stack level, gave caller's caller."
+					elseif CallScript ~= CameraModule.ClassicCamera then
+						LastError = `returned "{CallScript:GetFullName()}" instead of “ClassicCamera”.`
+					end
+				end
+			})
+
+			local Old, Called = Camera.GetSubjectPosition, false
+			Camera.GetSubjectPosition = function(...)
+				local getfenv, setfenv, pcall = getfenv, setfenv, pcall
+
+				Camera.GetSubjectPosition = Old
+				
+				local setfenv = getfenv().setfenv -- remove type error yay
+
+				local Succes, OriginalENV = pcall(getfenv, 3)
+				pcall(setfenv, 3, setmetatable({}, {
+					__index = function()
+						SecureGET = false
+					end,
+				}))
+
+				CallingCheck.debUNC = true
+				Called = true
+
+				pcall(setfenv, 3, OriginalENV)
+
+				return Old(...)
+			end
+
+			local StartTime = tick()
+			while not Called and tick() - StartTime < 2 do task.wait() end
+
+			assert(Called, "it takes too long to respond")
+			assert(SecureGET, "VERY BADLY implemented, tries to do .script (dtc)")
+			assert(not LastError, LastError)
+		end,
+	},
+	
+	isnetworkowner = {
+		Test = function()
+			local isnetworkowner = getfenv().isnetworkowner
+			
+			assert(isnetworkowner(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart) == true, "should return true on the hrp")
+		end,
+	}
 }
 
 local NoTests: {[string | number]: any} = {
@@ -1133,7 +1204,6 @@ local NoTests: {[string | number]: any} = {
 	"queueonteleport",
 	"setreadonly",
 	"sethiddenproperty",
-	"getcallingscript",
 	"setscriptable",
 	"setthreadidentity",
 	"setstack",
@@ -1192,11 +1262,6 @@ local NoTests: {[string | number]: any} = {
 	getscriptclosure = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "function"},
 	checkparallel = {ReturnType = "boolean"},
 	getrawmetatable = {Parameters = {game}, ReturnType = "table"},
-	isnetworkowner = {
-		Parameters = {game:GetService("Players").LocalPlayer.Character.HumanoidRootPart}, 
-		ReturnType = "boolean", 
-		DisabledFor = {"Velocity 1.1.1"}
-	},
 	getfflag = {Parameters = {"MaxFrameBufferSize"}, ReturnType = "string"},
 	isnewcclosure = {Parameters = {function()end}, ReturnType = "boolean"},
 	isreadonly = {Parameters = {{}}, ReturnType = "boolean"},
