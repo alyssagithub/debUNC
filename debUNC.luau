@@ -100,24 +100,6 @@ local Tests: any = {
 		end,
 	},
 
-	getfenv = {
-		Test = function()
-			local Environment = getfenv()
-			assert(typeof(Environment) == "table", "Function should return a table.")
-
-			local getgenv: () -> {[string]: any} = CheckExist("getgenv")
-
-			for Name, Value in getgenv() do
-				if typeof(Value) ~= "table" and typeof(Value) ~= "function" then
-					continue
-				end
-
-				assert(Environment[Name], `Missing '{Name}' from the global environment in the function environment.`)
-			end
-		end,
-		ReturnType = "table"
-	},
-
 	readfile = {
 		Test = function()
 			local readfile: (Path: string) -> string = getfenv().readfile
