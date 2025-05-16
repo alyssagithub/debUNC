@@ -1162,6 +1162,7 @@ local Tests: any = {
 			
 			assert(isnetworkowner(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart) == true, "should return true on the hrp")
 		end,
+		DisabledFor = {"Velocity"} -- keep making it crash veloshitty
 	},
 	
 	replicatesignal = {
@@ -1207,7 +1208,6 @@ local Tests: any = {
 				assert(RandomNumber - GlobalRandom == 5, "returned an unexpected number")
 
 				local NilLocal = table.pack(debug.getstack(2, 2))
-				print("debug.getstack(2, 1)", debug.getstack(2, 1))
 				assert(NilLocal[1] == nil, `returned value at index 2: {NilLocal[1]} (expected nil)`)
 				assert(NilLocal.n == 1, `returned {NilLocal.n} values at index 2 (expected 1)`)
 
@@ -1226,7 +1226,19 @@ local Tests: any = {
 				DumpStack()
 			end)()
 		end,
-	}
+	},
+	
+	["game.HttpGet"] = {
+		Test = function()
+			local Success, Result = pcall(game.HttpGet, game, "https://awqbcduwendewbnzd.aaaaaa")
+			
+			assert(not Success or not Result, "httpgetting a nonexistent website should either error or return nil")
+			
+			local Result = game:HttpGet("https://raw.githubusercontent.com/alyssagithub/debUNC/refs/heads/main/debUNC.luau")
+			
+			assert(Result:find("debUNC"), "failed to get the code of debUNC")
+		end,
+	},
 }
 
 local NoTests: {[string | number]: any} = {
@@ -1305,7 +1317,7 @@ local NoTests: {[string | number]: any} = {
 	isnewcclosure = {Parameters = {function()end}, ReturnType = "boolean"},
 	getnilinstances = {ReturnType = "table"},
 	getrunningscripts = {ReturnType = "table"},
-	isparallel = {ReturnType = "boolean"},
+	--isparallel = {ReturnType = "boolean"},
 	getactors = {ReturnType = "table"},
 	getfunctionhash = {Parameters = {function()end}, ReturnType = "string"},
 	getactorthreads = {ReturnType = "table"},
@@ -1373,10 +1385,7 @@ end
 local Settings: {[string]: any} = {
 	FakeFunctions = false,
 	GetTests = false,
-	GetUnaddedFunctions = true,
-	MultithreadTests = true,
-	ShowErrorLines = false,
-	TestIntervals = 0,
+	DebugMode = false
 }
 
 for Name: string, Enabled: boolean in Settings do
@@ -1412,12 +1421,8 @@ if Settings.FakeFunctions then
 	getgenv().NonExistentFunctions = NonExistentFunctions
 end
 
-if Settings.HideNonExistentFunctions then
-	DisplayMessage("[debUNC]: Hide non-existent functions is enabled")
-end
-
-if Settings.GetTests then
-	DisplayMessage("[debUNC]: Getting all the tests is enabled")
+if Settings.DebugMode then
+	DisplayMessage("Debug Mode is enabled!")
 end
 
 local getrenv = getfenv().getrenv
@@ -1427,15 +1432,15 @@ local CompletedTests = 0
 local FailedTests = 0
 local MissingFunctions = 0
 
+local isfunctionhooked = getfenv().isfunctionhooked
+
+if isfunctionhooked then
+	assert(isfunctionhooked(pcall) == false, "tests cannot run if pcall is hooked")
+
+	assert(isfunctionhooked(loadstring) == false, "tests cannot run if loadstring is hooked")
+end
+
 for Name: string, Info in Tests do
-	local isfunctionhooked = getfenv().isfunctionhooked
-	
-	if isfunctionhooked then
-		assert(isfunctionhooked(pcall) == false, "tests cannot run if pcall is hooked")
-		
-		assert(isfunctionhooked(loadstring) == false, "tests cannot run if loadstring is hooked")
-	end
-	
 	local function RunTest()
 		local Success, ErrorMessage = pcall(function()
 			local Function = FindFirstFunction(Name)
@@ -1452,7 +1457,7 @@ for Name: string, Info in Tests do
 			do
 				local DisabledFor = Info.DisabledFor
 				
-				assert(not DisabledFor or not table.find(DisabledFor, `{ExecutorName} {ExecutorVersion}`), `disabled for {ExecutorName} {ExecutorVersion}, most likely due to crashes`)
+				assert(not DisabledFor or not table.find(DisabledFor, ExecutorName), `disabled for {ExecutorName}, most likely due to crashes`)
 			end
 
 			if Info.ReturnType then
@@ -1468,7 +1473,7 @@ for Name: string, Info in Tests do
 			print(`🟢 {Name}`)
 			CompletedTests += 1
 		else
-			if not Settings.ShowErrorLines then
+			if not Settings.DebugMode then
 				ErrorMessage = ErrorMessage:gsub(".*:%d+: ", "")
 			end
 			
@@ -1484,14 +1489,16 @@ for Name: string, Info in Tests do
 		TotalTests += 1
 	end
 	
-	if Settings.MultithreadTests then
-		task.spawn(RunTest)
-	else
+	if Settings.DebugMode then
 		RunTest()
+	else
+		task.spawn(RunTest)
 	end
 	
-	if Settings.TestIntervals and Settings.TestIntervals ~= 0 then
-		task.wait(Settings.TestIntervals)
+	if Settings.DebugMode then
+		task.wait(0.1)
+	else
+		task.wait()
 	end
 end
 
