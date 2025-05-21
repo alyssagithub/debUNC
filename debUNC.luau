@@ -59,7 +59,7 @@ local Tests: any = {
 				"_G",
 				"workspace",
 			}
-			
+
 			local Environment = getrenv()
 
 			for _, Global: string in ExpectedGlobals do
@@ -72,7 +72,7 @@ local Tests: any = {
 	getgenv = {
 		Test = function()
 			local getgenv: () -> {[string]: any} = getfenv().getgenv
-			
+
 			local Environment = getgenv()
 
 			for FunctionName in getfenv() do
@@ -91,7 +91,7 @@ local Tests: any = {
 			assert(not Success, "expected error when providing a non-thread value")
 
 			local ThreadEnvironment = gettenv(task.spawn(function() end))
-			
+
 			CheckReturnType(ThreadEnvironment, "table")
 
 			for FunctionName in ThreadEnvironment do
@@ -116,7 +116,7 @@ local Tests: any = {
 			writefile(FileName, GeneratedResult)
 
 			local Result = readfile(FileName)
-			
+
 			local delfile: (Path: string) -> () = getfenv().delfile
 
 			if delfile then
@@ -139,7 +139,7 @@ local Tests: any = {
 			writefile(FileName, GeneratedResult)
 
 			local Result = readfile(FileName)
-			
+
 			local delfile: (Path: string) -> () = getfenv().delfile
 
 			if delfile then
@@ -161,9 +161,9 @@ local Tests: any = {
 			local writefile: (Path: string, Data: string) -> () = CheckExist("writefile")
 
 			writefile(FileName, "Test")
-			
+
 			local Exists = isfile(FileName)
-			
+
 			local delfile: (Path: string) -> () = getfenv().delfile
 
 			if delfile then
@@ -182,9 +182,9 @@ local Tests: any = {
 
 			local GeneratedResult = tostring(math.random())
 			local FileName = `File_{math.random()}.txt`
-			
+
 			local Success = pcall(appendfile, FileName, GeneratedResult)
-			
+
 			if not Success then
 				CheckExist("writefile")(FileName, GeneratedResult)
 			end
@@ -192,9 +192,9 @@ local Tests: any = {
 			assert(readfile(FileName) == GeneratedResult, "failed to create the file")
 
 			appendfile(FileName, "Append")
-			
+
 			local HasAppend = readfile(FileName):find("Append")
-			
+
 			local delfile: (Path: string) -> () = getfenv().delfile
 
 			if delfile then
@@ -223,7 +223,7 @@ local Tests: any = {
 			writefile(FileName, GeneratedResult)
 
 			local Result = listfiles(FolderName)
-			
+
 			local delfolder: (Path: string) -> () = getfenv().delfolder
 
 			if delfolder then
@@ -342,61 +342,61 @@ local Tests: any = {
 		Test = function()
 			local hookfunction: (FunctionToHook: (...any) -> (...any), Hook: () -> ()) -> () -> () = getfenv().hookfunction
 			local newcclosure: (((...any) -> ...any) -> (...any) -> ...any)? = getfenv().newcclosure
-			
+
 			local function HookTest(FunctionToHook, Hook: (...any) -> ...any, ...)
 				local Original = hookfunction(FunctionToHook, Hook)
-				
+
 				local Test = Hook(...)
-				
+
 				local Success, Result = pcall(FunctionToHook, ...)
-				
+
 				assert(Success, `errored with '{Result}' while running test {Test}`)
-				
+
 				assert(Result == Test, `{Test} didn't return the expected value`)
-				
+
 				hookfunction(FunctionToHook, Original) -- restorefunction
 			end
-			
+
 			--lclosures
-			
+
 			HookTest(function()end, function()
 				return "lclosure -> lclosure"
 			end)
-			
+
 			HookTest(function()end, string.upper, "lclosure -> cclosure")
-			
+
 			if newcclosure then
 				HookTest(function()end, newcclosure(function()
 					return "lclosure -> newcclosure"
 				end))
 			end
-			
+
 			--cclosures
-			
+
 			HookTest(string.upper, function()
 				return "cclosure -> lclosure"
 			end)
-			
+
 			HookTest(string.lower, string.upper, "cclosure -> cclosure")
-			
+
 			if newcclosure then
 				HookTest(string.lower, newcclosure(function()
 					return "cclosure -> newcclosure"
 				end))
 			end
-			
+
 			--newcclosures
-			
+
 			if not newcclosure then
 				return
 			end
-			
+
 			HookTest(newcclosure(function()end), function()
 				return "newcclosure -> lclosure"
 			end)
-			
+
 			HookTest(newcclosure(function()end), string.upper, "newcclosure -> cclosure")
-			
+
 			HookTest(newcclosure(function()end), newcclosure(function()
 				return "newcclosure -> newcclosure"
 			end))
@@ -406,7 +406,7 @@ local Tests: any = {
 	iscclosure = {
 		Test = function()
 			local iscclosure: (Function: (any?) -> ()) -> (boolean) = getfenv().iscclosure
-			
+
 			assert(iscclosure(assert) == true, "function 'assert' is a c closure")
 
 			assert(not iscclosure(function() end), "A function created in the executor is not written in C.")
@@ -463,11 +463,11 @@ local Tests: any = {
 				Url = "https://httpbin.org/get",
 				Method = "GET"
 			})
-			
+
 			CheckReturnType(Result, "table")
-			
+
 			assert(Result.StatusCode == 200, `failed to request, StatusMessage: {Result.StatusMessage}, StatusCode: {Result.StatusCode}`)
-			
+
 			assert(Result.StatusMessage == "OK", `StatusMessage should be 'OK' when the StatusCode is 200`)
 
 			local Body = Result.Body
@@ -475,7 +475,7 @@ local Tests: any = {
 			assert(typeof(Body) == "string", "expected a string from the Body")
 
 			local Decoded = game:GetService("HttpService"):JSONDecode(Body)
-			
+
 			CheckReturnType(Decoded, "table")
 
 			local DecodedHeaders = Decoded.headers
@@ -604,12 +604,12 @@ local Tests: any = {
 			assert(Module, FailedFind(`ModuleScript '{Module}'`))
 
 			local LoadedModules = getloadedmodules()
-			
+
 			local require: any = require
-			
+
 			if not table.find(LoadedModules, Module) then
 				require(Module)
-				
+
 				LoadedModules = getloadedmodules()
 			end
 
@@ -634,11 +634,12 @@ local Tests: any = {
 
 			local GeneratedValue = math.random()
 
-			NumberValue.Changed:Once(function(Value, OtherValue: any)
-				if typeof(Value) ~= "number" then
-					Value = OtherValue
-				end
-				
+			NumberValue.Changed:Once(function(Value)
+				assert(
+					GeneratedValue == Value, 
+					`connection was fired but improper parameter given, expected number '{GeneratedValue}', got {typeof(Value)} '{Value}'`
+				)
+
 				if GeneratedValue == Value then
 					DidChange = true
 				end
@@ -712,7 +713,7 @@ local Tests: any = {
 			local StartLoop = tick()
 
 			local FPS
-			
+
 			local Timeout = 5
 
 			repeat
@@ -743,105 +744,95 @@ local Tests: any = {
 			assert(Decoded == GeneratedString, "decoded result did not provide the original string")
 		end
 	},
-	
-	loadstring = {
-		Test = function()
-			local Loaded = loadstring("return 'debunc'")
-			
-			assert(typeof(Loaded) == "function", `expected return type to be a function, got {typeof(Loaded)}`)
-			
-			assert(Loaded() == "debunc", "failed to return the expected value")
-		end,
-	},
-	
+
 	getfpscap = {
 		Test = function()
 			local getfpscap: () -> number = getfenv().getfpscap
-			
+
 			local setfpscap: (FPSCap: number) -> () = CheckExist("setfpscap")
-			
+
 			setfpscap(10)
-			
+
 			local Result = getfpscap()
-			
+
 			assert(Result == 10, `expected value '10', got '{Result}'`)
-			
+
 			setfpscap(0)
-			
+
 			local NewResult = getfpscap()
-			
+
 			assert(NewResult ~= Result, "set fps cap to 0, result stayed at 10")
 		end,
 	},
-	
+
 	newcclosure = {
 		Test = function()
 			local newcclosure: ((...any) -> ...any) -> (...any) -> ...any = getfenv().newcclosure
-			
+
 			local function TestFunction()
 				return "debunc"
 			end
-			
+
 			local NewClosure = newcclosure(TestFunction)
-			
+
 			assert(debug.info(NewClosure, "s") == "[C]", `expected the returned closure to be in [C], got '{debug.info(NewClosure, "s")}'`)
-			
+
 			assert(NewClosure ~= TestFunction, "function returned is the same as the function given")
-			
+
 			assert(NewClosure() == "debunc", "failed to return the expected value")
 		end,
 	},
-	
+
 	isscriptable = {
 		Test = function()
 			local isscriptable: (Object: Object, Property: string) -> boolean = getfenv().isscriptable
-			
+
 			assert(isscriptable(game, "Parent") == true, "game.Parent is scriptable")
-			
+
 			local Success, Result = pcall(isscriptable, game, "SimulationRadius")
-			
+
 			assert(not Success or Result == false, "game.SimulationRadius is a hidden property, and isn't scriptable")
-			
+
 			local Success, Result = pcall(isscriptable, game, "a")
-			
+
 			assert(not Success or not Result, "game.a is not a valid property")
 		end,
 	},
-	
+
 	firetouchinterest = {
 		Test = function()
 			local firetouchinterest: (FireTouch: BasePart, WithPart: BasePart, Ended: number) -> () = getfenv().firetouchinterest
-			
+
 			local FireTouch = Instance.new("Part")
 			local WithPart = Instance.new("Part")
-			
+
 			FireTouch.Parent = workspace
 			WithPart.Parent = workspace
-			
+
 			local Complete = false
-			
+
 			FireTouch.Touched:Connect(function(Part)
 				if WithPart == Part then
 					Complete = true
 				end
 			end)
-			
+
 			firetouchinterest(FireTouch, WithPart, 0)
 			firetouchinterest(FireTouch, WithPart, 1)
-			
+
 			local Start = tick()
-			
+
 			repeat
 				task.wait()
 			until Complete or tick() - Start >= 5
-			
+
 			FireTouch:Destroy()
 			WithPart:Destroy()
-			
+
 			assert(Complete, "failed to fire the touched event within 5 seconds")
 		end,
 	},
-	
+
 	hookmetamethod = {
 		Test = function() -- credit to dante for contributing to this
 			local hookmetamethod: (Metatable: any, Metamethod: string, Hook: Function) -> Function = getfenv().hookmetamethod
@@ -859,81 +850,81 @@ local Tests: any = {
 			assert(getmetatable(Metatable).__index == OriginalIndx, "function replaced the metamethod's function instead of it's proto")
 		end,
 	},
-	
+
 	["WebSocket.connect"] = {
 		Test = function()
 			local connect: (WebSocket: string) -> {[any]: any} = getfenv().WebSocket.connect
-			
+
 			local WebSocket = connect("ws://echo.websocket.events")
-			
+
 			--CheckReturnType(WebSocket, "userdata")
-			
+
 			assert(typeof(WebSocket.Send) == "function", "missing 'Send' function")
-			
+
 			assert(typeof(WebSocket.Close) == "function", "missing 'Close' function")
-			
+
 			assert(typeof(WebSocket.OnMessage) == "RBXScriptSignal", "missing 'OnMessage' RBXScriptSignal")
-			
+
 			assert(typeof(WebSocket.OnClose) == "RBXScriptSignal", "missing 'OnClose' RBXScriptSignal")
-			
+
 			local Messaged = false
-			
+
 			WebSocket.OnMessage:Once(function()
 				Messaged = true
 			end)
-			
+
 			WebSocket:Send("debUNC")
-			
+
 			local Start = tick()
-			
+
 			repeat
 				task.wait()
 			until Messaged or tick() - Start >= 5
-			
+
 			WebSocket:Close()
-			
+
 			assert(Messaged, "failed to receive message within 5 seconds")
 		end,
 	},
-	
+
 	["cache.invalidate"] = {
 		Test = function() -- skidded from unc
 			local invalidate = getfenv().cache.invalidate
-			
+
 			local container = Instance.new("Folder")
 			local part = Instance.new("Part", container)
 			invalidate(container:FindFirstChild("Part"))
 			assert(part ~= container:FindFirstChild("Part"), "Reference `part` could not be invalidated")
 		end,
 	},
-	
+
 	["cache.iscached"] = {
 		Test = function() -- skidded from unc
 			local iscached = getfenv().cache.iscached
 			local invalidate = CheckExist("cache.invalidate")
-			
+
 			local part = Instance.new("Part")
 			assert(iscached(part), "Part should be cached")
 			invalidate(part)
 			assert(not iscached(part), "Part should not be cached")
 		end,
 	},
-	
+
 	["cache.replace"] = {
 		Test = function() -- skidded from unc
 			local replace = getfenv().cache.replace
-			
+
 			local part = Instance.new("Part") :: Instance
 			local fire = Instance.new("Fire") :: Instance
 			replace(part, fire)
 			assert(part ~= fire, "Part was not replaced with Fire")
 		end,
 	},
-	
+
 	cloneref = {
 		Test = function() -- skidded from unc
 			local cloneref = getfenv().cloneref
-			
+
 			local part = Instance.new("Part")
 			local clone = cloneref(part)
 			assert(part ~= clone, "Clone should not be equal to original")
@@ -941,63 +932,63 @@ local Tests: any = {
 			assert(part.Name == "Test", "Clone should have updated the original")
 		end,
 	},
-	
+
 	compareinstances = {
 		Test = function() -- skidded from unc
 			local compareinstances = getfenv().compareinstances
 			local cloneref = CheckExist("cloneref")
-			
+
 			local part = Instance.new("Part")
 			local clone = cloneref(part)
 			assert(part ~= clone, "Clone should not be equal to original")
 			assert(compareinstances(part, clone), "Clone should be equal to original when using compareinstances()")
 		end,
 	},
-	
+
 	checkcaller = {
 		Test = function()
 			-- TODO: make this test check situations where it'd return false
 			assert(getfenv().checkcaller() == true, "should return true when called by the executor")
 		end,
 	},
-	
+
 	isfunctionhooked = {
 		Test = function()
 			local isfunctionhooked: ((...any?) -> ...any?) -> boolean = getfenv().isfunctionhooked
 			local hookfunction = CheckExist("hookfunction")
-			
+
 			local function Test()
 				return "debUNC Original"
 			end
-			
+
 			assert(isfunctionhooked(Test) == false, "an unhooked function should return false")
-			
+
 			hookfunction(Test, function()
 				return "debUNC Hooked"
 			end)
-			
+
 			assert(isfunctionhooked(Test) == true, "a hooked function should return true")
-			
+
 			local restorefunction = getfenv().restorefunction
-			
+
 			if not restorefunction then
 				return
 			end
-			
+
 			restorefunction(Test)
-			
+
 			assert(isfunctionhooked(Test) == false, "a restored hooked function should return false")
 		end,
 	},
-	
+
 	base64decode = {
 		Test = function()
 			local base64decode: (Encoded: string) -> string = getfenv().base64decode
-			
+
 			assert(base64decode("ZGVidW5j") == "debunc", "failed to decode a string encoded in base64")
 		end,
 	},
-	
+
 	setrawmetatable = {
 		Test = function() -- credit to dante for making this
 			local setrawmetatable: (Table: {[any]: any}, Metatable: {[any]: any}) -> () = getfenv().setrawmetatable
@@ -1022,41 +1013,41 @@ local Tests: any = {
 			assert(Result == "debUNC", "calling the new proxy failed to return the expected value")
 		end,
 	},
-	
+
 	lz4compress = {
 		Test = function()
 			local lz4compress: (String: string) -> string = getfenv().lz4compress
-			
+
 			assert(lz4compress("debUNC") == "`debUNC", "failed to compress the string with lz4")
 		end,
 	},
-	
+
 	lz4decompress = {
 		Test = function()
 			local lz4decompress: (Compressed: string, Allocation: number) -> string = getfenv().lz4decompress
-			
+
 			local String = "`debUNC"
-			
+
 			assert(lz4decompress(String, #String):find("debUNC"), "failed to decompress the string with lz4")
 		end,
 	},
-	
+
 	["debug.getproto"] = {
 		Test = function()
 			local getproto: (Function: (...any?) -> ...any?, Index: number) -> ((...any?) -> ...any?)? = CheckExist("debug.getproto")
-			
+
 			local Proto = getproto(function()
 				local function b()
 					return "debUNC"
 				end	
 			end, 1)
-			
+
 			assert(typeof(Proto) == "function", "didn't return a function")
-			
+
 			assert(Proto() == "debUNC", "calling the proto failed to return the expected value")
 		end,
 	},
-	
+
 	["debug.getprotos"] = {
 		Test = function()
 			local getprotos: (Function: (...any?) -> ...any?) -> {(...any?) -> ...any?} = CheckExist("debug.getprotos")
@@ -1066,15 +1057,15 @@ local Tests: any = {
 					return "debUNC"
 				end	
 			end)
-			
+
 			assert(typeof(Protos) == "table", "didn't return a table")
 
 			assert(#Protos == 1, "expected table to be an array with only 1 index")
-			
+
 			assert(Protos[1]() == "debUNC", "calling the proto within the table failed to return the expected value")
 		end,
 	},
-	
+
 	getnamecallmethod = {
 		Test = function() -- credit to dante for making this test
 			local getnamecallmethod: () -> string = getfenv().getnamecallmethod
@@ -1097,45 +1088,50 @@ local Tests: any = {
 			assert(OutsideMethod == "debUNC", `getnamecallmethod gave '{OutsideMethod}' instead of 'debUNC' outside __namecall`)
 		end,
 	},
-	
+
 	getcallingscript = {
 		Test = function() -- credit to dante
 			local getcallingscript = getfenv().getcallingscript
-			
+
 			local Success, CameraModule = pcall(function()
 				return game:GetService("Players").LocalPlayer.PlayerScripts.PlayerModule.CameraModule
 			end)
 
-			assert(Success, "failed to find the CameraModule")
+			assert(Success, "BaseCamera does not exist, go to a normal game.")
 
 			local Success, Camera = pcall(require, CameraModule.BaseCamera)
 			
-			assert(Success, `failed to require module, error: {Camera}`)
+			assert(Success, `failed to require BaseCamera with error: {Camera}`)
 
 			local LastError, SecureGET = nil, true
 
 			local CallingCheck = setmetatable({}, {
 				__newindex = function()
-					local CallScript = getcallingscript()
-					
-					assert(CallScript == CameraModule, "failed to return CameraModule when replacing a function in CameraModule.BaseCamera")
+					local CallScript = getcallingscript() 
+					if typeof(CallScript) ~= "Instance" then
+						LastError = "do not save scripts, possibly use getfenv"
+					elseif CallScript == CameraModule.BaseCamera then
+						LastError = "returned from where it is a function, not from where it is executed."
+					elseif CallScript == CameraModule then
+						LastError = "added an extra stack level, gave caller's caller."
+					elseif CallScript ~= CameraModule.ClassicCamera then
+						LastError = `returned "{CallScript:GetFullName()}" instead of “ClassicCamera”.`
+					end
 				end
 			})
 
 			local Old, Called = Camera.GetSubjectPosition, false
 			Camera.GetSubjectPosition = function(...)
 				local getfenv, setfenv, pcall = getfenv, setfenv, pcall
-				
+
 				Camera.GetSubjectPosition = Old
-				
-				local setfenv = getfenv().setfenv
 
 				local Succes, OriginalENV = pcall(getfenv, 3)
 				pcall(setfenv, 3, setmetatable({}, {
 					__index = function()
 						SecureGET = false
 					end,
-				}))
+				}) :: any)
 
 				CallingCheck.debUNC = true
 				Called = true
@@ -1147,52 +1143,51 @@ local Tests: any = {
 
 			local StartTime = tick()
 			while not Called and tick() - StartTime < 2 do task.wait() end
-			
-			Camera.GetSubjectPosition = Old
-			
-			assert(Called, "took more than 2 seconds to respond")
+
+			assert(Called, "it takes too long to respond")
 			assert(SecureGET, "VERY BADLY implemented, tries to do .script (dtc)")
 			assert(not LastError, LastError)
 		end,
 	},
-	
+
 	isnetworkowner = {
 		Test = function()
 			local isnetworkowner = getfenv().isnetworkowner
-			
+
 			assert(isnetworkowner(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart) == true, "should return true on the hrp")
 		end,
 		DisabledFor = {"Velocity"} -- keep making it crash veloshitty
 	},
-	
+
 	replicatesignal = {
 		Test = function()
 			local replicatesignal: (Signal: RBXScriptSignal) -> () = getfenv().replicatesignal
-			
-			local Player = game:GetService("Players").LocalPlayer
-			
-			local Died = false
 
-			Player.Character.Humanoid.Died:Once(function()
-				Died = true
+			local Player = game:GetService("Players").LocalPlayer
+
+			local Fired = false
+
+			Player.Character.Humanoid.HealthChanged:Once(function()
+				Fired = true
 			end)
-			
+
 			replicatesignal(Player.Kill)
-			
+
 			local Start = tick()
-			
+
 			repeat
 				task.wait()
-			until Died or tick() - Start > 5
-			
-			assert(Died, "didn't die within 5 seconds")
+			until Fired or tick() - Start > 5
+
+			assert(Fired, "health wasn't changed within 5 seconds")
 		end,
+		DisableOnDebug = true,
 	},
-	
+
 	["debug.getstack"] = {
 		Test = function() -- credit to dante
 			local debug = getfenv().debug
-			
+
 			local GlobalRandom = math.random()
 			local RandomGlobal
 
@@ -1227,16 +1222,174 @@ local Tests: any = {
 			end)()
 		end,
 	},
-	
+
 	["game.HttpGet"] = {
 		Test = function()
 			local Success, Result = pcall(game.HttpGet, game, "https://awqbcduwendewbnzd.aaaaaa")
-			
-			assert(not Success or not Result, "httpgetting a nonexistent website should either error or return nil")
-			
+
+			assert(
+				not Success
+					or not Result
+					or Result == "",
+				"httpgetting a nonexistent website should return an error, nil, or an empty string"
+			)
+
 			local Result = game:HttpGet("https://raw.githubusercontent.com/alyssagithub/debUNC/refs/heads/main/debUNC.luau")
-			
+
 			assert(Result:find("debUNC"), "failed to get the code of debUNC")
+		end,
+	},
+	
+	identifyexecutor = {
+		Test = function()
+			local identifyexecutor: () -> (string, string) = getfenv().identifyexecutor
+
+			local Name, Version = identifyexecutor()
+
+			assert(typeof(Name) == "string", "the first returned value, the executor's name, should be a string")
+
+			assert(typeof(Version) == "string", "the second returned value, the executor's version, should be a string")
+		end,
+	},
+
+	gethwid = {
+		Test = function()
+			local gethwid: () -> string = getfenv().gethwid
+
+			assert(typeof(gethwid()) == "string", "the returned value (user's hwid/fingerprint) should be a string")
+		end,
+	},
+	
+	getrawmetatable = {
+		Test = function() -- credit to dante
+			local getrawmetatable: (Table: {[any]: any}) -> any = getfenv().getrawmetatable
+
+			local Detector = newproxy(true)
+			local DetectorMETA, IndxFunc
+
+			local FakeMETA = {
+				__index = function()
+					return true
+				end,
+			}
+
+			do
+				DetectorMETA = getmetatable(Detector)
+
+				IndxFunc = (function() 
+					return (function() -- Break debug.info Stack 2 and 3
+						return error("first debUNC", 2)
+					end)()
+				end)
+
+				DetectorMETA.__index = IndxFunc
+				DetectorMETA.__metatable = FakeMETA
+			end
+
+			local RawDetectorMETA = getrawmetatable(Detector)
+
+			assert(RawDetectorMETA == getrawmetatable(Detector), "did not even return 2 times the same thing")
+			assert(RawDetectorMETA ~= FakeMETA, "its getmetatable with other name")
+			assert(RawDetectorMETA == DetectorMETA, "failed to return original META")
+			assert(rawequal(RawDetectorMETA, DetectorMETA), "failed to return original META and tried to fake it")
+			assert(not table.isfrozen(RawDetectorMETA), "returned a read-only META")
+			assert(IndxFunc == RawDetectorMETA.__index, "didnt return the original __index")
+
+			local NewIndxFunc = `debUNC {math.random()}`
+			DetectorMETA.__index = NewIndxFunc
+
+			assert(NewIndxFunc == RawDetectorMETA.__index, `changed __index to {NewIndxFunc} but still returns the old one`)
+
+			local Part1 = Instance.new("Part") :: any
+			local Part2 = Instance.new("Part") :: any
+
+			local Part1META = getrawmetatable(Part1)
+
+			assert(Part1META == getrawmetatable(Part2), "did not return the same META for unmodified parts")
+			assert(table.isfrozen(Part1META), "returned a non read-only Part META")
+
+			for i, MetaType in {"__index", "__newindex", "__namecall", "__metatable"} do
+				assert(Part1META[MetaType], `{MetaType} is not valid in a Part`)
+			end
+
+			local __index
+			xpcall(function()
+				return Part1[{}]
+			end, function()
+				__index = debug.info(2, "f")
+			end)
+
+			assert(Part1META["__index"] == __index, `__index did not give {Part1META["__index"]} instead of {__index} (__index may not be CClosure)`)
+		end,
+	},
+	
+	["debug.getinfo"] = {
+		Test = function()
+			local getinfo = CheckExist("debug.getinfo")
+
+			local A, B, C = 1, nil, nil
+			local Funcs = {
+				TestFunc = function(D, E, F, ...)
+					return A, B, C
+				end,
+				IsYieldable = coroutine.isyieldable :: any
+			}
+
+			local LuaFuncInfo = getinfo(Funcs.TestFunc)
+			local CFuncInfo = getinfo(Funcs.IsYieldable)
+
+			local Checks = {
+				source = function(func, source)
+					return source == debug.info(func, "s")
+				end,
+				what = function(func, what)
+					local line = debug.info(func, "l")
+					return ((line == -1 and "C") or "Lua") == what
+				end,
+				numparams = function(func, numParams)
+					local params = debug.info(func, "a")
+					return params == numParams
+				end,
+				func = function(func, actualFunc)
+					return func == actualFunc
+				end,
+				short_src = function(func, shortSrc)
+					return shortSrc == debug.info(func, "s")
+				end,
+				currentline = function(func, currentLine)
+					return currentLine == debug.info(func, "l")
+				end,
+				name = function(func, name)
+					return name == debug.info(func, "n")
+				end,
+				is_vararg = function(func, isVararg)
+					local _, varargs = debug.info(func, "a")
+					return varargs == (isVararg == 1)
+				end,
+				nups = function(func, expectedNups)
+					local getupvalue = rawget(debug, "getupvalue")
+					assert(getupvalue, "Cannot check 'nups': 'debug.getupvalue' is missing.")
+
+					local count = 0
+					for i = 1, 10 do
+						local success = pcall(getupvalue, func, i)
+						if not success then break end
+						count += 1
+					end
+
+					return expectedNups == count
+				end,
+			}
+
+			for field, check in pairs(Checks) do
+				assert(LuaFuncInfo[field], `Missing field in getinfo: {field}`)
+				assert(check(Funcs.TestFunc, LuaFuncInfo[field]), `Mismatch in field '{field}': got '{LuaFuncInfo[field]}'`)
+				assert(check(Funcs.IsYieldable, CFuncInfo[field]), `Mismatch in C function field '{field}': got '{CFuncInfo[field]}'`)
+			end
+
+			for field in pairs(LuaFuncInfo) do
+				assert(Checks[field], `no test defined for '{field}'.`)
+			end
 		end,
 	},
 }
@@ -1289,11 +1442,9 @@ local NoTests: {[string | number]: any} = {
 	"rconsolewarn",
 	"rconsoleprint",
 	"rconsolecreate",
-	
+
 	-- Short Tests
 	gethiddenproperty = {Parameters = {game:GetService("Players").LocalPlayer, "SimulationRadius"}, ReturnType = "number"},
-	identifyexecutor = {ReturnType = "string"},
-	gethwid = {ReturnType = "string"},
 	["debug.getregistry"] = {ReturnType = "table"},
 	gethui = {ReturnType = "Instance"},
 	isrbxactive = {ReturnType = "boolean"},
@@ -1303,7 +1454,6 @@ local NoTests: {[string | number]: any} = {
 	comparefunctions = {Parameters = {wait, wait}, ReturnType = "boolean"},
 	isexecutorclosure = {Parameters = {wait}, ReturnType = "boolean"},
 	islclosure = {Parameters = {wait}, ReturnType = "boolean"},
-	["debug.getinfo"] = {Parameters = {function()end}, ReturnType = "table"},
 	["debug.getconstants"] = {Parameters = {function()end}, ReturnType = "table"},
 	["debug.getconstant"] = {Parameters = {function()local a; a = "hi"end, 1 :: any}, ReturnType = "string"},
 	decompile = {Parameters = {game:FindFirstChildWhichIsA("LuaSourceContainer", true)}, ReturnType = "string"},
@@ -1312,12 +1462,11 @@ local NoTests: {[string | number]: any} = {
 	getscripthash = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "string"},
 	getscriptclosure = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "function"},
 	checkparallel = {ReturnType = "boolean"},
-	getrawmetatable = {Parameters = {game}, ReturnType = "table"},
 	getfflag = {Parameters = {"MaxFrameBufferSize"}, ReturnType = "string"},
 	isnewcclosure = {Parameters = {function()end}, ReturnType = "boolean"},
 	getnilinstances = {ReturnType = "table"},
 	getrunningscripts = {ReturnType = "table"},
-	--isparallel = {ReturnType = "boolean"},
+	isparallel = {ReturnType = "boolean"},
 	getactors = {ReturnType = "table"},
 	getfunctionhash = {Parameters = {function()end}, ReturnType = "string"},
 	getactorthreads = {ReturnType = "table"},
@@ -1325,7 +1474,7 @@ local NoTests: {[string | number]: any} = {
 
 for Index, Info in NoTests do
 	assert(not Tests[Index] and not Tests[Info], `A test for {Index} or {Info} already exists.`)
-	
+
 	if typeof(Index) == "string" then
 		Tests[Index] = Info
 	else
@@ -1336,17 +1485,19 @@ end
 local getgenv: () -> {[string]: any} = getfenv().getgenv or function() return {} end
 
 local function RestoreFunctions()
-	if getgenv().OriginalFunctions then
-		for Name, Function in getgenv().OriginalFunctions do
-			getfenv()[Name] = Function
-		end
-
-		for Name in getgenv().NonExistentFunctions do
-			getfenv()[Name] = nil
-		end
-		
-		getgenv().OriginalFunctions = nil
+	if not getgenv().OriginalFunctions then
+		return
 	end
+
+	for Name, Function in getgenv().OriginalFunctions do
+		getfenv()[Name] = Function
+	end
+
+	for Name in getgenv().NonExistentFunctions do
+		getfenv()[Name] = nil
+	end
+
+	getgenv().OriginalFunctions = nil
 end
 
 RestoreFunctions()
@@ -1385,12 +1536,13 @@ end
 local Settings: {[string]: any} = {
 	FakeFunctions = false,
 	GetTests = false,
+	GetUnaddedFunctions = true,
 	DebugMode = false
 }
 
 for Name: string, Enabled: boolean in Settings do
 	local Saved = getgenv()[Name]
-	
+
 	if Saved ~= nil then
 		Settings[Name] = Saved
 	end
@@ -1398,25 +1550,25 @@ end
 
 if Settings.FakeFunctions then
 	local newcclosure: ((...any) -> ...any) -> (...any) -> ...any = getfenv().newcclosure
-	
+
 	DisplayMessage("[debUNC]: Faking functions is enabled")
-	
+
 	local OriginalFunctions = {}
 	local NonExistentFunctions = {}
-	
+
 	for FunctionName in Tests do
 		if FunctionName == "getgenv" or FunctionName == "getfenv" or FunctionName == "newcclosure" then
 			continue
 		end
-		
+
 		if not getfenv()[FunctionName] then
 			NonExistentFunctions[FunctionName] = true
 		end
-		
+
 		OriginalFunctions[FunctionName] = getfenv()[FunctionName]
 		getfenv()[FunctionName] = newcclosure(function()end)
 	end
-	
+
 	getgenv().OriginalFunctions = OriginalFunctions
 	getgenv().NonExistentFunctions = NonExistentFunctions
 end
@@ -1443,20 +1595,22 @@ end
 for Name: string, Info in Tests do
 	local function RunTest()
 		local Success, ErrorMessage = pcall(function()
+			assert(not (Settings.DebugMode and Info.DisableOnDebug), "this function is disabled in debug mode")
+
 			local Function = FindFirstFunction(Name)
 
 			assert(Function, "doesn't exist")
 			assert(typeof(Function) == "function", "doesn't have 'function' type")
-			
+
 			if isfunctionhooked then
 				assert(isfunctionhooked(Function) == false, "function is hooked and cannot be accurately tested")
 			end
 
 			local Info = Info
-			
+
 			do
 				local DisabledFor = Info.DisabledFor
-				
+
 				assert(not DisabledFor or not table.find(DisabledFor, ExecutorName), `disabled for {ExecutorName}, most likely due to crashes`)
 			end
 
@@ -1476,7 +1630,7 @@ for Name: string, Info in Tests do
 			if not Settings.DebugMode then
 				ErrorMessage = ErrorMessage:gsub(".*:%d+: ", "")
 			end
-			
+
 			if ErrorMessage:match("doesn't exist") then
 				warn(`🟡 {Name}`)
 				MissingFunctions += 1
@@ -1485,18 +1639,18 @@ for Name: string, Info in Tests do
 				FailedTests += 1
 			end
 		end
-		
+
 		TotalTests += 1
 	end
-	
+
 	if Settings.DebugMode then
 		RunTest()
 	else
 		task.spawn(RunTest)
 	end
-	
+
 	if Settings.DebugMode then
-		task.wait(0.1)
+		task.wait(0.01)
 	else
 		task.wait()
 	end
@@ -1504,11 +1658,11 @@ end
 
 local function GetAllTests()
 	local AllTests = 0
-	
+
 	for _ in Tests do
 		AllTests += 1
 	end
-	
+
 	return AllTests
 end
 
@@ -1562,154 +1716,7 @@ Divider()
 local Blacklist = {
 	"aunisgay",
 	"aunisafemboy",
-	"consolecreate",
-	"queue_on_teleport",
-	"consoledestroy",
-	"isgameactive",
-	"crypt.base64.base64_decode",
-	"crypt.base64.base64encode",
-	"crypt.base64.encode",
-	"crypt.base64.base64decode",
-	"crypt.base64.base64_encode",
-	"crypt.base64.decode",
-	"crypt.base64decode",
-	"crypt.base64_decode",
-	"crypt.base64encode",
-	"crypt.decrypt",
-	"crypt.base64_encode",
-	"setthreadcontext",
-	"toclipboard",
-	"getthreadcontext",
-	"replacefunction",
-	"inparallel",
-	"get_thread_identity",
-	"getupvalue",
-	"httpget",
-	"setupvalue",
-	"getregistry",
-	"makereadonly",
-	"dumpstring",
-	"getinstancelist",
-	"getupvalues",
-	"get_hidden_gui",
-	"consoleerr",
-	"getinfo",
-	"consolewarn",
-	"base64_encode",
-	"getconstant",
-	"is_synapse_function",
-	"issentinelclosure",
-	"executescript",
-	"getscriptfromthread",
-	"http.request",
-	"base64.base64_decode",
-	"base64.base64encode",
-	"base64.encode",
-	"base64.base64decode",
-	"base64.base64_encode",
-	"base64.decode",
-	"setconstant",
-	"getconstants",
-	"run_on_thread",
-	"getobjects",
-	"setnamecallmethod",
-	"consoleprint",
-	"getcustomasset",
-	"replaceclosure",
-	"getprotos",
-	"is_protosmasher_closure",
-	"is_sirhurt_closure",
-	"setidentity",
-	"iscustomcclosure",
-	"isourclosure",
-	"checkclosure",
-	"set_thread_context",
-	"base64_decode",
-	"getscriptfunction",
-	"get_actors",
-	"run_on_actor",
-	"WebSocket.New",
-	"WebSocket.new",
-	"WebSocket.Connect",
-	"getidentity",
-	"defersignal",
-	"consoleinfo",
-	"getstack",
-	"httppost",
-	"getproto",
-	"http_request",
-	"getexecutorname",
-	"getreg",
-	"bit.bdiv",
-	"bit.badd",
-	"bit.rshift",
-	"bit.band",
-	"bit.bor",
-	"bit.bnot",
-	"bit.bmul",
-	"bit.bswap",
-	"bit.arshift",
-	"bit.tobit",
-	"bit.ror",
-	"bit.rol",
-	"bit.lshift",
-	"bit.tohex",
-	"bit.bxor",
-	"bit.bsub",
-	"set_thread_identity",
-	"istempleclosure",
-	"input.mouse2release",
-	"input.keyrelease",
-	"input.mousemoveabs",
-	"input.keypress",
-	"input.mousemoverel",
-	"input.mouse2click",
-	"input.mouse2press",
-	"input.mousescroll",
-	"input.mouse1click",
-	"input.mouse1release",
-	"input.mouse1press",
-	"get_thread_context",
-	"get_actors_threads",
-	"getcallbackvalue",
-	"rconsolehide",
-	"rconsolesettitle",
-	"crypt_generatekey",
-	"cache_invalidate",
-	"consolesettitle",
-	"rconsoleclear",
-	"iskeydown",
-	"rconsolehidden",
-	"info",
-	"consolehide",
-	"rconsoletoggle",
 	"iusets is a skid",
-	"HookCaller",
-	"consoletoggle",
-	"consoleshow",
-	"hookfunc",
-	"consoletopmost",
-	"rconsolename",
-	"consoleinput",
-	"getfunctionbytecode",
-	"cache_iscached",
-	"consolename",
-	"rconsoletopmost",
-	"websocket_connect",
-	"consoleclear",
-	"crypt_hash",
-	"cache_replace",
-	"HttpRequest",
-	"GetObjects",
-	"oldrequire",
-	"HttpGet",
-	"messagebox",
-	"rconsoleinput",
-	"rconsoleshow",
-	"dofile",
-	"crypt_generatebytes",
-	"keyclick",
-	"setcallbackvalue",
 }
 
 local RobloxEnvironment = getrenv and getrenv() or {}
@@ -1723,7 +1730,7 @@ local function GetFromEnv(Environment, GetTests: boolean?, Library: string?)
 		if Library then
 			Name = `{Library}.{Name}`
 		end
-		
+
 		if not GetTests then
 			if Tests[Name] then
 				continue
@@ -1740,21 +1747,21 @@ local function GetFromEnv(Environment, GetTests: boolean?, Library: string?)
 			if AlreadyChecked[Name] then
 				continue
 			end
-			
+
 			if table.find(Blacklist, Name) then
 				continue
 			end
 		end
-		
+
 		if typeof(Value) == "table" then
 			GetFromEnv(Value, Settings.GetTests, Name)
 			continue
 		end
-		
+
 		AlreadyChecked[Name] = true
-		
+
 		local Message = `"{Name}",`
-		
+
 		Copy ..= `{Message}\n`
 		print(Message)
 	end
@@ -1782,6 +1789,6 @@ local setclipboard = getfenv().setclipboard
 if setclipboard then
 	setclipboard(Copy)
 	print("^ Copied to your clipboard! ^")
-	
+
 	Divider()
 end
