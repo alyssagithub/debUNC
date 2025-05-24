@@ -988,9 +988,33 @@ local Tests: any = {
 	},
 
 	checkcaller = {
-		Test = function()
-			-- TODO: make this test check situations where it'd return false
-			assert(getfenv().checkcaller() == true, "should return true when called by the executor")
+		Test = function() -- credit to dante
+			local checkcaller = getfenv().checkcaller
+
+			assert(checkcaller() == true, "should return true when called by the executor")
+
+			local Success, CameraModule = pcall(function()
+				return game:GetService("Players").LocalPlayer.PlayerScripts.PlayerModule.CameraModule
+			end)
+
+			assert(Success, "BaseCamera does not exist, go to a normal game.")
+
+			local Success, Camera = pcall(require, CameraModule.BaseCamera)
+
+			assert(Success, `failed to require BaseCamera with error: {Camera}`)
+
+			local Old, Called = Camera.GetSubjectPosition, nil
+			Camera.GetSubjectPosition = function(...)
+				Camera.GetSubjectPosition = Old
+				Called = checkcaller()
+				return Old(...)
+			end
+
+			local StartTime = tick()
+			while Called == nil and tick() - StartTime < 2 do task.wait() end
+
+			Camera.GetSubjectPosition = Old
+			assert(Called == false, "should return false when called by the CameraModule.BaseCamera")
 		end,
 	},
 
@@ -1185,6 +1209,7 @@ local Tests: any = {
 
 			local StartTime = tick()
 			while not Called and tick() - StartTime < 2 do task.wait() end
+			Camera.GetSubjectPosition = Old
 
 			assert(Called, "it takes too long to respond")
 			assert(SecureGET, "VERY BADLY implemented, tries to do .script (dtc)")
