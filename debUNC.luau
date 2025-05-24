@@ -414,20 +414,62 @@ local Tests: any = {
 	},
 
 	clonefunction = {
-		Test = function()
+		Test = function() -- credit to dante
 			local clonefunction: ((any?) -> any?) -> ((any?) -> any?) = getfenv().clonefunction
+			local pcall: (Function: Function, Arg1: any, Arg2: any) -> (any?, any?)  = getfenv().pcall
 
 			local GeneratedNumber = math.random()
+			local TestENV = {}
 
 			local function Original()
 				return GeneratedNumber
 			end
 
-			local Clone = clonefunction(Original)
+			local PreviousENVClone = clonefunction(Original) -- If you call you should have the normal ENV
+
+			setfenv(Original, TestENV)
+
+			local Clone = clonefunction(Original) -- If called you should have TestENV from ENV
 
 			assert(Clone ~= Original, "Cloned and original function should not have the same reference.")
-
 			assert(Clone() == Original(), "Cloned and original function should return the same value.")
+			assert(getfenv(Clone) == TestENV, "The ENV of the previous function is not saved.")
+			assert(getfenv(PreviousENVClone) ~= TestENV, "The ENV of the original function changed and the one of the cloned one is not the old one.")
+
+			local InfoResultsOrder = {
+				["Source"] = 1,
+				["Line"] = 2,
+				["Name"] = 3,
+				["Params"] = 4,
+				["VarArgs"] = 5
+			}
+
+			local OriginalInfo = {debug.info(Original, "slna")}
+			local ClonedInfo = {debug.info(Clone, "slna")}
+
+			local OldInfo = {}
+			for CheckName, Position in pairs(InfoResultsOrder) do
+				OldInfo[CheckName] = {Position, OriginalInfo[Position]}
+			end
+
+			for CheckName, ExtraCheckInfo in pairs(OldInfo) do
+				local ClonedResult = ClonedInfo[ExtraCheckInfo[1]]
+				local RealResult = ExtraCheckInfo[2]
+
+				assert(ClonedResult == RealResult, `"{CheckName}" is not the same, it returned "{ClonedResult}" instead of "{RealResult}").`)
+			end
+
+			local WaitForChild = game.WaitForChild
+			local NewWaitForChild = clonefunction(WaitForChild)
+
+			assert(WaitForChild ~= NewWaitForChild, "Cloned and original C function should not have the same reference.")
+
+			local Terrain = workspace:FindFirstChildWhichIsA("Terrain")
+			local TerrainName = Terrain.Name :: any
+
+			local Succes, Result = pcall(NewWaitForChild, workspace, TerrainName)
+			assert(Succes, `new WaitForChild failed: "{Result}"`)
+			assert(Result == Terrain, `new WaitForChild returns: "{Result}", but we need "{TerrainName}"`)
 		end
 	},
 
