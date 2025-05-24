@@ -1324,7 +1324,7 @@ local Tests: any = {
 	},
 	
 	["debug.getinfo"] = {
-		Test = function()
+		Test = function() -- credit to dante
 			local getinfo = CheckExist("debug.getinfo")
 
 			local A, B, C = 1, nil, nil
@@ -1340,7 +1340,7 @@ local Tests: any = {
 
 			local Checks = {
 				source = function(func, source)
-					return source == debug.info(func, "s")
+					return source == "=" .. debug.info(func, "s")
 				end,
 				what = function(func, what)
 					local line = debug.info(func, "l")
