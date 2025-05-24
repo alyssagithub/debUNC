@@ -1434,6 +1434,55 @@ local Tests: any = {
 			end
 		end,
 	},
+	
+	setreadonly = {
+		Test = function() -- credit to dante
+			local setreadonly: (Table: any, ReadOnly: boolean) -> () = getfenv().setreadonly
+
+			local ReadOnlyTable = ColorSequence
+
+			assert(table.isfrozen(ReadOnlyTable), "ColorSequence is not frozen.")
+
+			local function ReadOnlyEditTest()
+				local Succes = pcall(function()
+					ReadOnlyTable[1] = "debUNC"
+				end)
+
+				if Succes then
+					pcall(function()
+						ReadOnlyTable[1] = nil
+					end)
+				end
+
+				return Succes
+			end
+
+			assert(not ReadOnlyEditTest(), "should not be able to write to ColorSequence while frozen.")
+
+			setreadonly(ReadOnlyTable, false)
+
+			local Success, err = pcall(function()
+				ColorSequence[123] = "debUNC"
+			end)
+
+			assert(Success, "failed to write after unfreezing: " .. tostring(err))
+
+			pcall(function()
+				table.remove(ReadOnlyTable, 123)
+			end)
+
+			assert(not table.isfrozen(ReadOnlyTable),  "table still appears to be frozen after unfreezing.")
+
+			setreadonly(ReadOnlyTable, true)
+
+			local FinishTest = ReadOnlyEditTest()
+			if not FinishTest then
+				pcall(table.freeze, ReadOnlyTable) -- it makes almost no sense for an executor to pass all of the above except this
+			end
+
+			assert(not FinishTest, "table did not become readonly again.")
+		end,
+	},
 }
 
 local NoTests: {[string | number]: any} = {
@@ -1450,7 +1499,6 @@ local NoTests: {[string | number]: any} = {
 	"keyrelease",
 	"setclipboard",
 	"queueonteleport",
-	"setreadonly",
 	"sethiddenproperty",
 	"setscriptable",
 	"setthreadidentity",
