@@ -786,6 +786,16 @@ local Tests: any = {
 			assert(Decoded == GeneratedString, "decoded result did not provide the original string")
 		end
 	},
+	
+	loadstring = {
+		Test = function()
+			local Loaded = loadstring("return 'debunc'")
+
+			assert(typeof(Loaded) == "function", `expected return type to be a function, got {typeof(Loaded)}`)
+
+			assert(Loaded() == "debunc", "failed to return the expected value")
+		end,
+	},
 
 	getfpscap = {
 		Test = function()
