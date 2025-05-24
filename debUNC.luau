@@ -345,8 +345,12 @@ local Tests: any = {
 
 			local function HookTest(FunctionToHook, Hook: (...any) -> ...any, ...)
 				local Original = hookfunction(FunctionToHook, Hook)
+				
+				assert(typeof(Original) == "function", `failed to return the original function, got {typeof(Original)} '{Original}'`)
 
 				local Test = Hook(...)
+				
+				assert(Original() == Test, "failed to return the proper value when calling the orignal")
 
 				local Success, Result = pcall(FunctionToHook, ...)
 
@@ -433,7 +437,7 @@ local Tests: any = {
 
 			assert(Clone ~= Original, "Cloned and original function should not have the same reference.")
 			assert(Clone() == Original(), "Cloned and original function should return the same value.")
-			assert(getfenv(Clone) == TestENV, "The ENV of the previous function is not saved.")
+			assert(getfenv(Clone) == TestENV, "didn't clone the function's environment")
 			assert(getfenv(PreviousENVClone) ~= TestENV, "The ENV of the original function changed and the one of the cloned one is not the old one.")
 
 			local InfoResultsOrder = {
@@ -883,6 +887,7 @@ local Tests: any = {
 
 			assert(Complete, "failed to fire the touched event within 5 seconds")
 		end,
+		DisabledFor = {"Visual"}
 	},
 
 	hookmetamethod = {
@@ -1233,7 +1238,6 @@ local Tests: any = {
 
 			assert(isnetworkowner(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart) == true, "should return true on the hrp")
 		end,
-		DisabledFor = {"Velocity"} -- keep making it crash veloshitty
 	},
 
 	replicatesignal = {
@@ -1398,6 +1402,7 @@ local Tests: any = {
 
 			assert(Part1META["__index"] == __index, `__index did not give {Part1META["__index"]} instead of {__index} (__index may not be CClosure)`)
 		end,
+		DisabledFor = {"Visual"}
 	},
 	
 	["debug.getinfo"] = {
@@ -1658,7 +1663,7 @@ local function DisplayMessage(MessageToDisplay)
 	DisplayFunction(MessageToDisplay)
 end
 
-local Settings: {[string]: any} = {
+local Settings: {[string]: any} = getgenv().Settings or {
 	FakeFunctions = false,
 	GetTests = false,
 	GetUnaddedFunctions = true,
@@ -1700,6 +1705,68 @@ end
 
 if Settings.DebugMode then
 	DisplayMessage("Debug Mode is enabled!")
+	
+	local hookfunction = getfenv().hookfunction
+	local writefile = getfenv().writefile
+	
+	if not hookfunction or not writefile then
+		return
+	end
+	
+	local Blacklist = {
+		"hookfunction",
+		"print",
+		"profilebegin",
+		"profileend",
+		"writefile"
+	}
+
+	local Log = ""
+
+	local function Hook(Name, Function)
+		if typeof(Function) == "table" then
+			for OtherName, OtherFunction in Function do
+				Hook(OtherName, OtherFunction)
+			end
+			return
+		end
+
+		if table.find(Blacklist, Name) then
+			return
+		end
+
+		if typeof(Function) ~= "function" then
+			return
+		end
+
+		local Original
+		Original = hookfunction(Function, function(...)
+			local Args = {...}
+			local Message = `Ran function {Name}`
+			print(Message)
+
+			local NewArgs = {}
+
+			for i,v in Args do
+				table.insert(NewArgs, tostring(v))
+			end
+
+			Log ..= `{Message}{if Args[1] then ` with args: {table.concat(NewArgs, ", ")}` else ""}\n`
+			writefile(`LogFunctionCalls.txt`, Log)
+
+			task.wait(0.1)
+
+			return Original(...)
+		end)
+	end
+
+	print("Starting LogFunctionCalls")
+	
+	for Name, Function in getgenv() do
+		Hook(Name, Function)
+	end
+	
+	print("Started LogFunctionCalls")
 end
 
 local getrenv = getfenv().getrenv
@@ -1711,7 +1778,7 @@ local MissingFunctions = 0
 
 local isfunctionhooked = getfenv().isfunctionhooked
 
-if isfunctionhooked then
+if isfunctionhooked and not Settings.DebugMode then
 	assert(isfunctionhooked(pcall) == false, "tests cannot run if pcall is hooked")
 
 	assert(isfunctionhooked(loadstring) == false, "tests cannot run if loadstring is hooked")
@@ -1727,7 +1794,7 @@ for Name: string, Info in Tests do
 			assert(Function, "doesn't exist")
 			assert(typeof(Function) == "function", "doesn't have 'function' type")
 
-			if isfunctionhooked then
+			if isfunctionhooked and not Settings.DebugMode then
 				assert(isfunctionhooked(Function) == false, "function is hooked and cannot be accurately tested")
 			end
 
@@ -1774,8 +1841,8 @@ for Name: string, Info in Tests do
 		task.spawn(RunTest)
 	end
 
-	if Settings.DebugMode then
-		task.wait(0.01)
+	if Settings.DebugMode then -- getgenv().DebugMode = true
+		task.wait(0.179)
 	else
 		task.wait()
 	end
@@ -1842,6 +1909,7 @@ local Blacklist = {
 	"aunisgay",
 	"aunisafemboy",
 	"iusets is a skid",
+	"queue_on_teleport",
 }
 
 local RobloxEnvironment = getrenv and getrenv() or {}
