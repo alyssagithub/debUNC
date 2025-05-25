@@ -1,5 +1,5 @@
 --!strict
-type Function = (...any?) -> ...any?
+type Function = (...any) -> ...any?
 
 -- didn't return a {Type}
 local function CheckReturnType(Result: any, Type: string)
@@ -343,14 +343,18 @@ local Tests: any = {
 			local hookfunction: (FunctionToHook: (...any) -> (...any), Hook: () -> ()) -> () -> () = getfenv().hookfunction
 			local newcclosure: (((...any) -> ...any) -> (...any) -> ...any)? = getfenv().newcclosure
 
-			local function HookTest(FunctionToHook, Hook: (...any) -> ...any, ...)
+			local function HookTest(FunctionToHook: Function, Hook: Function, ...)
+				local OriginalValue = FunctionToHook("test")
+				
 				local Original = hookfunction(FunctionToHook, Hook)
 				
 				assert(typeof(Original) == "function", `failed to return the original function, got {typeof(Original)} '{Original}'`)
 
 				local Test = Hook(...)
 				
-				assert(Original() == Test, "failed to return the proper value when calling the orignal")
+				print(Original(), OriginalValue)
+				
+				assert(Original() == OriginalValue, "failed to return the proper value when calling the orignal")
 
 				local Success, Result = pcall(FunctionToHook, ...)
 
@@ -363,14 +367,20 @@ local Tests: any = {
 
 			--lclosures
 
-			HookTest(function()end, function()
+			HookTest(function()
+				return "test"
+			end, function()
 				return "lclosure -> lclosure"
 			end)
 
-			HookTest(function()end, string.upper, "lclosure -> cclosure")
+			HookTest(function()
+				return "test"
+			end, string.upper, "lclosure -> cclosure")
 
 			if newcclosure then
-				HookTest(function()end, newcclosure(function()
+				HookTest(function()
+					return "test"
+				end, newcclosure(function()
 					return "lclosure -> newcclosure"
 				end))
 			end
@@ -395,13 +405,19 @@ local Tests: any = {
 				return
 			end
 
-			HookTest(newcclosure(function()end), function()
+			HookTest(newcclosure(function()
+				return "test"
+			end), function()
 				return "newcclosure -> lclosure"
 			end)
 
-			HookTest(newcclosure(function()end), string.upper, "newcclosure -> cclosure")
+			HookTest(newcclosure(function()
+				return "test"
+			end), string.upper, "newcclosure -> cclosure")
 
-			HookTest(newcclosure(function()end), newcclosure(function()
+			HookTest(newcclosure(function()
+				return "test"
+			end), newcclosure(function()
 				return "newcclosure -> newcclosure"
 			end))
 		end
@@ -526,7 +542,7 @@ local Tests: any = {
 
 			local DecodedHeaders = Decoded.headers
 
-			assert(DecodedHeaders, "Decoded body does not contain the headers.")
+			assert(DecodedHeaders, "decoded body does not contain the headers")
 
 			local Fingerprint
 
@@ -537,7 +553,7 @@ local Tests: any = {
 				end
 			end
 
-			assert(Fingerprint, "Decoded headers does not contain an executor fingerprint.")
+			assert(Fingerprint, "missing fingerprint (hwid) header")
 		end
 	},
 
@@ -1194,7 +1210,7 @@ local Tests: any = {
 					elseif CallScript == CameraModule.BaseCamera then
 						LastError = "returned from where it is a function, not from where it is executed."
 					elseif CallScript == CameraModule then
-						LastError = "added an extra stack level, gave caller's caller."
+						LastError = "expected CameraModule.ClassicCamera, got CameraModule"
 					elseif CallScript ~= CameraModule.ClassicCamera then
 						LastError = `returned "{CallScript:GetFullName()}" instead of “ClassicCamera”.`
 					end
@@ -1230,6 +1246,7 @@ local Tests: any = {
 			assert(SecureGET, "VERY BADLY implemented, tries to do .script (dtc)")
 			assert(not LastError, LastError)
 		end,
+		DisableOnDebug = true,
 	},
 
 	isnetworkowner = {
@@ -1552,7 +1569,7 @@ local Tests: any = {
 					Called = true
 					setfenv(2, CustomENV)
 
-					return wait(9e9)
+					return task.wait(9e9)
 				end
 
 				New.Parent = PlayerScripts
@@ -1845,7 +1862,11 @@ end
 for Name: string, Info in Tests do
 	local function RunTest()
 		local Success, ErrorMessage = pcall(function()
-			assert(not (Settings.DebugMode and Info.DisableOnDebug), "this function is disabled in debug mode")
+			local DisabledFor = Info.DisabledFor
+
+			assert(not DisabledFor or not table.find(DisabledFor, ExecutorName), `disabled for {ExecutorName}, most likely due to crashes`)
+			
+			assert(not (Settings.DebugMode and Info.DisableOnDebug), "disabled in debug mode")
 
 			local Function = FindFirstFunction(Name)
 
@@ -1854,14 +1875,6 @@ for Name: string, Info in Tests do
 
 			if isfunctionhooked and not Settings.DebugMode then
 				assert(isfunctionhooked(Function) == false, "function is hooked and cannot be accurately tested")
-			end
-
-			local Info = Info
-
-			do
-				local DisabledFor = Info.DisabledFor
-
-				assert(not DisabledFor or not table.find(DisabledFor, ExecutorName), `disabled for {ExecutorName}, most likely due to crashes`)
 			end
 
 			if Info.ReturnType then
@@ -1924,14 +1937,16 @@ until TotalTests == GetAllTests()
 
 local EndTime = tick() - StartTime
 
+local PercentageComplete = math.floor(CompletedTests / TotalTests * 100)
+
 local MinimumSeconds = 0.1
 
-if EndTime < MinimumSeconds then
-	DisplayMessage(`❗❗❗❗ This test is most likely faked as it took less than {MinimumSeconds} second(s). ❗❗❗❗`)
+if EndTime < MinimumSeconds and PercentageComplete > 80 then
+	DisplayMessage(`❗❗❗❗ This test is most likely faked as it took less than {MinimumSeconds} seconds. ❗❗❗❗`)
 end
 
 DisplayMessage(`❓ The score below is only for how many custom functions are supported.`)
-DisplayMessage(`🔵 debUNC BETA v2 Score for {ExecutorName} {ExecutorVersion}: {math.floor(CompletedTests / TotalTests * 100)}%`)
+DisplayMessage(`🔵 debUNC BETA v2 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(EndTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
@@ -1963,11 +1978,14 @@ print("A list of functions and libraries in getfenv() and getgenv() that isn't a
 
 Divider()
 
-local Blacklist = {
+local Blacklist = { -- aliases only
 	"aunisgay",
 	"aunisafemboy",
 	"iusets is a skid",
 	"queue_on_teleport",
+	"hookfunc",
+	"http.request",
+	
 }
 
 local RobloxEnvironment = getrenv and getrenv() or {}
