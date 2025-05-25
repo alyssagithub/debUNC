@@ -1523,6 +1523,65 @@ local Tests: any = {
 			assert(not FinishTest, "table did not become readonly again.")
 		end,
 	},
+	
+	getsenv = {
+		Test = function() -- credit to dante
+			local getsenv: (Script: LocalScript) -> any = getfenv().getsenv
+			local require: (Module: ModuleScript) -> any = getfenv().require
+			local setfenv: (Level: (number | Function), Environment: any) -> Function = getfenv().setfenv
+
+			local PlayerScripts = game:GetService("Players").LocalPlayer.PlayerScripts
+			local CustomENV = {
+				debUNC = true
+			}
+
+			local function CreateNewModuleTest(SetParent: boolean)
+				local New = PlayerScripts.RbxCharacterSounds:Clone()
+
+				local AtomicBinding = New and New:FindFirstChildWhichIsA("ModuleScript")
+				assert(AtomicBinding, "Failed to locate 'AtomicBinding' ModuleScript in the cloned RbxCharacterSounds.")
+
+				local NewAtomicBinding = require(AtomicBinding)
+
+				local Called = false
+				NewAtomicBinding.new = function()
+					if SetParent then
+						New.Parent = nil
+					end
+
+					Called = true
+					setfenv(2, CustomENV)
+
+					return wait(9e9)
+				end
+
+				New.Parent = PlayerScripts
+
+				local StartTime = tick()
+				while not Called and tick() - StartTime < 2 do task.wait() end
+
+				if not Called then New:Destroy() end
+
+				return Called, New
+			end
+
+			local Called, NewSoundsScript = CreateNewModuleTest(false)
+			assert(Called, "Script took too long to respond.")
+
+			local ScriptENV = getsenv(NewSoundsScript)
+
+			assert(ScriptENV, "getsenv returned nil.")
+			assert(ScriptENV == CustomENV, `getsenv returned "{ScriptENV}" instead of expected "{CustomENV}".`)
+
+			local Called2, NewSoundsNilScript = CreateNewModuleTest(true)
+			assert(Called2, "Script took too long to respond when parent was nil.")
+
+			local ScriptENV2 = getsenv(NewSoundsScript)
+
+			assert(ScriptENV2, "getsenv returned nil when parent was nil.")
+			assert(ScriptENV2 == CustomENV, `getsenv returned "{ScriptENV2}" instead of expected "{CustomENV}" when parent was nil.`)
+		end,
+	},
 }
 
 local NoTests: {[string | number]: any} = {
@@ -1550,7 +1609,6 @@ local NoTests: {[string | number]: any} = {
 	"filtergc",
 	"runonthread",
 	"setrbxclipboard",
-	"getsenv",
 	"getmenv",
 	"setfflag",
 	"Drawing.new",
