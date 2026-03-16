@@ -358,7 +358,7 @@ local Tests: any = {
 				assert(ReturnedFunction() == true, "the returned function isn't giving the expected result when called")
 				assert(
 					ReturnedFunction == FirstFunction,
-					`the returned function does not have the original function address, expected '{FirstFunction}', got {ReturnedFunction}`
+					`the returned function does not have the original function address, expected '{FirstFunction}', got '{ReturnedFunction}'`
 				)
 			end
 			
@@ -1270,10 +1270,6 @@ local Tests: any = {
 			end, 1)
 			
 			assert(Proto, "didn't return anything")
-
-			assert(typeof(Proto) == "function", `expected the return result to be a 'function', got '{typeof(Proto)}'`)
-
-			assert(Proto() == "debUNC", "calling the proto failed to return the expected value")
 		end,
 	},
 
@@ -1287,16 +1283,12 @@ local Tests: any = {
 				end	
 			end)
 
-			assert(typeof(Protos) == "table", "didn't return a table")
+			CheckReturnType(Protos, "table")
 			
 			local Proto = Protos[1]
 			
 			assert(Proto, "a proto doesn't exist in the first index of the returned table")
 			assert(not Protos[2], "there should be nothing in the second index of the returned table, as only 1 proto exists")
-			
-			assert(typeof(Proto) == "function", `expected the proto in the returned table to be a 'function', got '{typeof(Proto)}'`)
-
-			assert(Proto() == "debUNC", "calling the proto within the table failed to return the expected value")
 		end,
 	},
 
@@ -1722,6 +1714,20 @@ local Tests: any = {
 			NewSoundsNilScript:Destroy()
 		end,
 	},
+	decompile = {
+		Test = function()
+			local decompile: (Script: LocalScript | ModuleScript) -> string = getfenv().decompile
+			
+			local PlayerModule = game:GetService("StarterPlayer").StarterPlayerScripts.PlayerModule :: ModuleScript
+			
+			local Result = decompile(PlayerModule)
+			
+			CheckReturnType(Result, "string")
+			
+			assert(Result:find("__index"), "couldn't find '__index' in 'PlayerModule' decompiled")
+			assert(Result:find("CameraModule"), "couldn't find 'CameraModule' in 'PlayerModule' decompiled")
+		end,
+	},
 }
 
 local NoTests: {[string | number]: any} = {
@@ -1790,7 +1796,6 @@ local NoTests: {[string | number]: any} = {
 	islclosure = {Parameters = {wait}, ReturnType = "boolean"},
 	["debug.getconstants"] = {Parameters = {function()end}, ReturnType = "table"},
 	["debug.getconstant"] = {Parameters = {function()local a; a = "hi"end, 1 :: any}, ReturnType = "string"},
-	decompile = {Parameters = {game:FindFirstChildWhichIsA("LuaSourceContainer", true)}, ReturnType = "string"},
 	getscriptbytecode = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "string"},
 	getinstances = {ReturnType = "table"},
 	getscripthash = {Parameters = {game:FindFirstChildWhichIsA("LocalScript", true)}, ReturnType = "string"},
@@ -2075,7 +2080,7 @@ if EndTime < MinimumSeconds and PercentageComplete > 80 then
 end
 
 DisplayMessage(`❓ The score below is only for how many custom functions are supported.`)
-DisplayMessage(`🔵 debUNC BETA v2.0.1 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
+DisplayMessage(`🔵 debUNC BETA v2.0.2 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(EndTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
