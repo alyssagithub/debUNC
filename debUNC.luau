@@ -1,4 +1,6 @@
 --!strict
+local Version = "v2.0.3"
+
 type Function = (...any) -> ...any?
 
 -- didn't return a {Type}
@@ -1439,45 +1441,6 @@ local Tests: any = {
 		DisableOnDebug = true,
 	},
 
-	["debug.getstack"] = {
-		Test = function() -- credit to dante
-			local debug = getfenv().debug
-
-			local GlobalRandom = math.random()
-			local RandomGlobal
-
-			local DumpStack
-			DumpStack = function()
-				local Success, Result = pcall(debug.getstack, 3, 0)
-				assert(not Success, `Expected an error, but got: {Result} (argument 0 shouldn't exist)`)
-
-				local RandomNumber = debug.getstack(2, 1)
-
-				assert(type(RandomNumber) == "number", "did not return a number")
-				assert(debug.getstack(2)[1] == RandomNumber, "did not return consistent values")
-				assert(RandomNumber - GlobalRandom == 5, "returned an unexpected number")
-
-				local NilLocal = table.pack(debug.getstack(2, 2))
-				assert(NilLocal[1] == nil, `returned value at index 2: {NilLocal[1]} (expected nil)`)
-				assert(NilLocal.n == 1, `returned {NilLocal.n} values at index 2 (expected 1)`)
-
-				local ActualFunc = debug.getstack(2, 3)
-				assert(ActualFunc ~= "upvalue", "Unexpected upvalue detected (RandomGlobal treated as local)")
-				assert(ActualFunc == DumpStack, `Expected DumpStack, but got: {ActualFunc}`)
-
-				local Success2, Result2 = pcall(debug.getstack, 3, 4) -- pcall adds one stack level
-				assert(not Success2, `Expected an error, but got: {Result2} (stack level 4 shouldn't exist)`)
-			end
-
-			(function()
-				local RandomNumber = GlobalRandom + 5
-				local Hidden = nil
-				RandomGlobal = "upvalue"
-				DumpStack()
-			end)()
-		end,
-	},
-
 	["game.HttpGet"] = {
 		Test = function()
 			local Success, Result = pcall(game.HttpGet, game, "https://awqbcduwendewbnzd.aaaaaa")
@@ -1714,6 +1677,7 @@ local Tests: any = {
 			NewSoundsNilScript:Destroy()
 		end,
 	},
+	
 	decompile = {
 		Test = function()
 			local decompile: (Script: LocalScript | ModuleScript) -> string = getfenv().decompile
@@ -1767,6 +1731,7 @@ local NoTests: {[string | number]: any} = {
 	"crypt.generatekey",
 	"debug.getupvalues",
 	"debug.getupvalue",
+	"debug.getstack",
 	"debug.setstack",
 	"debug.setupvalue",
 	"debug.setconstant",
@@ -2080,7 +2045,7 @@ if EndTime < MinimumSeconds and PercentageComplete > 80 then
 end
 
 DisplayMessage(`❓ The score below is only for how many custom functions are supported.`)
-DisplayMessage(`🔵 debUNC BETA v2.0.2 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
+DisplayMessage(`🔵 debUNC BETA {Version} Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(EndTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
