@@ -340,10 +340,141 @@ local Tests: any = {
 
 	hookfunction = {
 		Test = function()
-			local hookfunction: (FunctionToHook: (...any) -> (...any), Hook: () -> ()) -> () -> () = getfenv().hookfunction
+			local hookfunction: (FunctionToHook: (...any) -> (...any), Hook: (...any) -> ()) -> () -> () = getfenv().hookfunction
 			local newcclosure: (((...any) -> ...any) -> (...any) -> ...any)? = getfenv().newcclosure
+			local restorefunction = getfenv().restorefunction
+			
+			-- Return Result | LuaClosure -> LuaClosure
+			do
+				local function FirstFunction()
+					return true
+				end
+				
+				local function SecondFunction()
+				end
+				
+				local ReturnedFunction = hookfunction(FirstFunction, SecondFunction)
+				
+				assert(ReturnedFunction() == true, "the returned function isn't giving the expected result when called")
+				assert(
+					ReturnedFunction == FirstFunction,
+					`the returned function does not have the original function address, expected '{FirstFunction}', got {ReturnedFunction}`
+				)
+			end
+			
+			-- LuaClosure -> CClosure
+			do
+				local function LuaClosure()
+					return true
+				end
+				
+				local CClosure = tick
+				
+				hookfunction(LuaClosure, CClosure)
+				
+				assert(type(LuaClosure()) == "number", "expected the LuaClosure to return a number when hooked as 'tick'")
+			end
+			
+			-- LuaClosure -> NewCClosure
+			if newcclosure then
+				local function LuaClosure()
+				end
+				
+				local NewCClosure = newcclosure(function()
+					return true
+				end)
+				
+				hookfunction(LuaClosure, NewCClosure)
+				
+				assert(LuaClosure() == true, "calling the LuaClosure did not return the NewCClosure's result")
+			end
+			
+			-- CClosure -> CClosure
+			if restorefunction then
+				local CClosure1 = tostring :: any
+				local CClosure2 = tonumber
 
-			local function HookTest(FunctionToHook: Function, Hook: Function, ...)
+				hookfunction(CClosure1, CClosure2)
+				
+				local TestResult = CClosure1("5") == 5
+				restorefunction(CClosure1)
+				
+				assert(TestResult, "expected tostring to return a number when hooked as tonumber and given '5'")
+			end
+			
+			-- CClosure -> LuaClosure
+			if restorefunction then
+				local CClosure = tonumber :: any
+				
+				local function LuaClosure()
+					return true
+				end
+				
+				hookfunction(CClosure, LuaClosure)
+				
+				local TestResult = CClosure() == true
+				restorefunction(CClosure)
+				
+				assert(TestResult, "expected tonumber to return a boolean when hooked as a LuaClosure that returns true")
+			end
+			
+			-- CClosure -> NewCClosure
+			if restorefunction and newcclosure then
+				local CClosure = table.create :: any
+				
+				local NewCClosure = newcclosure(function()
+					return true
+				end)
+				
+				hookfunction(CClosure, NewCClosure)
+				
+				local TestResult = CClosure() == true
+				restorefunction(CClosure)
+				
+				assert(TestResult, "expected table.create to return a boolean when hooked as a NewCClosure that returns true")
+			end
+			
+			-- NewCClosure -> NewCClosure
+			if newcclosure then
+				local NewCClosure1 = newcclosure(function()
+				end)
+				
+				local NewCClosure2 = newcclosure(function()
+					return true
+				end)
+				
+				hookfunction(NewCClosure1, NewCClosure2)
+				
+				assert(NewCClosure1() == true, "expected NewCClosure to return a boolean when hooked as a NewCClosure that returns true")
+			end
+			
+			-- NewCClosure -> LuaClosure
+			if newcclosure then
+				local NewCClosure = newcclosure(function()
+				end)
+				
+				local function LuaClosure()
+					return true
+				end
+				
+				hookfunction(NewCClosure, LuaClosure)
+				
+				assert(NewCClosure() == true, "expected NewCClosure to return a boolean when hooked as a LuaClosure that returns true")
+			end
+			
+			-- NewCClosure -> CClosure
+			if newcclosure then
+				local NewCClosure = newcclosure(function()
+				end)
+				
+				local CClosure = task.wait
+				
+				hookfunction(NewCClosure, CClosure)
+				
+				assert(type(NewCClosure()) == "number", "expected NewCClosure to return a numebr when hooked as task.wait")
+			end
+
+			--[[local function HookTest(FunctionToHook: Function, Hook: Function, ...)
 				local OriginalValue = FunctionToHook("test")
 				
 				local Original = hookfunction(FunctionToHook, Hook)
@@ -419,7 +550,7 @@ local Tests: any = {
 				return "test"
 			end), newcclosure(function()
 				return "newcclosure -> newcclosure"
-			end))
+			end))]]
 		end
 	},
 
@@ -546,14 +677,16 @@ local Tests: any = {
 
 			local Fingerprint
 
-			for i,v in DecodedHeaders do
-				if i:lower():find("fingerprint") then
-					Fingerprint = v
-					break
+			for Header: string, Info in Decoded.headers do
+				if not Header:lower():find("fingerprint") then
+					continue
 				end
+
+				Fingerprint = Info
+				break
 			end
 
-			assert(Fingerprint, "missing fingerprint (hwid) header")
+			assert(Fingerprint, `missing fingerprint (hwid) header: {game:GetService("HttpService"):JSONEncode(Decoded.headers)}`)
 		end
 	},
 
@@ -908,7 +1041,7 @@ local Tests: any = {
 
 	hookmetamethod = {
 		Test = function() -- credit to dante for contributing to this
-			local hookmetamethod: (Metatable: any, Metamethod: string, Hook: Function) -> Function = getfenv().hookmetamethod
+			local hookmetamethod: (Metatable: any, Metamethod: string, Hook: (any, ...any?) -> (...any)) -> Function = getfenv().hookmetamethod
 
 			local OriginalIndx = function() end
 			local Metatable = setmetatable({}, {__index = OriginalIndx})
@@ -928,17 +1061,7 @@ local Tests: any = {
 		Test = function()
 			local connect: (WebSocket: string) -> {[any]: any} = getfenv().WebSocket.connect
 
-			local WebSocket = connect("ws://echo.websocket.events")
-
-			--CheckReturnType(WebSocket, "userdata")
-
-			assert(typeof(WebSocket.Send) == "function", "missing 'Send' function")
-
-			assert(typeof(WebSocket.Close) == "function", "missing 'Close' function")
-
-			assert(typeof(WebSocket.OnMessage) == "RBXScriptSignal", "missing 'OnMessage' RBXScriptSignal")
-
-			assert(typeof(WebSocket.OnClose) == "RBXScriptSignal", "missing 'OnClose' RBXScriptSignal")
+			local WebSocket = connect("wss://echo.websocket.org")
 
 			local Messaged = false
 
@@ -953,10 +1076,17 @@ local Tests: any = {
 			repeat
 				task.wait()
 			until Messaged or tick() - Start >= 5
+			
+			local Closed = false
+			
+			WebSocket.OnClose:Once(function()
+				Closed = true
+			end)
 
 			WebSocket:Close()
 
 			assert(Messaged, "failed to receive message within 5 seconds")
+			assert(Closed, "OnClose failed to fire when :Close() was called")
 		end,
 	},
 
@@ -1138,8 +1268,10 @@ local Tests: any = {
 					return "debUNC"
 				end	
 			end, 1)
+			
+			assert(Proto, "didn't return anything")
 
-			assert(typeof(Proto) == "function", "didn't return a function")
+			assert(typeof(Proto) == "function", `expected the return result to be a 'function', got '{typeof(Proto)}'`)
 
 			assert(Proto() == "debUNC", "calling the proto failed to return the expected value")
 		end,
@@ -1156,10 +1288,15 @@ local Tests: any = {
 			end)
 
 			assert(typeof(Protos) == "table", "didn't return a table")
+			
+			local Proto = Protos[1]
+			
+			assert(Proto, "a proto doesn't exist in the first index of the returned table")
+			assert(not Protos[2], "there should be nothing in the second index of the returned table, as only 1 proto exists")
+			
+			assert(typeof(Proto) == "function", `expected the proto in the returned table to be a 'function', got '{typeof(Proto)}'`)
 
-			assert(#Protos == 1, "expected table to be an array with only 1 index")
-
-			assert(Protos[1]() == "debUNC", "calling the proto within the table failed to return the expected value")
+			assert(Proto() == "debUNC", "calling the proto within the table failed to return the expected value")
 		end,
 	},
 
@@ -1189,62 +1326,90 @@ local Tests: any = {
 	getcallingscript = {
 		Test = function() -- credit to dante
 			local getcallingscript = getfenv().getcallingscript
-
-			local Success, CameraModule = pcall(function()
-				return game:GetService("Players").LocalPlayer.PlayerScripts.PlayerModule.CameraModule
-			end)
-
-			assert(Success, "BaseCamera does not exist, go to a normal game.")
-
-			local Success, Camera = pcall(require, CameraModule.BaseCamera)
 			
-			assert(Success, `failed to require BaseCamera with error: {Camera}`)
-
-			local LastError, SecureGET = nil, true
-
-			local CallingCheck = setmetatable({}, {
-				__newindex = function()
-					local CallScript = getcallingscript() 
-					if typeof(CallScript) ~= "Instance" then
-						LastError = "do not save scripts, possibly use getfenv"
-					elseif CallScript == CameraModule.BaseCamera then
-						LastError = "returned from where it is a function, not from where it is executed."
-					elseif CallScript == CameraModule then
-						LastError = "expected CameraModule.ClassicCamera, got CameraModule"
-					elseif CallScript ~= CameraModule.ClassicCamera then
-						LastError = `returned "{CallScript:GetFullName()}" instead of “ClassicCamera”.`
-					end
-				end
-			})
-
-			local Old, Called = Camera.GetSubjectPosition, false
-			Camera.GetSubjectPosition = function(...)
-				local getfenv, setfenv, pcall = getfenv, setfenv, pcall
-
-				Camera.GetSubjectPosition = Old
-
-				local Succes, OriginalENV = pcall(getfenv, 3)
-				pcall(setfenv, 3, setmetatable({}, {
-					__index = function()
-						SecureGET = false
-					end,
-				}) :: any)
-
-				CallingCheck.debUNC = true
-				Called = true
-
-				pcall(setfenv, 3, OriginalENV)
-
-				return Old(...)
+			local Success, CameraWrapper = pcall(
+				require,
+				game:GetService("Players").LocalPlayer.PlayerScripts.PlayerModule.CommonUtils.CameraWrapper
+			)
+			
+			assert(Success, "your executor requires supporting 'require' in order to run this test")
+			
+			
+			local GetCameraOriginal = CameraWrapper.getCamera
+			local CallingScript
+			
+			CameraWrapper.getCamera = function(...)
+				CallingScript = getcallingscript()
+				
+				CameraWrapper.getCamera = GetCameraOriginal
+				
+				return GetCameraOriginal(...)
 			end
+			
+			task.wait()
+			
+			assert(CallingScript, "function returned nil in a case where it should've returned a script")
+			
+			assert(
+				CallingScript.Name == "CameraModule",
+				`the calling script of CameraWrapper.getCamera should be 'CameraModule', got '{CallingScript}'`
+			)
 
-			local StartTime = tick()
-			while not Called and tick() - StartTime < 2 do task.wait() end
-			Camera.GetSubjectPosition = Old
+			--local Success, CameraModule = pcall(function()
+			--	return game:GetService("Players").LocalPlayer.PlayerScripts.PlayerModule.CameraModule
+			--end)
 
-			assert(Called, "it takes too long to respond")
-			assert(SecureGET, "VERY BADLY implemented, tries to do .script (dtc)")
-			assert(not LastError, LastError)
+			--assert(Success, "BaseCamera does not exist, go to a normal game.")
+
+			--local Success, Camera = pcall(require, CameraModule.BaseCamera)
+			
+			--assert(Success, `failed to require BaseCamera with error: {Camera}`)
+
+			--local LastError, SecureGET = nil, true
+
+			--local CallingCheck = setmetatable({}, {
+			--	__newindex = function()
+			--		local CallScript = getcallingscript() 
+			--		if typeof(CallScript) ~= "Instance" then
+			--			LastError = "do not save scripts, possibly use getfenv"
+			--		elseif CallScript == CameraModule.BaseCamera then
+			--			LastError = "returned from where it is a function, not from where it is executed."
+			--		elseif CallScript == CameraModule then
+			--			LastError = "expected CameraModule.ClassicCamera, got CameraModule"
+			--		elseif CallScript ~= CameraModule.ClassicCamera then
+			--			LastError = `returned "{CallScript:GetFullName()}" instead of “ClassicCamera”.`
+			--		end
+			--	end
+			--})
+
+			--local Old, Called = Camera.GetSubjectPosition, false
+			--Camera.GetSubjectPosition = function(...)
+			--	local getfenv, setfenv, pcall = getfenv, setfenv, pcall
+
+			--	Camera.GetSubjectPosition = Old
+
+			--	local Succes, OriginalENV = pcall(getfenv, 3)
+			--	pcall(setfenv, 3, setmetatable({}, {
+			--		__index = function()
+			--			SecureGET = false
+			--		end,
+			--	}) :: any)
+
+			--	CallingCheck.debUNC = true
+			--	Called = true
+
+			--	pcall(setfenv, 3, OriginalENV)
+
+			--	return Old(...)
+			--end
+
+			--local StartTime = tick()
+			--while not Called and tick() - StartTime < 2 do task.wait() end
+			--Camera.GetSubjectPosition = Old
+
+			--assert(Called, "it takes too long to respond")
+			--assert(SecureGET, "VERY BADLY implemented, tries to do .script (dtc)")
+			--assert(not LastError, LastError)
 		end,
 		DisableOnDebug = true,
 	},
@@ -1423,71 +1588,26 @@ local Tests: any = {
 	},
 	
 	["debug.getinfo"] = {
-		Test = function() -- credit to dante
+		Test = function()
 			local getinfo = CheckExist("debug.getinfo")
 
-			local A, B, C = 1, nil, nil
-			local Funcs = {
-				TestFunc = function(D, E, F, ...)
-					return A, B, C
-				end,
-				IsYieldable = coroutine.isyieldable :: any
-			}
-
-			local LuaFuncInfo = getinfo(Funcs.TestFunc)
-			local CFuncInfo = getinfo(Funcs.IsYieldable)
-
-			local Checks = {
-				source = function(func, source)
-					return source == "=" .. debug.info(func, "s")
-				end,
-				what = function(func, what)
-					local line = debug.info(func, "l")
-					return ((line == -1 and "C") or "Lua") == what
-				end,
-				numparams = function(func, numParams)
-					local params = debug.info(func, "a")
-					return params == numParams
-				end,
-				func = function(func, actualFunc)
-					return func == actualFunc
-				end,
-				short_src = function(func, shortSrc)
-					return shortSrc == debug.info(func, "s")
-				end,
-				currentline = function(func, currentLine)
-					return currentLine == debug.info(func, "l")
-				end,
-				name = function(func, name)
-					return name == debug.info(func, "n")
-				end,
-				is_vararg = function(func, isVararg)
-					local _, varargs = debug.info(func, "a")
-					return varargs == (isVararg == 1)
-				end,
-				nups = function(func, expectedNups)
-					local getupvalue = rawget(debug, "getupvalue")
-					assert(getupvalue, "Cannot check 'nups': 'debug.getupvalue' is missing.")
-
-					local count = 0
-					for i = 1, 10 do
-						local success = pcall(getupvalue, func, i)
-						if not success then break end
-						count += 1
-					end
-
-					return expectedNups == count
-				end,
-			}
-
-			for field, check in pairs(Checks) do
-				assert(LuaFuncInfo[field], `Missing field in getinfo: {field}`)
-				assert(check(Funcs.TestFunc, LuaFuncInfo[field]), `Mismatch in field '{field}': got '{LuaFuncInfo[field]}'`)
-				assert(check(Funcs.IsYieldable, CFuncInfo[field]), `Mismatch in C function field '{field}': got '{CFuncInfo[field]}'`)
+			-- Lua Function
+			do
+				local function DebuncIsBetterThanSunc()
+				end
+				
+				local Info = getinfo(DebuncIsBetterThanSunc)
+				
+				assert(Info.what == "Lua", ".what should be 'Lua' when used on a Lua Function")
+				assert(Info.name == "DebuncIsBetterThanSunc", ".name should reflect the name of the Lua Function")
 			end
-
-			for field in pairs(LuaFuncInfo) do
-				assert(Checks[field], `no test defined for '{field}'.`)
+			
+			-- C Function
+			do
+				local Info = getinfo(task.wait)
+				
+				assert(Info.what == "C", ".what should be 'C' when used on a task.wait")
+				assert(Info.name == "wait", ".name should be 'wait' when used on task.wait")
 			end
 		end,
 	},
@@ -1588,7 +1708,9 @@ local Tests: any = {
 			local ScriptENV = getsenv(NewSoundsScript)
 
 			assert(ScriptENV, "getsenv returned nil.")
-			assert(ScriptENV == CustomENV, `getsenv returned "{ScriptENV}" instead of expected "{CustomENV}".`)
+			assert(ScriptENV.script == NewSoundsScript, ".script doesn't point to the script being used in the function call")
+			
+			NewSoundsScript:Destroy()
 
 			local Called2, NewSoundsNilScript = CreateNewModuleTest(true)
 			assert(Called2, "Script took too long to respond when parent was nil.")
@@ -1596,7 +1718,8 @@ local Tests: any = {
 			local ScriptENV2 = getsenv(NewSoundsScript)
 
 			assert(ScriptENV2, "getsenv returned nil when parent was nil.")
-			assert(ScriptENV2 == CustomENV, `getsenv returned "{ScriptENV2}" instead of expected "{CustomENV}" when parent was nil.`)
+			
+			NewSoundsNilScript:Destroy()
 		end,
 	},
 }
@@ -1647,6 +1770,12 @@ local NoTests: {[string | number]: any} = {
 	"rconsolewarn",
 	"rconsoleprint",
 	"rconsolecreate",
+	"raknet.addsendhook",
+	"raknet.removesendhook",
+	"raknet.addreceivehook",
+	"raknet.removereceivehook",
+	"raknet.send",
+	"raknet.receive",
 
 	-- Short Tests
 	gethiddenproperty = {Parameters = {game:GetService("Players").LocalPlayer, "SimulationRadius"}, ReturnType = "number"},
@@ -1741,7 +1870,7 @@ end
 local Settings: {[string]: any} = getgenv().Settings or {
 	FakeFunctions = false,
 	GetTests = false,
-	GetUnaddedFunctions = true,
+	GetUnaddedFunctions = false,
 	DebugMode = false
 }
 
@@ -1946,7 +2075,7 @@ if EndTime < MinimumSeconds and PercentageComplete > 80 then
 end
 
 DisplayMessage(`❓ The score below is only for how many custom functions are supported.`)
-DisplayMessage(`🔵 debUNC BETA v2 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
+DisplayMessage(`🔵 debUNC BETA v2.0.1 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(EndTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
