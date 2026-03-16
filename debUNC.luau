@@ -1075,6 +1075,8 @@ local Tests: any = {
 				task.wait()
 			until Messaged or tick() - Start >= 5
 			
+			assert(Messaged, "failed to receive message within 5 seconds")
+			
 			local Closed = false
 			
 			WebSocket.OnClose:Once(function()
@@ -1083,7 +1085,6 @@ local Tests: any = {
 
 			WebSocket:Close()
 
-			assert(Messaged, "failed to receive message within 5 seconds")
 			assert(Closed, "OnClose failed to fire when :Close() was called")
 		end,
 	},
@@ -1123,14 +1124,23 @@ local Tests: any = {
 	},
 
 	cloneref = {
-		Test = function() -- skidded from unc
-			local cloneref = getfenv().cloneref
-
-			local part = Instance.new("Part")
-			local clone = cloneref(part)
-			assert(part ~= clone, "Clone should not be equal to original")
-			clone.Name = "Test"
-			assert(part.Name == "Test", "Clone should have updated the original")
+		Test = function()
+			local cloneref: (Object: Instance) -> Instance = getfenv().cloneref
+			
+			local Part = Instance.new("Part")
+			
+			local ClonedReference = cloneref(Part) :: Part
+			
+			assert(ClonedReference ~= Part, "the cloned reference shouldn't be the same as the original reference")
+			
+			local NewPosition = Vector3.new(69, 67, 420)
+			
+			Part.Position = NewPosition
+			
+			assert(
+				ClonedReference:GetPivot().Position == NewPosition,
+				"setting the Position property of the original reference does not update the cloned reference"
+			)
 		end,
 	},
 
