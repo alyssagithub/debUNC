@@ -1,5 +1,5 @@
 --!strict
-local Version = "v2.0.3"
+local Version = "v2.0.4"
 
 type Function = (...any) -> ...any?
 
@@ -796,21 +796,17 @@ local Tests: any = {
 		Test = function()
 			local getloadedmodules: () -> {ModuleScript} = getfenv().getloadedmodules
 
-			local Module = game:FindFirstChildWhichIsA("ModuleScript", true)
-
-			assert(Module, FailedFind(`ModuleScript '{Module}'`))
+			local PlayerModule = game:GetService("StarterPlayer").StarterPlayerScripts.PlayerModule
 
 			local LoadedModules = getloadedmodules()
-
-			local require: any = require
-
-			if not table.find(LoadedModules, Module) then
-				require(Module)
-
-				LoadedModules = getloadedmodules()
-			end
-
-			assert(table.find(LoadedModules, Module), `failed to find ModuleScript '{Module}' in table`)
+			
+			CheckReturnType(LoadedModules, "table")
+			
+			assert(not table.find(LoadedModules, PlayerModule), "StarterPlayerScripts.PlayerModule should not be in the returned table")
+			
+			local PlayerModule = game:GetService("Players").LocalPlayer.PlayerScripts.PlayerModule
+			
+			assert(table.find(LoadedModules, PlayerModule), "could not find 'PlayerScripts.PlayerModule' in the returned table")
 		end,
 		ReturnType = "table"
 	},
