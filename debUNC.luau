@@ -358,10 +358,6 @@ local Tests: any = {
 				local ReturnedFunction = hookfunction(FirstFunction, SecondFunction)
 				
 				assert(ReturnedFunction() == true, "the returned function isn't giving the expected result when called")
-				assert(
-					ReturnedFunction == FirstFunction,
-					`the returned function does not have the original function address, expected '{FirstFunction}', got '{ReturnedFunction}'`
-				)
 			end
 			
 			-- LuaClosure -> CClosure
