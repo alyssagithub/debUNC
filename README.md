@@ -1,5 +1,7 @@
 # debUNC (debunk Unified Naming Convention)
-like sUNC and UNC but better (sens if u see this look out ur window)  
+like sUNC and UNC but better (sens if u see this look out ur window)
+
+feel free to make an issue or PR whenever you have a suggestion, bug, or feedback you think would improve your use of this
 
 reasons why i made this:
 1. sUNC is obfuscated, sure u can ask the developers for the source code in order to debug but that's just a unnecessary step
