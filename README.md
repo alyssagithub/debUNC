@@ -26,13 +26,13 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 |---|---|:---:|:---:|:---:|:---:|:---:|:---:|
 | Lucid | 1.0.3-build20 | **96%** | 9.1s | 206 | 1 | 0 | 6 |
 | Synapse Z | v1.0.3.9 | **83%** | 12.15s | 176 | 13 | 1 | 23 |
-| Bunni | v2.0.1.R7 | **78%** | 26.22s | 166 | 17 | 1 | 29 |
+| Bunni | v2.0.1.R7 | **78%** | 7.95s | 167 | 16 | 1 | 29 |
 
 <details>
 <summary><b>Lucid details</b></summary>
 
 **🔴 Failed**
-- `getactors`: returns threads instead of Actor instances
+- `getactors`: should return Actor instances, but got a thread (threads are what getactorthreads is for)
 
 **🟡 Missing**
 - `getclipboard`
@@ -48,22 +48,22 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 <summary><b>Synapse Z details</b></summary>
 
 **🔴 Failed**
-- `createcommchannel`: the id is a string instead of a number
-- `crypt.encrypt`: rejects keys from `crypt.generatekey`
-- `crypt.hash`: wrong SHA-256 result
-- `dofile`: returns the file name first
-- `Drawing.new`: a Text object's `Font` reads back as an object instead of a number
-- `getcommchannel`: the id is a string instead of a number, and it doesn't return the same channel
-- `getproperties`: returns property names without their values
-- `getscripthash`: the hash is 64 characters instead of a 96 character SHA-384
-- `getsenv`: returns nil for a running script whose parent was set to nil
-- `hooksignal`: returning false from the hook doesn't stop the connection from firing
-- `mousemoveabs`: the mouse didn't reach the target
-- `mousescroll`: needs a second argument
+- `createcommchannel`: expected a number id, got a string
+- `crypt.encrypt`: invalid argument #2 to 'encrypt' (invalid key size)
+- `crypt.hash`: the sha256 hash of 'abc' was wrong, got 89911f71a4508762a5791590153c68a9bbee326969d37b603697a692b3fdf553
+- `dofile`: expected the value the file returned to be 0.08059208071228102, got File_0.7101256742487573.lua
+- `Drawing.new`: expected a Text object's Font after setting it to 3 to be 3, got DrawFont: 0xbf5fb84c3f8fd3b9
+- `getcommchannel`: expected a number id, got a string
+- `getproperties`: expected the Size in the returned table to be 8, 2, 5, got nil
+- `getscripthash`: should be a 96 character sha384 hash, got 64 characters
+- `getsenv`: getsenv returned nil when the parent was nil
+- `hooksignal`: returning false from the hook didn't stop the connection from firing
+- `mousemoveabs`: the mouse didn't move to 397, 275.5
+- `mousescroll`: missing argument #2 to 'mousescroll' (number expected)
 - `raknet.receive`: the receive hook didn't see the packet
 
 **🟠 Skipped**
-- `crypt.decrypt`: needs `crypt.encrypt`
+- `crypt.decrypt`: couldn't be tested because crypt.encrypt failed
 
 **🟡 Missing**
 - `appendfileasync`
@@ -96,26 +96,25 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 <summary><b>Bunni details</b></summary>
 
 **🔴 Failed**
-- `cansignalreplicate`: returns false for `Player.Kill`
-- `decompile`: its server returned HTTP 522
-- `dofile`: runs the file but returns nothing
-- `game.HttpGet`: returns the failure message as if it were the page
-- `getactorthreads`: returns no threads
-- `getfpscap`: always returns 0
-- `getmenv`: returns a different module's environment
-- `getsignalarguments`: returns 125 entries for `Touched`
-- `getsignalargumentsinfo`: returns 125 entries for `Touched`
-- `hooksignal`: returning false from the hook doesn't stop the connection from firing
-- `keyclick`: the key press isn't detected
-- `keypress`: the key press isn't detected
-- `keyrelease`: the key press isn't detected
-- `mousemoveabs`: the mouse went to 265, 242 instead of 300, 300
-- `raknet.send`: only accepts strings, not buffers
-- `replicatesignal`: doesn't error on a signal that can't be replicated
-- `saveinstance`: returns true instead of a file name, and only saves a small stub
+- `cansignalreplicate`: should return true for Player.Kill
+- `dofile`: expected the value the file returned to be 0.5055002156012108, got nil
+- `game.HttpGet`: httpgetting a website that doesn't exist should return an error, nil, or an empty string
+- `getactorthreads`: expected at least one actor thread
+- `getfpscap`: expected the fps cap to be 10, got 0
+- `getmenv`: .script doesn't point to the module
+- `getsignalarguments`: expected the number of arguments Touched has to be 1, got 125
+- `getsignalargumentsinfo`: expected the name of Touched's argument to be otherPart, got Instance
+- `hooksignal`: returning false from the hook didn't stop the connection from firing
+- `keyclick`: the key press wasn't detected
+- `keypress`: the input wasn't detected
+- `keyrelease`: the input wasn't detected
+- `mousemoveabs`: the mouse went to 322, 273 instead of 376, 311.5
+- `raknet.send`: invalid argument #1 to 'send' (string expected, got buffer)
+- `replicatesignal`: should error on a signal that can't be replicated
+- `saveinstance`: didn't return a string
 
 **🟠 Skipped**
-- `restoresignal`: needs `hooksignal`
+- `restoresignal`: couldn't be tested because hooksignal failed
 
 **🟡 Missing**
 - `appendfileasync`
