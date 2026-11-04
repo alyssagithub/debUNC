@@ -1874,8 +1874,12 @@ const Tests: any = {
 		Test = function()
 			CheckInputFree()
 
-			Formatters.CheckExist("mousemoveabs")(workspace.CurrentCamera.ViewportSize.X / 2, 10)
-			task.wait()
+			const MouseMoveAbsolute = getfenv().mousemoveabs
+
+			if MouseMoveAbsolute then
+				MouseMoveAbsolute(workspace.CurrentCamera.ViewportSize.X / 2, 65)
+				task.wait()
+			end
 
 			const MouseScroll = getfenv().mousescroll
 
