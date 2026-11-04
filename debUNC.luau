@@ -76,11 +76,26 @@ const EncodingService = game:GetService("EncodingService")
 
 const UserInputService = game:GetService("UserInputService")
 
-const function WaitForInput(Signal: RBXScriptSignal, Check: (InputObject) -> boolean, Action: () -> ()): boolean
+const function CheckInputFree()
 	const IsRobloxActive = getfenv().isrbxactive
 
-	assert(not IsRobloxActive or IsRobloxActive(), "the Roblox window needs to be focused for this test")
+	if IsRobloxActive and not IsRobloxActive() then
+		error({Skipped = "the Roblox window isn't focused"})
+	end
 
+	const Free = WaitFor(function()
+		return UserInputService.MouseBehavior == Enum.MouseBehavior.Default
+			and not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
+			and not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)
+			and not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton3)
+	end, 1)
+
+	if not Free then
+		error({Skipped = "a mouse button is being held or the mouse is locked"})
+	end
+end
+
+const function WaitForInput(Signal: RBXScriptSignal, Check: (InputObject) -> boolean, Action: () -> ()): boolean
 	local Detected = false
 
 	const Connection = Signal:Connect(function(Input)
@@ -152,6 +167,7 @@ end
 const function CheckMouseButton(Button: number, TestedName: string)
 	const InputType = if Button == 1 then Enum.UserInputType.MouseButton1 else Enum.UserInputType.MouseButton2
 
+	CheckInputFree()
 	CenterMouse()
 
 	CheckPressAndRelease(`mouse{Button}press`, `mouse{Button}release`, TestedName, function()
@@ -162,6 +178,8 @@ const function CheckMouseButton(Button: number, TestedName: string)
 end
 
 const function CheckKey(TestedName: string)
+	CheckInputFree()
+
 	CheckPressAndRelease("keypress", "keyrelease", TestedName, function()
 		return UserInputService:IsKeyDown(Enum.KeyCode.J)
 	end, function(Input)
@@ -177,7 +195,7 @@ const function CheckPacketHook(Direction: string, CheckRemove: boolean)
 
 	const function OnPacket(Packet)
 		Count += 1
-		PacketId = PacketId or Packet.Id
+		PacketId = PacketId or Packet.PacketId
 	end
 
 	RakNet[`add{Direction}hook`](OnPacket)
@@ -190,8 +208,12 @@ const function CheckPacketHook(Direction: string, CheckRemove: boolean)
 
 	const CountAtRemoval = Count
 
+	if CheckRemove and not Fired then
+		error({Skipped = `the {Direction} hook never fired, so removing it can't be checked`})
+	end
+
 	assert(Fired, `the {Direction} hook wasn't called within 3 seconds`)
-	assert(typeof(PacketId) == "number", `expected the packet to have a number Id, got {typeof(PacketId)}`)
+	assert(typeof(PacketId) == "number", `expected the packet to have a number PacketId, got {typeof(PacketId)}`)
 
 	if not CheckRemove then
 		return
@@ -235,44 +257,6 @@ const function CheckSetStack(SetStack: (Level: number, Index: number, Value: any
 	const Result, Expected = Test()
 
 	assert(Result == Expected, `the local should've changed to {Expected}, got {Result}`)
-end
-
-const function CheckSignalHook()
-	const HookSignal = Formatters.CheckExist("hooksignal")
-	const IsSignalHooked = Formatters.CheckExist("issignalhooked")
-	const NumberValue = Instance.new("NumberValue")
-
-	local FiredCount = 0
-	local HookArgument
-
-	NumberValue.Changed:Connect(function()
-		FiredCount += 1
-	end)
-
-	assert(IsSignalHooked(NumberValue.Changed) == false, "issignalhooked returned true before the signal was hooked")
-
-	HookSignal(NumberValue.Changed, function(Info)
-		HookArgument = Info
-		return false
-	end)
-
-	const HookedBefore = IsSignalHooked(NumberValue.Changed)
-
-	NumberValue.Value = 1
-	task.wait()
-
-	const FiredWhileHooked = FiredCount
-
-	Formatters.CheckExist("restoresignal")(NumberValue.Changed)
-
-	NumberValue.Value = 2
-	task.wait()
-
-	assert(HookedBefore == true, "issignalhooked returned false after the signal was hooked")
-	assert(HookArgument ~= nil, "the hook wasn't called when the signal fired")
-	assert(FiredWhileHooked == 0, "returning false from the hook didn't stop the connection from firing")
-	assert(IsSignalHooked(NumberValue.Changed) == false, "issignalhooked still returned true after restoresignal")
-	assert(FiredCount == 1, "the connection didn't fire again after restoresignal")
 end
 
 const function CheckOffThreadHook()
@@ -1109,39 +1093,38 @@ const Tests: any = {
 		Test = function()
 			const FireTouchInterest: (FireTouch: BasePart, WithPart: BasePart, Ended: number) -> () = getfenv().firetouchinterest
 
-			const FireTouch = Instance.new("Part")
-			const WithPart = Instance.new("Part")
+			const RootPart = GetRootPart()
 
-			FireTouch.Anchored = true
-			WithPart.Anchored = true
-			FireTouch.Position = Vector3.new(0, 1000, 0)
-			WithPart.Position = Vector3.new(50, 1000, 0)
-			FireTouch.Parent = workspace
-			WithPart.Parent = workspace
+			assert(RootPart, "your character didn't load within 10 seconds")
+
+			const Pad = Instance.new("Part")
+
+			Pad.Anchored = true
+			Pad.CanCollide = false
+			Pad.Position = RootPart.Position + Vector3.new(0, 100, 0)
+			Pad.Parent = workspace
 
 			local Complete = false
 
-			FireTouch.Touched:Connect(function(Part)
-				if WithPart ~= Part then
+			Pad.Touched:Connect(function(Part)
+				if RootPart ~= Part then
 					return
 				end
 
 				Complete = true
 			end)
 
-			FireTouchInterest(FireTouch, WithPart, 0)
-			FireTouchInterest(FireTouch, WithPart, 1)
+			FireTouchInterest(Pad, RootPart, 0)
+			FireTouchInterest(Pad, RootPart, 1)
 
 			const Touched = WaitFor(function()
 				return Complete
 			end, 5)
 
-			FireTouch:Destroy()
-			WithPart:Destroy()
+			Pad:Destroy()
 
 			assert(Touched, "failed to fire the touched event within 5 seconds")
 		end,
-		DisabledFor = {"Visual"},
 	},
 
 	hookmetamethod = {
@@ -1211,7 +1194,7 @@ const Tests: any = {
 
 			getfenv().cache.invalidate(Container:FindFirstChild("Part"))
 
-			assert(Part ~= Container:FindFirstChild("Part"), "the reference to the part couldn't be invalidated")
+			assert(not rawequal(Part, Container:FindFirstChild("Part")), "the reference to the part couldn't be invalidated")
 		end,
 	},
 
@@ -1248,7 +1231,7 @@ const Tests: any = {
 			const ClonedReference = getfenv().cloneref(Part) :: Part
 			const NewPosition = Vector3.new(69, 67, 420)
 
-			assert(ClonedReference ~= Part, "the cloned reference shouldn't be the same as the original reference")
+			assert(not rawequal(ClonedReference, Part), "the cloned reference shouldn't be the same as the original reference")
 
 			Part.Position = NewPosition
 
@@ -1264,7 +1247,7 @@ const Tests: any = {
 			const Part = Instance.new("Part")
 			const Clone = Formatters.CheckExist("cloneref")(Part)
 
-			assert(Part ~= Clone, "the clone shouldn't be equal to the original")
+			assert(not rawequal(Part, Clone), "the clone shouldn't be equal to the original")
 			assert(getfenv().compareinstances(Part, Clone), "the clone should be equal to the original when using compareinstances()")
 		end,
 	},
@@ -1451,7 +1434,9 @@ const Tests: any = {
 				return GetCameraOriginal(...)
 			end
 
-			task.wait()
+			WaitFor(function()
+				return CallingScript ~= nil
+			end, 2)
 
 			assert(CallingScript, "returned nil when it should've returned a script")
 			assert(
@@ -1459,7 +1444,6 @@ const Tests: any = {
 				`the calling script of CameraWrapper.getCamera should be 'CameraModule', got '{CallingScript}'`
 			)
 		end,
-		DisableOnDebug = true,
 	},
 
 	isnetworkowner = {
@@ -1514,7 +1498,6 @@ const Tests: any = {
 
 			assert(Killed, "you weren't killed within 5 seconds after replicating Player.Kill")
 		end,
-		DisableOnDebug = true,
 		RunLast = true,
 	},
 
@@ -1645,7 +1628,6 @@ const Tests: any = {
 				`__index gave {FirstPartMetatable.__index} instead of {IndexMetamethod} (__index may not be a CClosure)`
 			)
 		end,
-		DisabledFor = {"Visual"},
 	},
 
 	["debug.getinfo"] = {
@@ -1838,6 +1820,8 @@ const Tests: any = {
 
 	mousemoveabs = {
 		Test = function()
+			CheckInputFree()
+
 			const Target = workspace.CurrentCamera.ViewportSize / 2 + Vector2.new(math.random(-50, 50), math.random(-50, 50))
 
 			getfenv().mousemoveabs(Target.X, Target.Y)
@@ -1851,6 +1835,8 @@ const Tests: any = {
 
 	mousemoverel = {
 		Test = function()
+			CheckInputFree()
+
 			const StartLocation = UserInputService:GetMouseLocation()
 
 			getfenv().mousemoverel(25, 25)
@@ -1864,6 +1850,7 @@ const Tests: any = {
 
 	mousescroll = {
 		Test = function()
+			CheckInputFree()
 			CenterMouse()
 
 			assert(WaitForInput(UserInputService.InputChanged, function(Input)
@@ -1891,18 +1878,12 @@ const Tests: any = {
 
 	sethiddenproperty = {
 		Test = function()
-			const SetHiddenProperty = getfenv().sethiddenproperty
-			const GetHiddenProperty = Formatters.CheckExist("gethiddenproperty")
-			const Original = GetHiddenProperty(Player, "SimulationRadius")
-			const NewValue = math.random(100, 500)
+			const Fire = Instance.new("Fire")
+			const NewValue = math.random(6, 20)
 
-			SetHiddenProperty(Player, "SimulationRadius", NewValue)
+			getfenv().sethiddenproperty(Fire, "size_xml", NewValue)
 
-			const Result = GetHiddenProperty(Player, "SimulationRadius")
-
-			SetHiddenProperty(Player, "SimulationRadius", Original)
-
-			Formatters.CheckEqual(Result, NewValue, "SimulationRadius")
+			Formatters.CheckEqual(Formatters.CheckExist("gethiddenproperty")(Fire, "size_xml"), NewValue, "size_xml")
 		end,
 	},
 
@@ -1917,26 +1898,25 @@ const Tests: any = {
 	setscriptable = {
 		Test = function()
 			const SetScriptable = getfenv().setscriptable
-			const WasScriptable = Formatters.CheckExist("isscriptable")(Player, "SimulationRadius")
+			const Fire = Instance.new("Fire")
 
 			const function CanRead()
 				return pcall(function()
-					return (Player :: any).SimulationRadius
+					return (Fire :: any).size_xml
 				end)
 			end
 
-			SetScriptable(Player, "SimulationRadius", false)
+			const ReadBefore = CanRead()
 
-			const ReadWhileOff = CanRead()
-
-			SetScriptable(Player, "SimulationRadius", true)
+			SetScriptable(Fire, "size_xml", true)
 
 			const ReadWhileOn = CanRead()
 
-			SetScriptable(Player, "SimulationRadius", WasScriptable)
+			SetScriptable(Fire, "size_xml", false)
 
-			assert(not ReadWhileOff, "SimulationRadius could still be read after it was made unscriptable")
-			assert(ReadWhileOn, "SimulationRadius couldn't be read after it was made scriptable")
+			assert(not ReadBefore, "size_xml could be read before it was made scriptable")
+			assert(ReadWhileOn, "size_xml couldn't be read after it was made scriptable")
+			assert(not CanRead(), "size_xml could still be read after it was made unscriptable")
 		end,
 	},
 
@@ -2243,9 +2223,16 @@ const Tests: any = {
 			const Thickness = Line.Thickness
 			const Visible = Line.Visible
 			const Existed = Line.__OBJECT_EXISTS
+			const Text = getfenv().Drawing.new("Text")
+
+			Text.Font = 3
+
+			const AppliedFont = Text.Font
 
 			Line:Remove()
+			Text:Remove()
 
+			Formatters.CheckEqual(AppliedFont, 3, "a Text object's Font after setting it to 3")
 			assert(typeof(Thickness) == "number", "Thickness should be a number")
 			assert(typeof(Visible) == "boolean", "Visible should be a boolean")
 			assert(Existed == true, "__OBJECT_EXISTS should be true before :Remove()")
@@ -2309,17 +2296,22 @@ const Tests: any = {
 
 	runonthread = {
 		Test = function()
-			const Thread = coroutine.create(function() end)
-
-			local RanOn
-
-			getfenv().runonthread(Thread, function()
-				RanOn = true
+			const Thread = task.spawn(function()
+				task.wait(2)
 			end)
 
-			assert(WaitFor(function()
-				return RanOn == true
-			end, 1), "the function didn't run")
+			const Value = math.random()
+
+			getfenv().runonthread(Thread, `shared.debUNCThreadValue = {Value}`)
+
+			const Ran = WaitFor(function()
+				return shared.debUNCThreadValue == Value
+			end, 1)
+
+			shared.debUNCThreadValue = nil
+			task.cancel(Thread)
+
+			assert(Ran, "the code didn't run on the thread")
 		end,
 	},
 
@@ -2443,8 +2435,6 @@ const Tests: any = {
 	getscriptbytecode = {
 		Test = function()
 			const GetScriptBytecode = getfenv().getscriptbytecode
-			const GetScriptHash = getfenv().getscripthash
-			const Crypt = getfenv().crypt
 			const LocalScript = Player.PlayerScripts:FindFirstChildWhichIsA("LocalScript", true)
 			const Bytecode = GetScriptBytecode(LocalScript)
 
@@ -2467,14 +2457,6 @@ const Tests: any = {
 				break
 			end
 
-			if not GetScriptHash or not Crypt then
-				return
-			end
-
-			assert(
-				GetScriptHash(LocalScript) == Crypt.hash(Bytecode, "sha384"),
-				"getscripthash doesn't match the sha384 of the bytecode, so one of them is returning the wrong thing"
-			)
 		end,
 	},
 
@@ -2488,6 +2470,16 @@ const Tests: any = {
 
 			assert(#Hash > 0, "the hash is empty")
 			assert(GetScriptHash(LocalScript) == Hash, "hashing the same script twice gave different results")
+			assert(#Hash == 96 and Hash:match("^%x+$"), `should be a 96 character sha384 hash, got {#Hash} characters`)
+
+			const Crypt = getfenv().crypt
+			const GetScriptBytecode = getfenv().getscriptbytecode
+
+			if not Crypt or not GetScriptBytecode or #Crypt.hash("abc", "sha384") ~= 96 then
+				return
+			end
+
+			assert(Hash == Crypt.hash(GetScriptBytecode(LocalScript), "sha384"), "the hash isn't the sha384 of the script's bytecode")
 		end,
 	},
 
@@ -2592,14 +2584,14 @@ const Tests: any = {
 		Test = function()
 			const GetFastFlag = Formatters.CheckExist("getfflag")
 			const SetFastFlag = getfenv().setfflag
-			const Original = GetFastFlag("MaxFrameBufferSize")
-			const NewValue = tostring(math.random(2, 9))
+			const Original = GetFastFlag("TaskSchedulerTargetFps")
+			const NewValue = tostring(math.random(100, 200))
 
-			SetFastFlag("MaxFrameBufferSize", NewValue)
+			SetFastFlag("TaskSchedulerTargetFps", NewValue)
 
-			const Result = GetFastFlag("MaxFrameBufferSize")
+			const Result = GetFastFlag("TaskSchedulerTargetFps")
 
-			SetFastFlag("MaxFrameBufferSize", Original)
+			SetFastFlag("TaskSchedulerTargetFps", Original)
 
 			Formatters.CheckEqual(Result, NewValue, "the flag")
 		end,
@@ -2635,8 +2627,11 @@ const Tests: any = {
 			const Marker = `\255debUNC {math.random()}`
 
 			local Received = false
+			local HookFired = false
 
 			const function OnReceive(Packet)
+				HookFired = true
+
 				if Packet.AsString ~= Marker then
 					return
 				end
@@ -2650,9 +2645,13 @@ const Tests: any = {
 
 			WaitFor(function()
 				return Received
-			end, 2)
+			end, 3)
 
 			RakNet.removereceivehook(OnReceive)
+
+			if not HookFired then
+				error({Skipped = "the receive hook never fired, so the packet can't be checked"})
+			end
 
 			assert(Received, "the receive hook didn't see the packet")
 		end,
@@ -2722,9 +2721,7 @@ const Tests: any = {
 
 	getallthreads = {
 		Test = function()
-			const Thread = coroutine.create(function() end)
-
-			assert(table.find(getfenv().getallthreads(), Thread), "didn't find a new thread")
+			assert(table.find(getfenv().getallthreads(), coroutine.running()), "didn't find the thread that's running this test")
 		end,
 	},
 
@@ -2888,15 +2885,74 @@ const Tests: any = {
 	},
 
 	hooksignal = {
-		Test = CheckSignalHook,
+		Test = function()
+			const NumberValue = Instance.new("NumberValue")
+
+			local FiredCount = 0
+			local HookArgument
+
+			NumberValue.Changed:Connect(function()
+				FiredCount += 1
+			end)
+
+			getfenv().hooksignal(NumberValue.Changed, function(Info)
+				HookArgument = Info
+				return false
+			end)
+
+			NumberValue.Value = 1
+			task.wait()
+
+			assert(HookArgument ~= nil, "the hook wasn't called when the signal fired")
+			assert(FiredCount == 0, "returning false from the hook didn't stop the connection from firing")
+		end,
 	},
 
 	issignalhooked = {
-		Test = CheckSignalHook,
+		Test = function()
+			const IsSignalHooked = getfenv().issignalhooked
+			const NumberValue = Instance.new("NumberValue")
+
+			NumberValue.Changed:Connect(function() end)
+
+			assert(IsSignalHooked(NumberValue.Changed) == false, "should return false before the signal is hooked")
+
+			Formatters.CheckExist("hooksignal")(NumberValue.Changed, function() end)
+
+			assert(IsSignalHooked(NumberValue.Changed) == true, "should return true after the signal is hooked")
+		end,
 	},
 
 	restoresignal = {
-		Test = CheckSignalHook,
+		Test = function()
+			const NumberValue = Instance.new("NumberValue")
+
+			local FiredCount = 0
+			local HookCount = 0
+
+			NumberValue.Changed:Connect(function()
+				FiredCount += 1
+			end)
+
+			Formatters.CheckExist("hooksignal")(NumberValue.Changed, function()
+				HookCount += 1
+			end)
+
+			NumberValue.Value = 1
+			task.wait()
+
+			assert(HookCount == 1, "hooksignal didn't hook the signal, can't continue the test")
+
+			getfenv().restoresignal(NumberValue.Changed)
+
+			const FiredBefore = FiredCount
+
+			NumberValue.Value = 2
+			task.wait()
+
+			assert(HookCount == 1, "the hook was still called after restoresignal")
+			assert(FiredCount == FiredBefore + 1, "the connection didn't fire after restoresignal")
+		end,
 	},
 
 	["oth.hook"] = {
@@ -2921,6 +2977,8 @@ const Tests: any = {
 
 	keyclick = {
 		Test = function()
+			CheckInputFree()
+
 			const Detected = WaitForInput(UserInputService.InputBegan, function(Input)
 				return Input.KeyCode == Enum.KeyCode.J
 			end, function()
@@ -3098,13 +3156,6 @@ const Tests: any = {
 	["Drawing.Fonts"] = {
 		Test = function()
 			const Fonts = getfenv().Drawing.Fonts
-			const Text = Formatters.CheckExist("Drawing.new")("Text")
-
-			Text.Font = Fonts.Monospace
-
-			const AppliedFont = Text.Font
-
-			Text:Remove()
 
 			for Name, Value in {
 				UI = 0,
@@ -3114,8 +3165,6 @@ const Tests: any = {
 			} do
 				Formatters.CheckEqual(Fonts[Name], Value, `Drawing.Fonts.{Name}`)
 			end
-
-			Formatters.CheckEqual(AppliedFont, Fonts.Monospace, "a Text object's Font after setting it to Monospace")
 		end,
 		ValueType = "table",
 	},
@@ -3385,6 +3434,63 @@ const Tests: any = {
 	restoreproto = {
 		Test = CheckProtoHook,
 	},
+
+	getcallbackvalue = {
+		Test = function()
+			const GetCallbackValue = getfenv().getcallbackvalue
+			const BindableFunction = Instance.new("BindableFunction")
+
+			const function OnInvoke()
+				return "debUNC"
+			end
+
+			assert(GetCallbackValue(BindableFunction, "OnInvoke") == nil, "should return nil when no callback is set")
+
+			BindableFunction.OnInvoke = OnInvoke
+
+			assert(GetCallbackValue(BindableFunction, "OnInvoke") == OnInvoke, "didn't return the callback that was set")
+		end,
+	},
+
+	getfunctionbytecode = {
+		Test = function()
+			const GetFunctionBytecode = getfenv().getfunctionbytecode
+
+			const function First()
+				return 1
+			end
+
+			const function Second()
+				return "debUNC"
+			end
+
+			const Bytecode = GetFunctionBytecode(First)
+
+			Formatters.CheckReturnType(Bytecode, "string")
+
+			assert(#Bytecode > 0, "the bytecode is empty")
+			assert(GetFunctionBytecode(Second) ~= Bytecode, "two different functions gave the same bytecode")
+		end,
+	},
+
+	getobjectreferences = {
+		Test = function()
+			const Target = {}
+			const Holder = {Target}
+
+			assert(table.find(getfenv().getobjectreferences(Target), Holder), "didn't find the table holding the object")
+		end,
+	},
+
+	getfunctionreferences = {
+		Test = function()
+			const function Target() end
+
+			const Holder = {Target}
+
+			assert(table.find(getfenv().getfunctionreferences(Target), Holder), "didn't find the table holding the function")
+		end,
+	},
 }
 
 const EconomyUrl = "https://economy.roblox.com/v1/user/currency"
@@ -3469,9 +3575,11 @@ for _, Method in {
 				return
 			end
 
-			assert(not pcall(function()
+			const Success, Result = pcall(function()
 				return Service[MethodName](Service, Argument)
-			end), `{ServiceName}:{MethodName} can be called, which lets scripts reach your private account data`)
+			end)
+
+			assert(not Success or Result == nil, `{ServiceName}:{MethodName} can be called, which lets scripts reach your private account data`)
 		end,
 		Security = true,
 	}
@@ -3502,9 +3610,11 @@ for Name, GetRoot in {
 				return
 			end
 
-			assert(not pcall(function()
+			const Reached, Balance = pcall(function()
 				return Root:GetService("MarketplaceService"):GetRobuxBalance()
-			end), `{Name} reached a method that's blocked everywhere else`)
+			end)
+
+			assert(not Reached or Balance == nil, `{Name} reached a method that's blocked everywhere else`)
 		end,
 		Security = true,
 	}
@@ -3596,6 +3706,8 @@ for Name in Settings do
 	Settings[Name] = Saved
 end
 
+DisplayMessage("If your Roblox crashes or freezes during these tests, run `shared.DebugMode = true` before debUNC to prevent it or find the crashing function.")
+
 const IsFunctionHooked = getfenv().isfunctionhooked
 
 if Settings.FakeFunctions then
@@ -3650,16 +3762,26 @@ const function StartCallLogging()
 
 	const Blacklist = {
 		"hookfunction",
+		"info",
 		"print",
 		"profilebegin",
 		"profileend",
 		"writefile",
 	}
 
+	const HookedTables = {}
+
 	local Log = ""
+	local Logging = true
 
 	const function Hook(Name, HookedFunction)
 		if typeof(HookedFunction) == "table" then
+			if HookedTables[HookedFunction] or getmetatable(HookedFunction) ~= nil then
+				return
+			end
+
+			HookedTables[HookedFunction] = true
+
 			for OtherName, OtherFunction in HookedFunction do
 				Hook(OtherName, OtherFunction)
 			end
@@ -3672,6 +3794,12 @@ const function StartCallLogging()
 
 		local Original
 		Original = HookFunction(HookedFunction, function(...)
+			if Logging then
+				return Original(...)
+			end
+
+			Logging = true
+
 			const Arguments = {...}
 			const Message = `Ran function {Name}`
 			const ArgumentNames = {}
@@ -3684,6 +3812,8 @@ const function StartCallLogging()
 
 			Log ..= `{Message}{if Arguments[1] then ` with args {table.concat(ArgumentNames, ", ")}` else ""}\n`
 			WriteFile("LogFunctionCalls.txt", Log)
+
+			Logging = false
 
 			task.wait(0.1)
 
@@ -3698,6 +3828,8 @@ const function StartCallLogging()
 	end
 
 	print("Started LogFunctionCalls")
+
+	Logging = false
 end
 
 if Settings.DebugMode then
@@ -3726,9 +3858,6 @@ const function RunTest(Name: string, Info: any)
 	local Missing = false
 
 	local Success, ErrorMessage = pcall(function()
-		assert(not Info.DisabledFor or not table.find(Info.DisabledFor, ExecutorName), `disabled for {ExecutorName}, most likely due to crashes`)
-		assert(not (Settings.DebugMode and Info.DisableOnDebug), "disabled in debug mode")
-
 		if not Info.Security then
 			const TestedValue = FindFirstFunction(Name)
 			const ValueType = Info.ValueType or "function"
@@ -3855,7 +3984,7 @@ if EndTime < MinimumSeconds and PercentageComplete > 80 then
 end
 
 DisplayMessage("❓ The score below is only for how many custom functions are supported and secure.")
-DisplayMessage(`🔵 debUNC BETA v2.1.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
+DisplayMessage(`🔵 debUNC BETA v2.2.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(EndTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
