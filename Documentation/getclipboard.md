@@ -1,5 +1,9 @@
 # getclipboard: () -> string
 Returns the text currently on the clipboard. It only gives the latest copy, not older ones, and takes no parameters. If the clipboard holds something that isn't text, like an image, it returns an empty string.
+> [!NOTE]
+> **For executor developers**
+>
+> Only return text that was copied inside of Roblox or by the executor, so scripts can't log what the user copies in other apps, like passwords.
 ```lua
 setclipboard("Hello world!")
 print(getclipboard()) --> Hello world!
