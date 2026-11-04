@@ -317,6 +317,22 @@ const function CheckCommChannel()
 	Formatters.CheckEqual(Received.n, 3, "the number of values sent, counting the nil")
 end
 
+const function CheckClipboard()
+	const GetClipboard = getfenv().getclipboard
+
+	if not GetClipboard then
+		return
+	end
+
+	const Text = `debUNC{math.random(1, 1e6)}`
+
+	Formatters.CheckExist("setclipboard")(Text)
+
+	assert(WaitFor(function()
+		return GetClipboard() == Text
+	end, 1), "the clipboard didn't have the text that was copied")
+end
+
 const function CheckScriptThread()
 	const LocalScript = Player.PlayerScripts:FindFirstChildWhichIsA("LocalScript", true)
 	const Thread = Formatters.CheckExist("getscriptthread")(LocalScript)
@@ -1040,6 +1056,12 @@ const Tests: any = {
 
 			assert(typeof(Loaded) == "function", `expected the return type to be a function, got {typeof(Loaded)}`)
 			assert(Loaded() == "debunc", "failed to return the expected value")
+
+			const ChunkName = `debUNC{math.random(1, 1e6)}`
+			const Compiled, CompileError = loadstring("local x x", ChunkName)
+
+			assert(Compiled == nil, "bad code compiled into a function")
+			assert(tostring(CompileError):find(ChunkName, 1, true), `the compile error doesn't mention the chunk name, got '{CompileError}'`)
 		end,
 	},
 
@@ -1440,8 +1462,8 @@ const Tests: any = {
 
 			assert(CallingScript, "returned nil when it should've returned a script")
 			assert(
-				CallingScript.Name == "CameraModule",
-				`the calling script of CameraWrapper.getCamera should be 'CameraModule', got '{CallingScript}'`
+				CallingScript:IsDescendantOf(Player.PlayerScripts.PlayerModule),
+				`the calling script of CameraWrapper.getCamera should be inside of PlayerModule, got '{CallingScript}'`
 			)
 		end,
 	},
@@ -1758,7 +1780,7 @@ const Tests: any = {
 
 			Formatters.CheckReturnType(Result, "string")
 
-			assert(Result:find("__index"), "couldn't find '__index' in the decompiled 'PlayerModule'")
+			assert(Result:find("__index"), `couldn't find '__index' in the decompiled 'PlayerModule', it started with '{Result:sub(1, 100)}'`)
 			assert(Result:find("CameraModule"), "couldn't find 'CameraModule' in the decompiled 'PlayerModule'")
 			assert(Decompile(PlayerModule.CameraModule) ~= Result, "'PlayerModule' and 'CameraModule' decompiled to the same thing")
 
@@ -1828,7 +1850,7 @@ const Tests: any = {
 
 			assert(WaitFor(function()
 				return (UserInputService:GetMouseLocation() - Target).Magnitude < 2
-			end, 1), `the mouse didn't move to {Target}`)
+			end, 1), `the mouse went to {UserInputService:GetMouseLocation()} instead of {Target}`)
 		end,
 		RunLast = true,
 	},
@@ -1851,13 +1873,25 @@ const Tests: any = {
 	mousescroll = {
 		Test = function()
 			CheckInputFree()
-			CenterMouse()
 
-			assert(WaitForInput(UserInputService.InputChanged, function(Input)
+			Formatters.CheckExist("mousemoveabs")(workspace.CurrentCamera.ViewportSize.X / 2, 10)
+			task.wait()
+
+			const MouseScroll = getfenv().mousescroll
+
+			const function CheckScroll(Input)
 				return Input.UserInputType == Enum.UserInputType.MouseWheel
-			end, function()
-				getfenv().mousescroll(120)
-			end), "the scroll wasn't detected")
+			end
+
+			const Detected = WaitForInput(UserInputService.InputChanged, CheckScroll, function()
+				MouseScroll(120)
+			end)
+
+			WaitForInput(UserInputService.InputChanged, CheckScroll, function()
+				MouseScroll(-120)
+			end)
+
+			assert(Detected, "the scroll wasn't detected")
 		end,
 		RunLast = true,
 	},
@@ -3389,17 +3423,26 @@ const Tests: any = {
 
 	dofile = {
 		Test = function()
+			const WriteFile = Formatters.CheckExist("writefile")
+			const DoFile = getfenv().dofile
 			const FileName = `File_{math.random()}.lua`
 			const Value = math.random()
+			const Marker = `debUNC{math.random(1, 1e6)}`
 
-			Formatters.CheckExist("writefile")(FileName, `return {Value}`)
+			WriteFile(FileName, `return {Value}`)
 
-			const Success, Result = pcall(getfenv().dofile, FileName)
+			const Success, Result = pcall(DoFile, FileName)
+
+			WriteFile(FileName, `error("{Marker}")`)
+
+			const Ran, ErrorMessage = pcall(DoFile, FileName)
 
 			RemovePath("delfile", FileName)
 
 			assert(Success, `errored while running the file with {Result}`)
 			Formatters.CheckEqual(Result, Value, "the value the file returned")
+			assert(not Ran, "an error inside of the file didn't reach the caller")
+			assert(tostring(ErrorMessage):find(Marker, 1, true), `the file's error message was lost, got '{ErrorMessage}'`)
 		end,
 	},
 
@@ -3489,6 +3532,73 @@ const Tests: any = {
 			const Holder = {Target}
 
 			assert(table.find(getfenv().getfunctionreferences(Target), Holder), "didn't find the table holding the function")
+		end,
+	},
+
+	getclipboard = {
+		Test = CheckClipboard,
+		RunLast = true,
+	},
+
+	setclipboard = {
+		Test = CheckClipboard,
+		RunLast = true,
+	},
+
+	getfilesize = {
+		Test = function()
+			const FileName = `File_{math.random()}.txt`
+			const Text = string.rep("debUNC", math.random(1, 100))
+
+			Formatters.CheckExist("writefile")(FileName, Text)
+
+			const Size = getfenv().getfilesize(FileName)
+
+			RemovePath("delfile", FileName)
+
+			Formatters.CheckEqual(Size, #Text, "the size of the file")
+		end,
+	},
+
+	renamefile = {
+		Test = function()
+			const IsFile = Formatters.CheckExist("isfile")
+			const OldName = `File_{math.random()}.txt`
+			const NewName = `File_{math.random()}.txt`
+			const Text = tostring(math.random())
+
+			Formatters.CheckExist("writefile")(OldName, Text)
+
+			getfenv().renamefile(OldName, NewName)
+
+			const OldExists = IsFile(OldName)
+			const Result = Formatters.CheckExist("readfile")(NewName)
+
+			RemovePath("delfile", NewName)
+
+			assert(not OldExists, "the old file still exists")
+			Formatters.CheckEqual(Result, Text, "the renamed file's text")
+		end,
+	},
+
+	movefile = {
+		Test = function()
+			const FolderName = `Folder_{math.random()}`
+			const FileName = `File_{math.random()}.txt`
+			const Text = tostring(math.random())
+
+			Formatters.CheckExist("makefolder")(FolderName)
+			Formatters.CheckExist("writefile")(FileName, Text)
+
+			getfenv().movefile(FileName, `{FolderName}/{FileName}`)
+
+			const OldExists = Formatters.CheckExist("isfile")(FileName)
+			const Result = Formatters.CheckExist("readfile")(`{FolderName}/{FileName}`)
+
+			RemovePath("delfolder", FolderName)
+
+			assert(not OldExists, "the old file still exists")
+			Formatters.CheckEqual(Result, Text, "the moved file's text")
 		end,
 	},
 }
@@ -3621,7 +3731,6 @@ for Name, GetRoot in {
 end
 
 const NoTests: {[string | number]: any} = {
-	"setclipboard",
 	"queueonteleport",
 	"setrbxclipboard",
 	"rconsoleinfo",
@@ -3694,6 +3803,7 @@ const Settings: {[string]: any} = shared.Settings or {
 	GetTests = false,
 	GetUnaddedFunctions = false,
 	DebugMode = false,
+	CrashTests = false,
 }
 
 for Name in Settings do
@@ -3704,6 +3814,48 @@ for Name in Settings do
 	end
 
 	Settings[Name] = Saved
+end
+
+if Settings.CrashTests then
+	Tests["crash: hooking a running proto"] = {
+		Test = function()
+			const RunCode = assert(loadstring([[
+				local Proto
+
+				local function Outer()
+					local function Inner(Depth)
+						if Depth == 1 then
+							hookproto(Proto, function() end)
+							pcall(function() fullgc() end)
+							pcall(function() collectgarbage("collect") end)
+
+							local Filler = {}
+
+							for Index = 1, 3000 do
+								Filler[Index] = {}
+							end
+						end
+
+						if Depth > 0 then
+							return Inner(Depth - 1)
+						end
+					end
+
+					return Inner
+				end
+
+				local Running = Outer()
+
+				Proto = debug.getproto(Outer, 1)
+				Running(2)
+				restoreproto(Proto)
+			]]))
+
+			RunCode()
+		end,
+		Security = true,
+		RunLast = true,
+	}
 end
 
 DisplayMessage("If your Roblox crashes or freezes during these tests, run `shared.DebugMode = true` before debUNC to prevent it or find the crashing function.")
@@ -3761,6 +3913,8 @@ const function StartCallLogging()
 	end
 
 	const Blacklist = {
+		"__ws_poll",
+		"__ws_send",
 		"hookfunction",
 		"info",
 		"print",
@@ -3794,7 +3948,7 @@ const function StartCallLogging()
 
 		local Original
 		Original = HookFunction(HookedFunction, function(...)
-			if Logging then
+			if Logging or tostring((...)) == "WebSocket" then
 				return Original(...)
 			end
 
@@ -3984,7 +4138,7 @@ if EndTime < MinimumSeconds and PercentageComplete > 80 then
 end
 
 DisplayMessage("❓ The score below is only for how many custom functions are supported and secure.")
-DisplayMessage(`🔵 debUNC BETA v2.2.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
+DisplayMessage(`🔵 debUNC BETA v2.3.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(EndTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
