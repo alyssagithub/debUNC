@@ -20,13 +20,13 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 
 ![Synapse Z](https://img.shields.io/badge/Synapse_Z_v1.0.3.9-83%25-yellow?style=for-the-badge)
 
-![Bunni](https://img.shields.io/badge/Bunni_2.0-78%25-yellow?style=for-the-badge)
+![Bunni](https://img.shields.io/badge/Bunni_v2.0.1.R7-78%25-yellow?style=for-the-badge)
 
 | Executor | Version | Score | Took | 🟢 Passed | 🔴 Failed | 🟠 Skipped | 🟡 Missing |
 |---|---|:---:|:---:|:---:|:---:|:---:|:---:|
 | Lucid | 1.0.3-build20 | **96%** | 9.1s | 206 | 1 | 0 | 6 |
 | Synapse Z | v1.0.3.9 | **83%** | 12.15s | 176 | 13 | 1 | 23 |
-| Bunni | 2.0 | **78%** | 26.22s | 166 | 17 | 1 | 29 |
+| Bunni | v2.0.1.R7 | **78%** | 26.22s | 166 | 17 | 1 | 29 |
 
 <details>
 <summary><b>Lucid details</b></summary>
