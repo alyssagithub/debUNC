@@ -1,5 +1,5 @@
 # setrbxclipboard: (Data: string) -> ()
-Copies data to Roblox's clipboard.
+Copies data to the clipboard in Roblox Studio's format instead of as text, so it can't be pasted as normal text. Use [setclipboard](setclipboard.md) for text.
 ```lua
 setrbxclipboard("Hello world!")
 ```

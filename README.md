@@ -1,5 +1,5 @@
 # debUNC (debunk Unified Naming Convention)
-like sUNC and UNC but better (sens if u see this look out ur window)
+like sUNC and UNC but better (made by vice (@wtits) on discord)
 
 feel free to make an issue or PR whenever you have a suggestion, bug, or feedback you think would improve your use of this
 
@@ -15,15 +15,18 @@ reasons why i made this:
 ```lua
 loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.luau"))()
 ```
-# Confirmed results (debUNC v2.2.0)
-![Lucid](https://img.shields.io/badge/Lucid_1.0.3--build18-98%25-brightgreen?style=for-the-badge)
+# Confirmed results (debUNC v2.3.0)
+![Lucid](https://img.shields.io/badge/Lucid_1.0.3--build20-96%25-brightgreen?style=for-the-badge)
 
-![Synapse Z](https://img.shields.io/badge/Synapse_Z_v1.0.3.9-84%25-yellow?style=for-the-badge)
+![Synapse Z](https://img.shields.io/badge/Synapse_Z_v1.0.3.9-83%25-yellow?style=for-the-badge)
 
-| Executor | Version | Score | 🟢 Passed | 🔴 Failed | 🟠 Skipped | 🟡 Missing |
-|---|---|:---:|:---:|:---:|:---:|:---:|
-| Lucid | 1.0.3-build18 | **98%** | 206 | 1 | 0 | 2 |
-| Synapse Z | v1.0.3.9 | **84%** | 176 | 13 | 1 | 19 |
+![Bunni](https://img.shields.io/badge/Bunni_2.0-78%25-yellow?style=for-the-badge)
+
+| Executor | Version | Score | Took | 🟢 Passed | 🔴 Failed | 🟠 Skipped | 🟡 Missing |
+|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| Lucid | 1.0.3-build20 | **96%** | 9.1s | 206 | 1 | 0 | 6 |
+| Synapse Z | v1.0.3.9 | **83%** | 12.15s | 176 | 13 | 1 | 23 |
+| Bunni | 2.0 | **78%** | 26.22s | 166 | 17 | 1 | 29 |
 
 <details>
 <summary><b>Lucid details</b></summary>
@@ -32,8 +35,12 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 - `getactors`: returns threads instead of Actor instances
 
 **🟡 Missing**
+- `getclipboard`
+- `getfilesize`
 - `getfunctionreferences`
 - `getobjectreferences`
+- `movefile`
+- `renamefile`
 
 </details>
 
@@ -65,6 +72,8 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 - `crypt.hmac`
 - `getactorfromthread`
 - `getactorthreads`
+- `getclipboard`
+- `getfilesize`
 - `getmenv`
 - `getmetafield`
 - `getmodules`
@@ -73,9 +82,69 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 - `hasmetafield`
 - `hasmetatable`
 - `loadfileasync`
+- `movefile`
 - `readfileasync`
+- `renamefile`
 - `runfile`
 - `saveinstance`
+- `writecustomasset`
+- `writefileasync`
+
+</details>
+
+<details>
+<summary><b>Bunni details</b></summary>
+
+**🔴 Failed**
+- `cansignalreplicate`: returns false for `Player.Kill`
+- `decompile`: its server returned HTTP 522
+- `dofile`: runs the file but returns nothing
+- `game.HttpGet`: returns the failure message as if it were the page
+- `getactorthreads`: returns no threads
+- `getfpscap`: always returns 0
+- `getmenv`: returns a different module's environment
+- `getsignalarguments`: returns 125 entries for `Touched`
+- `getsignalargumentsinfo`: returns 125 entries for `Touched`
+- `hooksignal`: returning false from the hook doesn't stop the connection from firing
+- `keyclick`: the key press isn't detected
+- `keypress`: the key press isn't detected
+- `keyrelease`: the key press isn't detected
+- `mousemoveabs`: the mouse went to 265, 242 instead of 300, 300
+- `raknet.send`: only accepts strings, not buffers
+- `replicatesignal`: doesn't error on a signal that can't be replicated
+- `saveinstance`: returns true instead of a file name, and only saves a small stub
+
+**🟠 Skipped**
+- `restoresignal`: needs `hooksignal`
+
+**🟡 Missing**
+- `appendfileasync`
+- `createcommchannel`
+- `debug.getcallstack`
+- `debug.isvalidlevel`
+- `debug.setinfo`
+- `getactorfromthread`
+- `getcommchannel`
+- `getfunctionbytecode`
+- `getfunctionreferences`
+- `gethwid`
+- `getobjectreferences`
+- `gettenv`
+- `getthreadenvironment`
+- `hookproto`
+- `iscorescript`
+- `isprotohooked`
+- `issignalhooked`
+- `loadfileasync`
+- `raknet.addreceivehook`
+- `raknet.addsendhook`
+- `raknet.receive`
+- `raknet.removereceivehook`
+- `raknet.removesendhook`
+- `readfileasync`
+- `restoreproto`
+- `runfile`
+- `runonthread`
 - `writecustomasset`
 - `writefileasync`
 
