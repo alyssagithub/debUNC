@@ -1,0 +1,21 @@
+# debug.setconstant: (Function: function, Index: number, Value: any) -> ()
+Changes a fixed value in a function's code, like a string or number, by its index.
+```lua
+local function Greet()
+	return "Hello"
+end
+
+debug.setconstant(Greet, 1, "Goodbye")
+print(Greet()) --> Goodbye
+```
+# Aliases
+| Library | Name |
+| :- | :- |
+| debug | set_constant |
+| | set_constant |
+| | setconstant |
+# Parameters
+| Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to change.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| :-------- | :------- |
+| Index: [number](https://create.roblox.com/docs/luau/numbers) | The index of the constant. |
+| Value: any | The new value. |
