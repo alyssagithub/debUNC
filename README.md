@@ -6,7 +6,7 @@ feel free to make an issue or PR whenever you have a suggestion, bug, or feedbac
 all custom functions that debUNC tests are documented in [Documentation](Documentation)
 
 reasons why i made this:
-1. sUNC is obfuscated, sure u can ask the developers for the source code in order to debug but that's just a unnecessary step
+1. sUNC is obfuscated, sure u can ask the developers for the source code in order to debug but that's just an unnecessary step
 2. sUNC's tests fail even though the function works, which atp what is the test even for?
 3. sUNC and UNC don't test ALL of the functions many scripts use, only the most necessary, which makes it so even with a 100% score it's not supporting every script's function use
 4. sUNC and UNC don't display the executor's version in test results, making it easy for people to misinform with outdated results
@@ -15,30 +15,29 @@ reasons why i made this:
 ```lua
 loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.luau"))()
 ```
-# Confirmed results (debUNC v2.3.0)
-![Lucid](https://img.shields.io/badge/Lucid_1.0.3--build20-96%25-brightgreen?style=for-the-badge)
+# Confirmed results (debUNC v2.4.0)
+![Lucid](https://img.shields.io/badge/Lucid_1.0.0-97%25-brightgreen?style=for-the-badge)
 
-![Synapse Z](https://img.shields.io/badge/Synapse_Z_v1.0.3.9-83%25-yellow?style=for-the-badge)
+![Synapse Z](https://img.shields.io/badge/Synapse_Z_v1.0.3.9-81%25-yellow?style=for-the-badge)
 
-![Bunni](https://img.shields.io/badge/Bunni_v2.0.1.R7-78%25-yellow?style=for-the-badge)
+![Bunni](https://img.shields.io/badge/Bunni_2.0-77%25-yellow?style=for-the-badge)
 
 | Executor | Version | Score | Took | 🟢 Passed | 🔴 Failed | 🟠 Skipped | 🟡 Missing |
 |---|---|:---:|:---:|:---:|:---:|:---:|:---:|
-| Lucid | 1.0.3-build20 | **96%** | 9.1s | 206 | 1 | 0 | 6 |
-| Synapse Z | v1.0.3.9 | **83%** | 12.15s | 176 | 13 | 1 | 23 |
-| Bunni | v2.0.1.R7 | **78%** | 7.95s | 167 | 16 | 1 | 29 |
+| Lucid | 1.0.0 | **97%** | 12.42s | 202 | 2 | 0 | 4 |
+| Synapse Z | v1.0.3.9 | **81%** | 16.17s | 169 | 17 | 1 | 21 |
+| Bunni | 2.0 | **77%** | 9.91s | 161 | 19 | 1 | 27 |
 
 <details>
 <summary><b>Lucid details</b></summary>
 
 **🔴 Failed**
 - `getactors`: should return Actor instances, but got a thread (threads are what getactorthreads is for)
+- `identifyexecutor`: the version '1.0.0' never changes between updates, it should be the real version of each release
 
 **🟡 Missing**
 - `getclipboard`
 - `getfilesize`
-- `getfunctionreferences`
-- `getobjectreferences`
 - `movefile`
 - `renamefile`
 
@@ -51,14 +50,18 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 - `createcommchannel`: expected a number id, got a string
 - `crypt.encrypt`: invalid argument #2 to 'encrypt' (invalid key size)
 - `crypt.hash`: the sha256 hash of 'abc' was wrong, got 89911f71a4508762a5791590153c68a9bbee326969d37b603697a692b3fdf553
-- `dofile`: expected the value the file returned to be 0.08059208071228102, got File_0.7101256742487573.lua
-- `Drawing.new`: expected a Text object's Font after setting it to 3 to be 3, got DrawFont: 0xbf5fb84c3f8fd3b9
+- `decompile`: couldn't find '__index' in the decompiled 'CameraModule', it started with '-- Decompiled with Medal thread 'main' (3064) panicked at luau-lifter\src\instruction.rs:174:18: internal error: entered unreachable code: 87 note: run with RUST_BACKTRACE=1 environment variable to display a backtrace'
+- `dofile`: expected the value the file returned to be 0.6094110861208102, got File_0.13667204146883877.lua
+- `Drawing.new`: expected a Text object's Font after setting it to 3 to be 3, got DrawFont: 0x33316ca90b2d9905
 - `getcommchannel`: expected a number id, got a string
-- `getproperties`: expected the Size in the returned table to be 8, 2, 5, got nil
+- `gethiddenproperties`: expected size_xml to be 17, got nil
+- `getproperties`: expected the Size in the returned table to be 4, 2, 5, got nil
 - `getscripthash`: should be a 96 character sha384 hash, got 64 characters
 - `getsenv`: getsenv returned nil when the parent was nil
 - `hooksignal`: returning false from the hook didn't stop the connection from firing
-- `mousemoveabs`: the mouse didn't move to 397, 275.5
+- `isparallel`: should return false in an actor before it desynchronizes
+- `mousemoveabs`: the mouse went to 400, 299 instead of 406, 346.5
+- `mousemoverel`: the mouse moved by -6, -47 instead of about 25, 25
 - `mousescroll`: missing argument #2 to 'mousescroll' (number expected)
 - `raknet.receive`: the receive hook didn't see the packet
 
@@ -78,14 +81,12 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 - `getmetafield`
 - `getmodules`
 - `getsignalwhitelist`
-- `getthreadenvironment`
 - `hasmetafield`
 - `hasmetatable`
 - `loadfileasync`
 - `movefile`
 - `readfileasync`
 - `renamefile`
-- `runfile`
 - `saveinstance`
 - `writecustomasset`
 - `writefileasync`
@@ -97,18 +98,21 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 
 **🔴 Failed**
 - `cansignalreplicate`: should return true for Player.Kill
-- `dofile`: expected the value the file returned to be 0.5055002156012108, got nil
+- `dofile`: expected the value the file returned to be 0.6385579215606689, got nil
 - `game.HttpGet`: httpgetting a website that doesn't exist should return an error, nil, or an empty string
 - `getactorthreads`: expected at least one actor thread
 - `getfpscap`: expected the fps cap to be 10, got 0
 - `getmenv`: .script doesn't point to the module
+- `getmodules`: didn't find a new ModuleScript
 - `getsignalarguments`: expected the number of arguments Touched has to be 1, got 125
 - `getsignalargumentsinfo`: expected the name of Touched's argument to be otherPart, got Instance
 - `hooksignal`: returning false from the hook didn't stop the connection from firing
+- `identifyexecutor`: the version '2.0' never changes between updates, it should be the real version of each release
+- `isparallel`: should return false in an actor before it desynchronizes
 - `keyclick`: the key press wasn't detected
 - `keypress`: the input wasn't detected
-- `keyrelease`: the input wasn't detected
-- `mousemoveabs`: the mouse went to 322, 273 instead of 376, 311.5
+- `keyrelease`: the input was never held down, so it can't be released
+- `mousemoveabs`: the mouse went to 439, 280 instead of 448, 312.5
 - `raknet.send`: invalid argument #1 to 'send' (string expected, got buffer)
 - `replicatesignal`: should error on a signal that can't be replicated
 - `saveinstance`: didn't return a string
@@ -129,7 +133,6 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 - `gethwid`
 - `getobjectreferences`
 - `gettenv`
-- `getthreadenvironment`
 - `hookproto`
 - `iscorescript`
 - `isprotohooked`
@@ -142,7 +145,6 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 - `raknet.removesendhook`
 - `readfileasync`
 - `restoreproto`
-- `runfile`
 - `runonthread`
 - `writecustomasset`
 - `writefileasync`

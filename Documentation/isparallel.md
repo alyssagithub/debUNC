@@ -6,6 +6,7 @@ print(isparallel()) --> false
 # Aliases
 | Library | Name |
 | :- | :- |
+| | checkparallel |
 | | is_parallel |
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not the thread is running in parallel.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |

@@ -7,6 +7,7 @@ print(dofile("Number.lua")) --> 42
 # Aliases
 | Library | Name |
 | :- | :- |
+| | runfile |
 | | do_file |
 # Parameters
 | Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The path of the file.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |

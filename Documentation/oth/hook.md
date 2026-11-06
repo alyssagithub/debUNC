@@ -16,5 +16,5 @@ print(Target()) --> Goodbye
 | :-------- | :------- |
 | Hook: (...any) -> ...any | The function to run instead. It's given the same values the original would get, and what it returns is used. |
 # Returns
-| (...any) -> ...any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | A function that runs the original. Give it the same values you'd give the original.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| (...any) -> ...any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | A function that runs the original. Call it from inside of the hook, with the same values you'd give the original.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
