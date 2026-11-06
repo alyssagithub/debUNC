@@ -1,7 +1,23 @@
 --!strict
 type Function = (...any) -> ...any?
 
+const EncodingService = game:GetService("EncodingService")
+const UserInputService = game:GetService("UserInputService")
 const Player = game:GetService("Players").LocalPlayer
+
+const function GetPlayerScripts(): Instance
+	return Player:FindFirstChild("PlayerScripts") or game:GetService("StarterPlayer").StarterPlayerScripts
+end
+
+const function GetPlayerModule(): any
+	const PlayerModule = GetPlayerScripts():FindFirstChild("PlayerModule") or game:GetService("StarterPlayer"):FindFirstChild("PlayerModule", true)
+
+	if not PlayerModule then
+		error({Skipped = "this game has no PlayerModule", Environment = true})
+	end
+
+	return PlayerModule
+end
 
 const function FindFirstFunction(Name: string, Environment: {[string]: any}?): any
 	local Value = Environment or getfenv()
@@ -9,7 +25,11 @@ const function FindFirstFunction(Name: string, Environment: {[string]: any}?): a
 	while Value ~= nil and Name ~= "" do
 		local Library, NewName = string.match(Name, "^([^.]+)%.?(.*)$")
 
-		Value = Value[Library or ""]
+		const Success, Found = pcall(function()
+			return Value[Library or ""]
+		end)
+
+		Value = if Success then Found else nil
 		Name = NewName or ""
 	end
 
@@ -17,6 +37,23 @@ const function FindFirstFunction(Name: string, Environment: {[string]: any}?): a
 end
 
 const TestThreads: {[thread]: string} = {}
+const Cleanups: {[thread]: {() -> ()}} = {}
+
+const function AddCleanup(Cleanup: () -> ())
+	const Thread = coroutine.running()
+
+	Cleanups[Thread] = Cleanups[Thread] or {}
+	table.insert(Cleanups[Thread], Cleanup)
+end
+
+const function RunCleanups(Thread: thread)
+	for _, Cleanup in Cleanups[Thread] or {} do
+		pcall(Cleanup)
+	end
+
+	Cleanups[Thread] = nil
+end
+
 const Dependencies: {[string]: {[string]: boolean}} = {}
 
 const Formatters = {
@@ -49,7 +86,7 @@ const function RemovePath(FunctionName: string, Path: string)
 		return
 	end
 
-	Remove(Path)
+	pcall(Remove, Path)
 end
 
 const function WaitFor(Check: () -> boolean, Timeout: number): boolean
@@ -72,26 +109,69 @@ const function CreateRandomString(Length: number): string
 	return table.concat(Characters)
 end
 
-const EncodingService = game:GetService("EncodingService")
+local FocusLost = false
+local HasFocus = true
+local MissedFocusLoss = false
 
-const UserInputService = game:GetService("UserInputService")
+const FocusConnection = UserInputService.WindowFocusReleased:Connect(function()
+	FocusLost = true
+	HasFocus = false
+
+	const IsRobloxActive = getfenv().isrbxactive
+
+	if not IsRobloxActive then
+		return
+	end
+
+	if not WaitFor(function()
+		return HasFocus or not IsRobloxActive()
+	end, 1) then
+		MissedFocusLoss = true
+	end
+end)
+
+const FocusGainedConnection = UserInputService.WindowFocused:Connect(function()
+	HasFocus = true
+end)
 
 const function CheckInputFree()
 	const IsRobloxActive = getfenv().isrbxactive
 
 	if IsRobloxActive and not IsRobloxActive() then
-		error({Skipped = "the Roblox window isn't focused"})
+		error({Skipped = "the Roblox window isn't focused", Environment = FocusLost})
 	end
 
-	const Free = WaitFor(function()
+	if not WaitFor(function()
 		return UserInputService.MouseBehavior == Enum.MouseBehavior.Default
 			and not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
 			and not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)
 			and not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton3)
-	end, 1)
+	end, 1) then
+		error({Skipped = "a mouse button is being held or the mouse is locked", Environment = true})
+	end
 
-	if not Free then
-		error({Skipped = "a mouse button is being held or the mouse is locked"})
+	local LastInput = os.clock()
+
+	const function OnInput()
+		LastInput = os.clock()
+	end
+
+	const Connections = {
+		UserInputService.InputBegan:Connect(OnInput),
+		UserInputService.InputChanged:Connect(OnInput),
+		UserInputService.InputEnded:Connect(OnInput),
+	}
+
+	const Quiet = WaitFor(function()
+		return os.clock() - LastInput >= 0.25
+	end, 3)
+
+	for _, Connection in Connections do
+		Connection:Disconnect()
+	end
+
+	if not Quiet then
+		error({Skipped = "the mouse or keyboard was being used during the test", Environment = true})
 	end
 end
 
@@ -99,11 +179,15 @@ const function WaitForInput(Signal: RBXScriptSignal, Check: (InputObject) -> boo
 	local Detected = false
 
 	const Connection = Signal:Connect(function(Input)
-		if not Check(Input) then
+		if typeof(Input) ~= "Instance" or not Input:IsA("InputObject") or not Check(Input) then
 			return
 		end
 
 		Detected = true
+	end)
+
+	AddCleanup(function()
+		Connection:Disconnect()
 	end)
 
 	Action()
@@ -131,13 +215,25 @@ const function CenterMouse()
 end
 
 const function CheckPressAndRelease(PressName: string, ReleaseName: string, TestedName: string, IsHeld: () -> boolean, IsInput: (InputObject) -> boolean, Argument: any?)
-	const Release = Formatters.CheckExist(ReleaseName)
+	const Release = if TestedName == PressName or TestedName == ReleaseName then Formatters.CheckExist(ReleaseName) else getfenv()[ReleaseName]
 
 	local Detected
 
+	if Release then
+		AddCleanup(function()
+			if IsHeld() then
+				Release(Argument)
+			end
+		end)
+	end
+
 	if TestedName == ReleaseName then
 		Formatters.CheckExist(PressName)(Argument)
-		WaitFor(IsHeld, 1)
+
+		if not WaitFor(IsHeld, 1) then
+			Release(Argument)
+			error("the input was never held down, so it can't be released")
+		end
 
 		Detected = WaitForInput(UserInputService.InputEnded, IsInput, function()
 			Release(Argument)
@@ -156,7 +252,7 @@ const function CheckPressAndRelease(PressName: string, ReleaseName: string, Test
 		return not IsHeld()
 	end, 1)
 
-	if not Released then
+	if not Released and Release then
 		Release(Argument)
 	end
 
@@ -192,10 +288,17 @@ const function CheckPacketHook(Direction: string, CheckRemove: boolean)
 
 	local Count = 0
 	local PacketId
+	local MatchedData
 
 	const function OnPacket(Packet)
 		Count += 1
 		PacketId = PacketId or Packet.PacketId
+
+		if MatchedData ~= nil then
+			return
+		end
+
+		MatchedData = Packet.Size == #Packet.AsString and buffer.tostring(Packet.AsBuffer) == Packet.AsString
 	end
 
 	RakNet[`add{Direction}hook`](OnPacket)
@@ -214,6 +317,7 @@ const function CheckPacketHook(Direction: string, CheckRemove: boolean)
 
 	assert(Fired, `the {Direction} hook wasn't called within 3 seconds`)
 	assert(typeof(PacketId) == "number", `expected the packet to have a number PacketId, got {typeof(PacketId)}`)
+	assert(MatchedData, "the packet's Size, AsString and AsBuffer don't match each other")
 
 	if not CheckRemove then
 		return
@@ -225,10 +329,15 @@ const function CheckPacketHook(Direction: string, CheckRemove: boolean)
 end
 
 const function RunOnNewActor(Code: string): {[string]: any}
+	const RunOnActor = Formatters.CheckExist("runonactor")
 	const Actor = Instance.new("Actor")
-	Actor.Parent = workspace
 
-	Formatters.CheckExist("runonactor")(Actor, `local Actor = ... {Code} Actor:SetAttribute("Done", true)`, Actor)
+	Actor.Parent = workspace
+	AddCleanup(function()
+		Actor:Destroy()
+	end)
+
+	RunOnActor(Actor, `local Actor = ... {Code} Actor:SetAttribute("Done", true)`, Actor)
 
 	WaitFor(function()
 		return Actor:GetAttribute("Done") == true
@@ -241,52 +350,69 @@ const function RunOnNewActor(Code: string): {[string]: any}
 	return Attributes
 end
 
-const function CheckSetStack(SetStack: (Level: number, Index: number, Value: any) -> ())
-	const function Test()
-		local Secret = math.random(1, 1e6) + 0.5
-		const Expected = Secret + 1
-		const Index = table.find(Formatters.CheckExist("debug.getstack")(1), Secret)
-
-		assert(Index, "couldn't find the local in the stack")
-
-		SetStack(1, Index, Expected)
-
-		return Secret, Expected
-	end
-
-	const Result, Expected = Test()
-
-	assert(Result == Expected, `the local should've changed to {Expected}, got {Result}`)
-end
-
 const function CheckOffThreadHook()
 	const OffThreadHooks = getfenv().oth
-	const Target = Formatters.CheckExist("newcclosure")(function()
-		return "debUNC Original"
-	end)
+	const Target = math.ldexp
 
 	local InHookThread
 	local RootCallback
 	local OriginalThread
+	local HookThread
+	local Original
+	local OriginalResult
 
-	const Original = OffThreadHooks.hook(Target, function()
+	AddCleanup(function()
+		OffThreadHooks.unhook(Target)
+	end)
+
+	Original = OffThreadHooks.hook(Target, function(...)
+		OriginalResult = Original(...)
+		HookThread = coroutine.running()
 		InHookThread = OffThreadHooks.is_hook_thread()
 		RootCallback = OffThreadHooks.get_root_callback()
 		OriginalThread = OffThreadHooks.get_original_thread()
 		return "debUNC Hooked"
 	end)
 
-	const HookedResult = Target()
+	const HookedResult = Target(1, 2)
 
 	OffThreadHooks.unhook(Target)
 
 	Formatters.CheckReturnType(Original, "function")
 	Formatters.CheckEqual(HookedResult, "debUNC Hooked", "the hooked function's result")
-	Formatters.CheckEqual(Target(), "debUNC Original", "the result after unhooking")
+	Formatters.CheckEqual(OriginalResult, 4, "the original function's result")
+	Formatters.CheckEqual(Target(1, 2), 4, "the result after unhooking")
 	assert(InHookThread == true, "is_hook_thread returned false inside the hook")
 	assert(OffThreadHooks.is_hook_thread() == false, "is_hook_thread returned true outside of a hook")
 	assert(typeof(RootCallback) == "function", `get_root_callback should return a function inside the hook, got a {typeof(RootCallback)}`)
+	assert(OriginalThread == coroutine.running(), "get_original_thread didn't return the thread that called the function")
+	assert(HookThread ~= coroutine.running(), "the hook ran on the same thread as the caller")
 	assert(typeof(OriginalThread) == "thread", `get_original_thread should return a thread inside the hook, got a {typeof(OriginalThread)}`)
+
+	const NewCClosure = getfenv().newcclosure
+
+	if not NewCClosure then
+		return
+	end
+
+	const WrappedTarget = NewCClosure(function()
+		return "debUNC Original"
+	end)
+
+	AddCleanup(function()
+		OffThreadHooks.unhook(WrappedTarget)
+	end)
+
+	OffThreadHooks.hook(WrappedTarget, function()
+		return "debUNC Hooked"
+	end)
+
+	const WrappedResult = WrappedTarget()
+
+	OffThreadHooks.unhook(WrappedTarget)
+
+	Formatters.CheckEqual(WrappedResult, "debUNC Hooked", "the hooked newcclosure function's result")
+	Formatters.CheckEqual(WrappedTarget(), "debUNC Original", "the newcclosure function's result after unhooking")
 end
 
 const function CheckCommChannel()
@@ -334,10 +460,30 @@ const function CheckClipboard()
 end
 
 const function CheckScriptThread()
-	const LocalScript = Player.PlayerScripts:FindFirstChildWhichIsA("LocalScript", true)
-	const Thread = Formatters.CheckExist("getscriptthread")(LocalScript)
+	const GetScriptThread = Formatters.CheckExist("getscriptthread")
+
+	local LocalScript
+	local Thread
+
+	for _, Descendant in GetPlayerScripts():GetDescendants() do
+		if not Descendant:IsA("LocalScript") then
+			continue
+		end
+
+		LocalScript = Descendant
+		Thread = GetScriptThread(Descendant)
+
+		if Thread then
+			break
+		end
+	end
+
+	if Thread == nil then
+		error({Skipped = "no LocalScript has a running thread right now"})
+	end
 
 	assert(typeof(Thread) == "thread", `getscriptthread should return a thread, got a {typeof(Thread)}`)
+	assert(Formatters.CheckExist("getscriptfromthread")(coroutine.running()) == nil, "getscriptfromthread should return nil for the thread running this test")
 	assert(Formatters.CheckExist("getscriptfromthread")(Thread) == LocalScript, "getscriptfromthread didn't give back the script the thread belongs to")
 end
 
@@ -356,6 +502,14 @@ const function CheckProtoHook()
 	const Proto = Formatters.CheckExist("debug.getproto")(Outer, 1)
 
 	assert(IsProtoHooked(Proto) == false, "isprotohooked returned true before the proto was hooked")
+
+	AddCleanup(function()
+		if not IsProtoHooked(Proto) then
+			return
+		end
+
+		getfenv().restoreproto(Proto)
+	end)
 
 	HookProto(Proto, function()
 		return "debUNC Hooked"
@@ -380,7 +534,47 @@ const function GetRootPart(): BasePart?
 		return RootPart ~= nil
 	end, 10)
 
+	assert(RootPart, "your character didn't load within 10 seconds")
+
 	return RootPart
+end
+
+const TestImage = buffer.tostring(EncodingService:Base64Decode(buffer.fromstring(
+	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+)))
+
+const function GetAssetStatus(AssetId: string): Enum.AssetFetchStatus?
+	const ImageLabel = Instance.new("ImageLabel")
+
+	ImageLabel.Image = AssetId
+
+	local FetchStatus
+
+	pcall(function()
+		game:GetService("ContentProvider"):PreloadAsync({ImageLabel}, function(_, Status)
+			FetchStatus = Status
+		end)
+	end)
+
+	ImageLabel:Destroy()
+
+	return FetchStatus
+end
+
+const function CheckWrongKey(Crypt: any, Encrypted: string, InitializationVector: string, Text: string)
+	const Success, Result = pcall(Crypt.decrypt, Encrypted, Crypt.generatekey(), InitializationVector)
+
+	assert(not Success or Result ~= Text, "decrypting with the wrong key still gave back the original text")
+end
+
+const function FindFingerprintHeader(Headers: {[string]: any}): string?
+	for Header in Headers do
+		if Header:lower():find("fingerprint") then
+			return Header
+		end
+	end
+
+	return nil
 end
 
 const function FindConstant(TestedFunction: Function, Value: any): number?
@@ -442,6 +636,16 @@ const Tests: any = {
 	getgenv = {
 		Test = function()
 			const Environment = getfenv().getgenv()
+			const Key = `debUNC{math.random(1, 1e6)}`
+			const Value = math.random()
+
+			Environment[Key] = Value
+
+			const Seen = loadstring(`return {Key}`)()
+
+			Environment[Key] = nil
+
+			Formatters.CheckEqual(Seen, Value, "a global set in the environment and read by another chunk")
 
 			for FunctionName in getfenv() do
 				assert(Environment[FunctionName], `missing '{FunctionName}'`)
@@ -459,6 +663,8 @@ const Tests: any = {
 			const ThreadEnvironment = GetThreadEnvironment(task.spawn(function() end))
 
 			Formatters.CheckReturnType(ThreadEnvironment, "table")
+
+			assert(ThreadEnvironment == getfenv(), "a thread started by this script should have the same environment as it")
 
 			for FunctionName in ThreadEnvironment do
 				assert(getfenv()[FunctionName], `the thread environment has '{FunctionName}' but getfenv() doesn't`)
@@ -507,11 +713,13 @@ const Tests: any = {
 
 			Formatters.CheckExist("writefile")(FileName, "Test")
 
-			const Exists = getfenv().isfile(FileName)
+			const IsFile = getfenv().isfile
+			const Exists = IsFile(FileName)
 
 			RemovePath("delfile", FileName)
 
 			assert(Exists, "failed to find the file")
+			assert(IsFile(`Missing_{math.random()}.txt`) == false, "found a file that doesn't exist")
 		end,
 	},
 
@@ -531,12 +739,12 @@ const Tests: any = {
 
 			AppendFile(FileName, "Append")
 
-			const HasAppend = ReadFile(FileName):find("Append")
+			const Result = ReadFile(FileName)
 
 			RemovePath("delfile", FileName)
 
 			assert(Created, "failed to create the file")
-			assert(HasAppend, "failed to add to the existing file")
+			Formatters.CheckEqual(Result, `{GeneratedResult}Append`, "the file's text after adding to it")
 		end,
 	},
 
@@ -545,7 +753,7 @@ const Tests: any = {
 			const ListFiles: (Path: string) -> {string} = getfenv().listfiles
 
 			const FolderName = `Folder_{math.random()}`
-			const FileName = `{FolderName}\\File_{math.random()}.txt`
+			const FileName = `{FolderName}/File_{math.random()}.txt`
 
 			Formatters.CheckExist("makefolder")(FolderName)
 
@@ -558,7 +766,7 @@ const Tests: any = {
 			RemovePath("delfolder", FolderName)
 
 			assert(ReturnedTable, "didn't return a table")
-			assert(Result[1] == FileName, "didn't find the written file")
+			assert(#Result == 1 and Result[1]:gsub("\\", "/") == FileName, "didn't find the written file")
 		end,
 	},
 
@@ -611,7 +819,7 @@ const Tests: any = {
 		Test = function()
 			const IsFolder: (Path: string) -> boolean = getfenv().isfolder
 
-			assert(IsFolder("???") == false, "didn't return false for a folder that doesn't exist")
+			assert(IsFolder(`Missing_{math.random()}`) == false, "didn't return false for a folder that doesn't exist")
 
 			const FolderName = `Folder_{math.random()}`
 
@@ -648,7 +856,13 @@ const Tests: any = {
 			const RestoreFunction = getfenv().restorefunction
 
 			const function HookAndRestore(CClosure: any, Hook: Function, ...): (boolean, any)
-				HookFunction(CClosure, Hook)
+				const Original = HookFunction(CClosure, Hook)
+
+				AddCleanup(function()
+					if not pcall(RestoreFunction, CClosure) then
+						HookFunction(CClosure, Original)
+					end
+				end)
 
 				const Success, Result = pcall(CClosure, ...)
 
@@ -699,14 +913,12 @@ const Tests: any = {
 				const Success, Result = HookAndRestore(tostring, tonumber, "5")
 
 				assert(Success and Result == 5, "expected tostring to return a number when hooked as tonumber and given '5'")
-			end
 
-			if RestoreFunction then
-				const Success, Result = HookAndRestore(tonumber, function()
+				const NumberSuccess, NumberResult = HookAndRestore(tonumber, function()
 					return true
 				end)
 
-				assert(Success and Result == true, "expected tonumber to return a boolean when hooked as a LuaClosure that returns true")
+				assert(NumberSuccess and NumberResult == true, "expected tonumber to return a boolean when hooked as a LuaClosure that returns true")
 			end
 
 			if RestoreFunction and NewCClosure then
@@ -753,8 +965,10 @@ const Tests: any = {
 		Test = function()
 			const IsCClosure: (Function: (any?) -> ()) -> (boolean) = getfenv().iscclosure
 
-			assert(IsCClosure(assert) == true, "function 'assert' is a c closure")
-			assert(not IsCClosure(function() end), "a function created in the executor isn't written in C")
+			assert(IsCClosure(assert) == true, "should return true for assert, which is a C closure")
+			assert(IsCClosure(print) == true, "should return true for print, which is a C closure")
+			assert(IsCClosure(task.wait) == true, "should return true for task.wait, which is a C closure")
+			assert(not IsCClosure(function() end), "should return false for a function made in the executor")
 		end,
 	},
 
@@ -787,8 +1001,8 @@ const Tests: any = {
 				Source = 1,
 				Line = 2,
 				Name = 3,
-				Params = 4,
-				VarArgs = 5,
+				Parameters = 4,
+				VariableArguments = 5,
 			} do
 				assert(
 					ClonedInfo[Position] == OriginalInfo[Position],
@@ -839,37 +1053,37 @@ const Tests: any = {
 			assert(Headers["X-Debunc"] == Marker, "the header that was sent didn't come back, so the request may not have really gone out")
 			assert(Decoded.args and Decoded.args.debunc == Marker, "the query that was sent didn't come back, so the request may not have really gone out")
 
-			local Fingerprint
+			const HeaderNames = {}
 
-			for Header: string, Info in Headers do
-				if not Header:lower():find("fingerprint") then
-					continue
-				end
-
-				Fingerprint = Info
-				break
+			for Header in Headers do
+				table.insert(HeaderNames, Header)
 			end
 
-			assert(Fingerprint, `missing the fingerprint (hwid) header, got {HttpService:JSONEncode(Headers)}`)
+			assert(FindFingerprintHeader(Headers), `missing the fingerprint (hwid) header, got {table.concat(HeaderNames, ", ")}`)
 		end,
 	},
 
 	require = {
 		Test = function()
-			const Module = game:FindFirstChildWhichIsA("ModuleScript", true)
-
-			assert(Module, "failed to find a module, retry this test")
-
+			const Module = GetPlayerModule()
 			const Success, Result = pcall(require, Module)
 
 			assert(Success, `expected success when requiring '{Module.Name}', got the error {Result}`)
-			assert(Result ~= nil, "expected a value to be returned, got nil")
+			Formatters.CheckReturnType(Result, "table")
+			assert(require(Module) == Result, "requiring the same module twice gave different results")
 		end,
 	},
 
 	fireclickdetector = {
 		Test = function()
-			const ClickDetector = Instance.new("ClickDetector")
+			const Part = Instance.new("Part")
+			const ClickDetector = Instance.new("ClickDetector", Part)
+
+			Part.Anchored = true
+			Part.Parent = workspace
+			AddCleanup(function()
+				Part:Destroy()
+			end)
 
 			local WasClicked = false
 
@@ -879,9 +1093,13 @@ const Tests: any = {
 
 			getfenv().fireclickdetector(ClickDetector)
 
-			assert(WaitFor(function()
+			const Clicked = WaitFor(function()
 				return WasClicked
-			end, 1), "the connection wasn't fired")
+			end, 1)
+
+			Part:Destroy()
+
+			assert(Clicked, "the connection wasn't fired")
 		end,
 	},
 
@@ -889,6 +1107,9 @@ const Tests: any = {
 		Test = function()
 			const Part = Instance.new("Part")
 			Part.Parent = workspace
+			AddCleanup(function()
+				Part:Destroy()
+			end)
 
 			const ProximityPrompt = Instance.new("ProximityPrompt")
 			ProximityPrompt.Parent = Part
@@ -937,13 +1158,26 @@ const Tests: any = {
 			Formatters.CheckReturnType(LoadedModules, "table")
 
 			assert(
-				not table.find(LoadedModules, game:GetService("StarterPlayer").StarterPlayerScripts.PlayerModule),
+				not table.find(LoadedModules, game:GetService("StarterPlayer").StarterPlayerScripts:FindFirstChild("PlayerModule") or false),
 				"StarterPlayerScripts.PlayerModule shouldn't be in the returned table"
 			)
 			assert(
-				table.find(LoadedModules, Player.PlayerScripts.PlayerModule),
+				table.find(LoadedModules, GetPlayerModule()),
 				"couldn't find 'PlayerScripts.PlayerModule' in the returned table"
 			)
+
+			const Clone = GetPlayerModule().CommonUtils.CameraWrapper:Clone()
+
+			Clone.Parent = Player:FindFirstChild("PlayerScripts") or Player.PlayerGui
+			AddCleanup(function()
+				Clone:Destroy()
+			end)
+
+			const FoundClone = table.find(getfenv().getloadedmodules(), Clone)
+
+			Clone:Destroy()
+
+			assert(not FoundClone, "found a module that was never required")
 		end,
 		ReturnType = "table",
 	},
@@ -993,7 +1227,11 @@ const Tests: any = {
 
 	getscripts = {
 		Test = function()
-			for _, CurrentScript: BaseScript | ModuleScript in getfenv().getscripts() do
+			const Scripts = getfenv().getscripts()
+
+			assert(table.find(Scripts, GetPlayerModule()), "didn't find PlayerModule")
+
+			for _, CurrentScript: BaseScript | ModuleScript in Scripts do
 				assert(typeof(CurrentScript) == "Instance", `expected an instance, got {typeof(CurrentScript)} '{CurrentScript}'`)
 				assert(
 					CurrentScript:IsA("BaseScript") or CurrentScript:IsA("ModuleScript"),
@@ -1022,6 +1260,10 @@ const Tests: any = {
 			end
 
 			const FPSCap = math.max(math.floor(MeasureFPS() / 4), 5)
+
+			AddCleanup(function()
+				SetFPSCap(0)
+			end)
 
 			SetFPSCap(FPSCap)
 			task.wait(0.5)
@@ -1070,6 +1312,10 @@ const Tests: any = {
 			const GetFPSCap: () -> number = getfenv().getfpscap
 			const SetFPSCap: (FPSCap: number) -> () = Formatters.CheckExist("setfpscap")
 
+			AddCleanup(function()
+				SetFPSCap(0)
+			end)
+
 			SetFPSCap(10)
 
 			const Result = GetFPSCap()
@@ -1092,6 +1338,12 @@ const Tests: any = {
 			assert(debug.info(NewClosure, "s") == "[C]", `expected the returned closure to be in [C], got '{debug.info(NewClosure, "s")}'`)
 			assert(NewClosure ~= TestFunction, "the returned function is the same as the function given")
 			assert(NewClosure() == "debunc", "failed to return the expected value")
+			assert(NewClosure() == "debunc", "failed to return the expected value on the second call")
+
+			Formatters.CheckEqual(getfenv().newcclosure(function(First, Second)
+				task.wait()
+				return First + Second
+			end)(2, 3), 5, "a wrapped function that yields")
 		end,
 	},
 
@@ -1099,15 +1351,15 @@ const Tests: any = {
 		Test = function()
 			const IsScriptable: (Object: Object, Property: string) -> boolean = getfenv().isscriptable
 
-			assert(IsScriptable(game, "Parent") == true, "game.Parent is scriptable")
+			assert(IsScriptable(game, "Parent") == true, "should return true for game.Parent")
 
-			const HiddenSuccess, HiddenResult = pcall(IsScriptable, game, "SimulationRadius")
+			const HiddenSuccess, HiddenResult = pcall(IsScriptable, Instance.new("Fire"), "size_xml")
 
-			assert(not HiddenSuccess or HiddenResult == false, "game.SimulationRadius is a hidden property, and isn't scriptable")
+			assert(not HiddenSuccess or HiddenResult == false, "should return false for Fire.size_xml, which is a hidden property")
 
 			const InvalidSuccess, InvalidResult = pcall(IsScriptable, game, "a")
 
-			assert(not InvalidSuccess or not InvalidResult, "game.a isn't a valid property")
+			assert(not InvalidSuccess or not InvalidResult, "should return false or error for game.a, which isn't a real property")
 		end,
 	},
 
@@ -1117,14 +1369,15 @@ const Tests: any = {
 
 			const RootPart = GetRootPart()
 
-			assert(RootPart, "your character didn't load within 10 seconds")
-
 			const Pad = Instance.new("Part")
 
 			Pad.Anchored = true
 			Pad.CanCollide = false
 			Pad.Position = RootPart.Position + Vector3.new(0, 100, 0)
 			Pad.Parent = workspace
+			AddCleanup(function()
+				Pad:Destroy()
+			end)
 
 			local Complete = false
 
@@ -1136,6 +1389,12 @@ const Tests: any = {
 				Complete = true
 			end)
 
+			local Ended = false
+
+			Pad.TouchEnded:Connect(function(Part)
+				Ended = Ended or RootPart == Part
+			end)
+
 			FireTouchInterest(Pad, RootPart, 0)
 			FireTouchInterest(Pad, RootPart, 1)
 
@@ -1143,9 +1402,14 @@ const Tests: any = {
 				return Complete
 			end, 5)
 
+			const TouchEnded = WaitFor(function()
+				return Ended
+			end, 5)
+
 			Pad:Destroy()
 
 			assert(Touched, "failed to fire the touched event within 5 seconds")
+			assert(TouchEnded, "failed to fire the touch ended event within 5 seconds")
 		end,
 	},
 
@@ -1191,6 +1455,14 @@ const Tests: any = {
 
 			Socket.OnClose:Once(function()
 				Closed = true
+			end)
+
+			AddCleanup(function()
+				Connection:Disconnect()
+
+				if not Closed then
+					Socket:Close()
+				end
 			end)
 
 			Socket:Send(Marker)
@@ -1253,6 +1525,7 @@ const Tests: any = {
 			const ClonedReference = getfenv().cloneref(Part) :: Part
 			const NewPosition = Vector3.new(69, 67, 420)
 
+			assert(typeof(ClonedReference) == "Instance", `expected an Instance, got a {typeof(ClonedReference)}`)
 			assert(not rawequal(ClonedReference, Part), "the cloned reference shouldn't be the same as the original reference")
 
 			Part.Position = NewPosition
@@ -1270,6 +1543,7 @@ const Tests: any = {
 			const Clone = Formatters.CheckExist("cloneref")(Part)
 
 			assert(not rawequal(Part, Clone), "the clone shouldn't be equal to the original")
+			assert(getfenv().compareinstances(Part, Instance.new("Part")) == false, "two different parts shouldn't be equal")
 			assert(getfenv().compareinstances(Part, Clone), "the clone should be equal to the original when using compareinstances()")
 		end,
 	},
@@ -1281,7 +1555,7 @@ const Tests: any = {
 			assert(CheckCaller() == true, "should return true when called by the executor")
 
 			const FoundModule, CameraModule = pcall(function()
-				return Player.PlayerScripts.PlayerModule.CameraModule
+				return GetPlayerModule().CameraModule
 			end)
 
 			assert(FoundModule, "BaseCamera doesn't exist, go to a normal game")
@@ -1304,6 +1578,10 @@ const Tests: any = {
 			end, 2)
 
 			Camera.GetSubjectPosition = Old
+
+			if Called == nil then
+				error({Skipped = "the camera never called the hooked function", Environment = true})
+			end
 
 			assert(Called == false, "should return false when called by the CameraModule.BaseCamera")
 		end,
@@ -1385,6 +1663,7 @@ const Tests: any = {
 			const GeneratedString = CreateRandomString(math.random(16, 256))
 
 			assert(getfenv().lz4decompress("`debUNC", 6) == "debUNC", "failed to decompress the string with lz4")
+			Formatters.CheckEqual(getfenv().lz4decompress("\x1Aa\x01\x00\x50aaaaa", 20), string.rep("a", 20), "a known compressed block")
 			Formatters.CheckEqual(
 				getfenv().lz4decompress(Formatters.CheckExist("lz4compress")(GeneratedString), #GeneratedString),
 				GeneratedString,
@@ -1395,26 +1674,47 @@ const Tests: any = {
 
 	["debug.getproto"] = {
 		Test = function()
-			assert(Formatters.CheckExist("debug.getproto")(function()
+			const Proto = getfenv().debug.getproto(function()
 				const function Inner()
 					return "debUNC"
 				end
-			end, 1), "didn't return anything")
+			end, 1)
+
+			assert(Proto, "didn't return anything")
+
+			if typeof(Proto) ~= "function" then
+				return
+			end
+
+			Formatters.CheckEqual(debug.info(Proto, "n"), "Inner", "the name of the inner function")
 		end,
 	},
 
 	["debug.getprotos"] = {
 		Test = function()
-			const Protos = Formatters.CheckExist("debug.getprotos")(function()
-				const function Inner()
-					return "debUNC"
+			const Protos = getfenv().debug.getprotos(function()
+				const function First()
+					return "debUNC First"
+				end
+
+				const function Second()
+					return "debUNC Second"
 				end
 			end)
 
 			Formatters.CheckReturnType(Protos, "table")
+			Formatters.CheckEqual(#Protos, 2, "the number of inner functions")
 
-			assert(Protos[1], "a proto doesn't exist in the first index of the returned table")
-			assert(not Protos[2], "there should be nothing in the second index of the returned table, as only 1 proto exists")
+			for Index, Name in {
+				"First",
+				"Second",
+			} do
+				if typeof(Protos[Index]) ~= "function" then
+					continue
+				end
+
+				Formatters.CheckEqual(debug.info(Protos[Index], "n"), Name, "the name of the inner function")
+			end
 		end,
 	},
 
@@ -1429,51 +1729,51 @@ const Tests: any = {
 				Detected = GetNamecallMethod()
 			end
 
-			const Success, Result = pcall(function()
-				ProxyTest:debUNC()
-			end)
-
-			const OutsideMethod = GetNamecallMethod()
+			const Method = `debUNC{math.random(1, 1e6)}`
+			const Success, Result = pcall(loadstring(`local ProxyTest = ... ProxyTest:{Method}()`) :: Function, ProxyTest)
 
 			assert(Success, `errored while calling the new proxy with namecall, got {Result}`)
-			assert(Detected == "debUNC", `getnamecallmethod gave '{Detected}' instead of 'debUNC' inside __namecall`)
-			assert(OutsideMethod == "debUNC", `getnamecallmethod gave '{OutsideMethod}' instead of 'debUNC' outside __namecall`)
+			Formatters.CheckEqual(Detected, Method, "the namecall method inside __namecall")
 		end,
 	},
 
 	getcallingscript = {
 		Test = function()
-			const Success, CameraWrapper = pcall(require, Player.PlayerScripts.PlayerModule.CommonUtils.CameraWrapper)
+			const Success, CameraWrapper = pcall(require, GetPlayerModule().CommonUtils.CameraWrapper)
 
 			assert(Success, "your executor needs to support 'require' to run this test")
 
 			const GetCameraOriginal = CameraWrapper.getCamera
 			local CallingScript
+			local Called = false
 
 			CameraWrapper.getCamera = function(...)
-				CallingScript = getfenv().getcallingscript()
 				CameraWrapper.getCamera = GetCameraOriginal
+				Called = true
+				CallingScript = getfenv().getcallingscript()
 				return GetCameraOriginal(...)
 			end
 
-			WaitFor(function()
-				return CallingScript ~= nil
-			end, 2)
+			if not WaitFor(function()
+				return Called
+			end, 2) then
+				CameraWrapper.getCamera = GetCameraOriginal
+				error({Skipped = "the camera never called the hooked function", Environment = true})
+			end
 
 			assert(CallingScript, "returned nil when it should've returned a script")
 			assert(
-				CallingScript:IsDescendantOf(Player.PlayerScripts.PlayerModule),
+				CallingScript:IsDescendantOf(GetPlayerModule()),
 				`the calling script of CameraWrapper.getCamera should be inside of PlayerModule, got '{CallingScript}'`
 			)
 		end,
 	},
 
 	isnetworkowner = {
+		RunLast = true,
 		Test = function()
 			const IsNetworkOwner = getfenv().isnetworkowner
 			const RootPart = GetRootPart()
-
-			assert(RootPart, "your character didn't load within 10 seconds")
 			assert(IsNetworkOwner(RootPart) == true, "should return true on your HumanoidRootPart")
 
 			for _, Descendant in workspace:GetDescendants() do
@@ -1495,30 +1795,24 @@ const Tests: any = {
 
 			const RootPart = GetRootPart()
 
-			assert(RootPart, "your character didn't load within 10 seconds")
-
 			const Character = RootPart.Parent :: Model
-			const Humanoid = Character:FindFirstChildWhichIsA("Humanoid") :: Humanoid
-
 			local Died = false
 
-			Humanoid.Died:Once(function()
+			(Character:FindFirstChildWhichIsA("Humanoid") :: Humanoid).Died:Once(function()
 				Died = true
 			end)
 
 			ReplicateSignal(Player.Kill)
 
-			const Killed = WaitFor(function()
+			assert(WaitFor(function()
 				return Died
-			end, 5)
+			end, 5), "you weren't killed within 5 seconds after replicating Player.Kill")
 
 			WaitFor(function()
 				const NewCharacter = Player.Character
 
 				return NewCharacter ~= nil and NewCharacter ~= Character and NewCharacter:FindFirstChild("HumanoidRootPart") ~= nil
 			end, game:GetService("Players").RespawnTime + 10)
-
-			assert(Killed, "you weren't killed within 5 seconds after replicating Player.Kill")
 		end,
 		RunLast = true,
 	},
@@ -1552,6 +1846,14 @@ const Tests: any = {
 			assert(typeof(ExecutorVersion) == "string", "the second returned value, the executor's version, should be a string")
 			assert(Name ~= "", "the executor's name is empty")
 			assert(ExecutorVersion:find("%d"), `the executor's version should have a number in it, got '{ExecutorVersion}'`)
+
+			assert(
+				ExecutorVersion:lower():gsub("^v", "") ~= ({
+					Lucid = "1.0.0",
+					Bunni = "2.0",
+				})[Name],
+				`the version '{ExecutorVersion}' never changes between updates, it should be the real version of each release`
+			)
 		end,
 	},
 
@@ -1578,14 +1880,19 @@ const Tests: any = {
 				return
 			end
 
-			for Header: string, Value in game:GetService("HttpService"):JSONDecode(Result.Body).headers do
-				if not Header:lower():find("fingerprint") then
-					continue
-				end
+			const Decoded, Response = pcall(game:GetService("HttpService").JSONDecode, game:GetService("HttpService"), Result.Body)
 
-				assert(Value == HardwareId, `the hwid doesn't match the '{Header}' header that request sends`)
+			if not Decoded then
 				return
 			end
+
+			const Header = FindFingerprintHeader(Response.headers)
+
+			if not Header then
+				return
+			end
+
+			assert(Response.headers[Header] == HardwareId, `the hwid doesn't match the '{Header}' header that request sends`)
 		end,
 	},
 
@@ -1667,6 +1974,14 @@ const Tests: any = {
 
 			assert(CInfo.what == "C", ".what should be 'C' when used on task.wait")
 			assert(CInfo.name == "wait", ".name should be 'wait' when used on task.wait")
+
+			const function WithArguments(First, Second, ...) end
+
+			const Arguments = GetInfo(WithArguments)
+
+			assert(Arguments.func == WithArguments, ".func should be the function")
+			Formatters.CheckEqual(Arguments.numparams, 2, ".numparams")
+			Formatters.CheckEqual(Arguments.is_vararg, 1, ".is_vararg")
 		end,
 	},
 
@@ -1676,11 +1991,9 @@ const Tests: any = {
 			const ReadOnlyTable = ColorSequence :: any
 
 			const function ReadOnlyEditTest()
-				const Succes = pcall(function()
+				if not pcall(function()
 					ReadOnlyTable[1] = "debUNC"
-				end)
-
-				if not Succes then
+				end) then
 					return false
 				end
 
@@ -1693,6 +2006,10 @@ const Tests: any = {
 
 			assert(table.isfrozen(ReadOnlyTable), "ColorSequence isn't frozen")
 			assert(not ReadOnlyEditTest(), "shouldn't be able to write to ColorSequence while it's frozen")
+
+			AddCleanup(function()
+				table.freeze(ReadOnlyTable)
+			end)
 
 			SetReadOnly(ReadOnlyTable, false)
 
@@ -1723,8 +2040,8 @@ const Tests: any = {
 	getsenv = {
 		Test = function()
 			const GetScriptEnvironment: (Script: LocalScript) -> any = getfenv().getsenv
-			const PlayerScripts = Player.PlayerScripts
-			const CustomEnvironment = {debUNC = true}
+			const PlayerScripts = GetPlayerScripts()
+			const Value = math.random()
 
 			const function CreateNewModuleTest(SetParent: boolean)
 				const New = PlayerScripts.RbxCharacterSounds:Clone()
@@ -1740,12 +2057,15 @@ const Tests: any = {
 					end
 
 					Called = true
-					getfenv().setfenv(2, CustomEnvironment)
+					getfenv(2).debUNC = Value
 
 					return task.wait(9e9)
 				end
 
-				New.Parent = PlayerScripts
+				New.Parent = Player:FindFirstChild("PlayerScripts") or Player.PlayerGui
+				AddCleanup(function()
+					New:Destroy()
+				end)
 
 				return WaitFor(function()
 					return Called
@@ -1760,6 +2080,7 @@ const Tests: any = {
 			assert(Called, "the script took too long to respond")
 			assert(ScriptEnvironment, "getsenv returned nil")
 			assert(ScriptEnvironment.script == NewSoundsScript, ".script doesn't point to the script being used in the function call")
+			Formatters.CheckEqual(ScriptEnvironment.debUNC, Value, "a global set by the running script")
 
 			const NilParentCalled, NewSoundsNilScript = CreateNewModuleTest(true)
 			const NilParentEnvironment = NilParentCalled and GetScriptEnvironment(NewSoundsNilScript)
@@ -1775,25 +2096,25 @@ const Tests: any = {
 		Test = function()
 			const Decompile = getfenv().decompile
 			const GetScriptClosure = getfenv().getscriptclosure
-			const PlayerModule = game:GetService("StarterPlayer").StarterPlayerScripts.PlayerModule :: ModuleScript
-			const Result = Decompile(PlayerModule)
+			const CameraModule = GetPlayerModule().CameraModule
+			const Result = Decompile(CameraModule)
 
 			Formatters.CheckReturnType(Result, "string")
 
-			assert(Result:find("__index"), `couldn't find '__index' in the decompiled 'PlayerModule', it started with '{Result:sub(1, 100)}'`)
-			assert(Result:find("CameraModule"), "couldn't find 'CameraModule' in the decompiled 'PlayerModule'")
-			assert(Decompile(PlayerModule.CameraModule) ~= Result, "'PlayerModule' and 'CameraModule' decompiled to the same thing")
+			assert(not Result:find("\0", 1, true), "the result has null bytes, so it isn't readable code")
+			assert(Result:find("__index"), `couldn't find '__index' in the decompiled 'CameraModule', it started with '{Result:sub(1, 300)}'`)
+			assert(Decompile(CameraModule.Parent.ControlModule) ~= Result, "'CameraModule' and 'ControlModule' decompiled to the same thing")
 
 			if not GetScriptClosure then
 				return
 			end
 
-			for _, Constant in Formatters.CheckExist("debug.getconstants")(GetScriptClosure(PlayerModule)) do
-				if typeof(Constant) ~= "string" or #Constant < 5 then
+			for _, Constant in Formatters.CheckExist("debug.getconstants")(GetScriptClosure(CameraModule)) do
+				if typeof(Constant) ~= "string" or #Constant < 5 or not Constant:match("^[%w_]+$") then
 					continue
 				end
 
-				assert(Result:find(Constant, 1, true), `couldn't find the string '{Constant}' from the script's own constants in the decompiled 'PlayerModule'`)
+				assert(Result:find(Constant, 1, true), `couldn't find the string '{Constant}' from the script's own constants in the decompiled 'CameraModule'`)
 			end
 		end,
 	},
@@ -1864,8 +2185,8 @@ const Tests: any = {
 			getfenv().mousemoverel(25, 25)
 
 			assert(WaitFor(function()
-				return UserInputService:GetMouseLocation() ~= StartLocation
-			end, 1), "the mouse didn't move")
+				return (UserInputService:GetMouseLocation() - StartLocation - Vector2.new(25, 25)).Magnitude < 10
+			end, 1), `the mouse moved by {UserInputService:GetMouseLocation() - StartLocation} instead of about 25, 25`)
 		end,
 		RunLast = true,
 	},
@@ -1883,19 +2204,20 @@ const Tests: any = {
 
 			const MouseScroll = getfenv().mousescroll
 
-			const function CheckScroll(Input)
-				return Input.UserInputType == Enum.UserInputType.MouseWheel
-			end
-
-			const Detected = WaitForInput(UserInputService.InputChanged, CheckScroll, function()
+			const Detected = WaitForInput(UserInputService.InputChanged, function(Input)
+				return Input.UserInputType == Enum.UserInputType.MouseWheel and Input.Position.Z > 0
+			end, function()
 				MouseScroll(120)
 			end)
 
-			WaitForInput(UserInputService.InputChanged, CheckScroll, function()
+			const DetectedDown = WaitForInput(UserInputService.InputChanged, function(Input)
+				return Input.UserInputType == Enum.UserInputType.MouseWheel and Input.Position.Z < 0
+			end, function()
 				MouseScroll(-120)
 			end)
 
-			assert(Detected, "the scroll wasn't detected")
+			assert(Detected, "the scroll up wasn't detected")
+			assert(DetectedDown, "the scroll down wasn't detected")
 		end,
 		RunLast = true,
 	},
@@ -1918,6 +2240,11 @@ const Tests: any = {
 		Test = function()
 			const Fire = Instance.new("Fire")
 			const NewValue = math.random(6, 20)
+			const Part = Instance.new("Part")
+
+			getfenv().sethiddenproperty(Part, "Transparency", 0.5)
+
+			Formatters.CheckEqual(Part.Transparency, 0.5, "a part's Transparency")
 
 			getfenv().sethiddenproperty(Fire, "size_xml", NewValue)
 
@@ -1927,9 +2254,12 @@ const Tests: any = {
 
 	gethiddenproperty = {
 		Test = function()
-			const Value = getfenv().gethiddenproperty(Player, "SimulationRadius")
+			const Fire = Instance.new("Fire")
+			const Size = math.random(6, 20)
 
-			assert(typeof(Value) == "number", `expected SimulationRadius to be a number, got {typeof(Value)}`)
+			Fire.Size = Size
+
+			Formatters.CheckEqual(getfenv().gethiddenproperty(Fire, "size_xml"), Size, "size_xml")
 		end,
 	},
 
@@ -1964,10 +2294,20 @@ const Tests: any = {
 			const SetThreadIdentity = Formatters.CheckExist("setthreadidentity")
 			const Original = GetThreadIdentity()
 
+			coroutine.resume(coroutine.create(function()
+				SetThreadIdentity(3)
+			end))
+
+			Formatters.CheckEqual(GetThreadIdentity(), Original, "this thread's identity after another thread changed its own")
+
 			local PrintedIdentity
 
 			const Connection = game:GetService("LogService").MessageOut:Connect(function(Message)
 				PrintedIdentity = PrintedIdentity or tonumber(Message:match("Current identity is (%d+)"))
+			end)
+
+			AddCleanup(function()
+				Connection:Disconnect()
 			end)
 
 			SetThreadIdentity(2)
@@ -2050,6 +2390,7 @@ const Tests: any = {
 			end
 
 			assert(FilterGc("table", {Keys = {Key}}, true) == Table, "didn't find the table by its key")
+			Formatters.CheckEqual(#FilterGc("table", {Keys = {Key}}), 1, "the number of tables with that key")
 			assert(table.find(FilterGc("function", {
 				Name = "TestFunction",
 				IgnoreExecutor = false,
@@ -2059,15 +2400,23 @@ const Tests: any = {
 
 	getmenv = {
 		Test = function()
-			const PlayerModule = Player.PlayerScripts.PlayerModule
+			const PlayerModule = GetPlayerModule()
+			const CameraModule = PlayerModule.CameraModule
 
-			require(PlayerModule)
+			require(CameraModule)
 
-			const Environment = getfenv().getmenv(PlayerModule)
+			const Environment = getfenv().getmenv(CameraModule)
 
 			Formatters.CheckReturnType(Environment, "table")
 
-			assert(Environment.script == PlayerModule, ".script doesn't point to the module")
+			assert(Environment.script == CameraModule, ".script doesn't point to the module")
+
+			const CameraWrapper = PlayerModule.CommonUtils.CameraWrapper
+
+			assert(
+				getfenv().getmenv(CameraWrapper) == getfenv(require(CameraWrapper).getCamera),
+				"didn't return the environment that the module's functions use"
+			)
 		end,
 	},
 
@@ -2098,100 +2447,116 @@ const Tests: any = {
 
 	["debug.setstack"] = {
 		Test = function()
-			CheckSetStack(getfenv().debug.setstack)
-		end,
-	},
+			const function Test()
+				local Secret = math.random(1, 1e6) + 0.5
+				const Expected = Secret + 1
+				const Index = table.find(Formatters.CheckExist("debug.getstack")(1), Secret)
 
-	setstack = {
-		Test = function()
-			CheckSetStack(getfenv().setstack)
+				assert(Index, "couldn't find the local in the stack")
+
+				getfenv().debug.setstack(1, Index, Expected)
+
+				return Secret, Expected
+			end
+
+			const Result, Expected = Test()
+
+			assert(Result == Expected, `the local should've changed to {Expected}, got {Result}`)
 		end,
 	},
 
 	["debug.getupvalues"] = {
 		Test = function()
-			const Upvalue = {}
+			const First, Second = {}, {}
 
 			const function Test()
-				return Upvalue
+				error("debUNC")
+				return First, Second
 			end
 
-			assert(table.find(getfenv().debug.getupvalues(Test), Upvalue), "didn't find the upvalue")
+			const Upvalues = getfenv().debug.getupvalues(Test)
+
+			assert(table.find(Upvalues, First) and table.find(Upvalues, Second), "didn't find both upvalues")
 		end,
 	},
 
 	["debug.getupvalue"] = {
 		Test = function()
-			const Upvalue = {}
+			const First, Second = {}, {}
 
 			const function Test()
-				return Upvalue
+				error("debUNC")
+				return First, Second
 			end
 
-			assert(getfenv().debug.getupvalue(Test, 1) == Upvalue, "didn't return the upvalue")
+			const GetUpvalue = getfenv().debug.getupvalue
+
+			assert(GetUpvalue(Test, 1) == First, "didn't return the first upvalue")
+			assert(GetUpvalue(Test, 2) == Second, "didn't return the second upvalue")
 		end,
 	},
 
 	["debug.setupvalue"] = {
 		Test = function()
-			const Upvalue = {}
+			local Upvalue = {}
 
 			const function Test()
+				return Upvalue
+			end
+
+			const function Other()
+				Upvalue = Upvalue
 				return Upvalue
 			end
 
 			getfenv().debug.setupvalue(Test, 1, "debUNC")
 
 			assert(Test() == "debUNC", "the upvalue wasn't changed")
+			assert(Other() == "debUNC", "another function using the same upvalue didn't see the change")
 		end,
 	},
 
 	["debug.getconstants"] = {
 		Test = function()
-			const function Test()
-				print("debUNC Constant")
-			end
+			const Constant = `debUNC{math.random(1, 1e6)}`
+			const Test = loadstring(`print("{Constant}")`) :: Function
 
 			Formatters.CheckReturnType(getfenv().debug.getconstants(Test), "table")
 
-			assert(FindConstant(Test, "debUNC Constant"), "didn't find the string constant")
+			assert(FindConstant(Test, Constant), "didn't find the string constant")
 		end,
 	},
 
 	["debug.getconstant"] = {
 		Test = function()
-			const function Test()
-				print("debUNC Constant")
-			end
+			const Constant = `debUNC{math.random(1, 1e6)}`
+			const Test = loadstring(`print("{Constant}")`) :: Function
 
-			assert(
-				getfenv().debug.getconstant(Test, FindConstant(Test, "debUNC Constant")) == "debUNC Constant",
-				"didn't return the string constant"
-			)
+			Formatters.CheckEqual(getfenv().debug.getconstant(Test, FindConstant(Test, Constant)), Constant, "the string constant")
 		end,
 	},
 
 	["debug.setconstant"] = {
 		Test = function()
-			const function Test()
-				return "debUNC Before"
-			end
+			const Test = loadstring("local Value = ... return `debUNC Before {Value}`") :: Function
+			const Other = loadstring("local Value = ... return 'debUNC Before' .. Value") :: Function
 
-			getfenv().debug.setconstant(Test, FindConstant(Test, "debUNC Before"), "debUNC After")
+			getfenv().debug.setconstant(Other, FindConstant(Other, "debUNC Before"), "debUNC After")
 
-			assert(Test() == "debUNC After", "the constant wasn't changed")
+			assert(Test("x") == "debUNC Before x", "changing a constant affected a different function")
+			Formatters.CheckEqual(Other("x"), "debUNC Afterx", "the function's result with the changed constant")
 		end,
 	},
 
 	["debug.getregistry"] = {
 		Test = function()
-			const Registry = getfenv().debug.getregistry()
+			const Values = getfenv().debug.getregistry()
 
-			Formatters.CheckReturnType(Registry, "table")
+			Formatters.CheckReturnType(Values, "table")
 
 			local HasThread = false
 
-			for _, Value in Registry do
+			for _, Value in Values do
 				if typeof(Value) ~= "thread" then
 					continue
 				end
@@ -2217,6 +2582,16 @@ const Tests: any = {
 			assert(RandomHash:match("^%x+$") and #RandomHash == 64, `a sha256 hash should be 64 hex characters, got '{RandomHash}'`)
 			assert(Hash(GeneratedString, "sha256") == RandomHash, "hashing the same random string twice gave different results")
 			assert(Hash(`{GeneratedString}x`, "sha256") ~= RandomHash, "two different strings gave the same hash")
+
+			const Expected = EncodingService:ComputeBufferHash(buffer.fromstring(GeneratedString), Enum.HashAlgorithm.Sha256)
+
+			Formatters.CheckEqual(
+				RandomHash:lower(),
+				buffer.tostring(Expected):gsub(".", function(Character)
+					return string.format("%02x", Character:byte())
+				end),
+				"the sha256 hash of a random string"
+			)
 		end,
 	},
 
@@ -2244,24 +2619,34 @@ const Tests: any = {
 			const Text = `debUNC {math.random()}`
 			const Encrypted, InitializationVector = Crypt.encrypt(Text, Key)
 
-			assert(Encrypted ~= Text, "the encrypted text is the same as the original")
+			assert(not Encrypted:find(Text, 1, true), "the encrypted text still has the original text in it")
 			assert(Crypt.decrypt(Encrypted, Key, InitializationVector) == Text, "decrypting didn't give back the original text")
 			assert(Crypt.encrypt(Text, Key) ~= Encrypted, "encrypting the same text twice gave the same result, so it isn't using a new iv each time")
 
-			const WrongKeySuccess, WrongKeyResult = pcall(Crypt.decrypt, Encrypted, Crypt.generatekey(), InitializationVector)
-
-			assert(not WrongKeySuccess or WrongKeyResult ~= Text, "decrypting with the wrong key still gave back the original text")
+			CheckWrongKey(Crypt, Encrypted, InitializationVector, Text)
 		end,
 	},
 
 	["Drawing.new"] = {
 		Test = function()
 			const Line = getfenv().Drawing.new("Line")
+			AddCleanup(function()
+				Line:Remove()
+			end)
+
+			assert(not pcall(getfenv().Drawing.new, "debUNC"), "should error on a type that doesn't exist")
+			assert(not pcall(function()
+				Line.Thickness = "debUNC"
+			end), "should error when Thickness is set to a string")
 
 			const Thickness = Line.Thickness
 			const Visible = Line.Visible
 			const Existed = Line.__OBJECT_EXISTS
 			const Text = getfenv().Drawing.new("Text")
+
+			AddCleanup(function()
+				Text:Remove()
+			end)
 
 			Text.Font = 3
 
@@ -2282,6 +2667,9 @@ const Tests: any = {
 		Test = function()
 			const IsRenderObject = getfenv().isrenderobj
 			const Line = Formatters.CheckExist("Drawing.new")("Line")
+			AddCleanup(function()
+				Line:Remove()
+			end)
 
 			const Result = IsRenderObject(Line)
 
@@ -2289,12 +2677,17 @@ const Tests: any = {
 
 			assert(Result == true, "should return true for a drawing object")
 			assert(IsRenderObject({}) == false, "should return false for a table")
+			assert(IsRenderObject(Instance.new("Part")) == false, "should return false for an Instance")
+			assert(IsRenderObject(5) == false, "should return false for a number")
 		end,
 	},
 
 	getrenderproperty = {
 		Test = function()
 			const Line = Formatters.CheckExist("Drawing.new")("Line")
+			AddCleanup(function()
+				Line:Remove()
+			end)
 			const Thickness = math.random(2, 9)
 
 			Line.Thickness = Thickness
@@ -2310,6 +2703,9 @@ const Tests: any = {
 	setrenderproperty = {
 		Test = function()
 			const Line = Formatters.CheckExist("Drawing.new")("Line")
+			AddCleanup(function()
+				Line:Remove()
+			end)
 			const Thickness = math.random(2, 9)
 
 			getfenv().setrenderproperty(Line, "Thickness", Thickness)
@@ -2325,6 +2721,9 @@ const Tests: any = {
 	cleardrawcache = {
 		Test = function()
 			const Line = Formatters.CheckExist("Drawing.new")("Line")
+			AddCleanup(function()
+				Line:Remove()
+			end)
 
 			getfenv().cleardrawcache()
 
@@ -2363,14 +2762,22 @@ const Tests: any = {
 
 	getactors = {
 		Test = function()
+			const RunOnActor = Formatters.CheckExist("runonactor")
 			const Actor = Instance.new("Actor")
+
 			Actor.Parent = workspace
+			AddCleanup(function()
+				Actor:Destroy()
+			end)
 
-			Formatters.CheckExist("runonactor")(Actor, "")
+			RunOnActor(Actor, "")
 
-			task.wait(0.2)
+			local Actors
 
-			const Actors = getfenv().getactors()
+			WaitFor(function()
+				Actors = getfenv().getactors()
+				return table.find(Actors, Actor) ~= nil
+			end, 2)
 
 			Actor:Destroy()
 
@@ -2391,6 +2798,7 @@ const Tests: any = {
 			Formatters.CheckReturnType(Threads, "table")
 
 			assert(#Threads > 0, "expected at least one actor thread")
+			assert(not table.find(Threads, coroutine.running()), "the thread running this test isn't on an actor")
 
 			for _, Thread in Threads do
 				assert(typeof(Thread) == "thread", `expected threads, got a {typeof(Thread)}`)
@@ -2401,6 +2809,7 @@ const Tests: any = {
 	isparallel = {
 		Test = function()
 			assert(getfenv().isparallel() == false, "should return false outside of an actor")
+			assert(RunOnNewActor("Actor:SetAttribute('Parallel', isparallel())").Parallel == false, "should return false in an actor before it desynchronizes")
 			assert(
 				RunOnNewActor("task.desynchronize() local Result = isparallel() task.synchronize() Actor:SetAttribute('Parallel', Result)").Parallel == true,
 				"should return true in a desynchronized actor"
@@ -2408,61 +2817,71 @@ const Tests: any = {
 		end,
 	},
 
-	checkparallel = {
-		Test = function()
-			assert(getfenv().checkparallel() == false, "should return false outside of an actor")
-			assert(
-				RunOnNewActor("task.desynchronize() local Result = checkparallel() task.synchronize() Actor:SetAttribute('Parallel', Result)").Parallel == true,
-				"should return true in a desynchronized actor"
-			)
-		end,
-	},
-
 	getgc = {
 		Test = function()
-			const Table = {}
-
-			const function TestFunction()
-				return Table
-			end
-
+			const Holder = {Table = {}, Function = function() end}
 			const GarbageCollected = getfenv().getgc(true)
 
 			Formatters.CheckReturnType(GarbageCollected, "table")
 
-			assert(table.find(GarbageCollected, TestFunction), "didn't find a new function")
-			assert(table.find(GarbageCollected, Table), "didn't find a new table when including tables")
+			assert(table.find(GarbageCollected, Holder.Function), "didn't find a new function")
+			assert(table.find(GarbageCollected, Holder.Table), "didn't find a new table when including tables")
 		end,
 	},
 
 	getinstances = {
 		Test = function()
-			const Part = Instance.new("Part")
+			const Holder = {Part = Instance.new("Part")}
 
-			assert(table.find(getfenv().getinstances(), Part), "didn't find a new part")
+			assert(table.find(getfenv().getinstances(), Holder.Part), "didn't find a new part")
 		end,
 	},
 
 	getnilinstances = {
 		Test = function()
-			const NilPart = Instance.new("Part")
+			const Holder = {NilPart = Instance.new("Part")}
 			const ParentedPart = Instance.new("Part")
 			ParentedPart.Parent = workspace
+			AddCleanup(function()
+				ParentedPart:Destroy()
+			end)
 
 			const NilInstances = getfenv().getnilinstances()
 
 			ParentedPart:Destroy()
 
-			assert(table.find(NilInstances, NilPart), "didn't find a part parented to nil")
+			assert(table.find(NilInstances, Holder.NilPart), "didn't find a part parented to nil")
 			assert(not table.find(NilInstances, ParentedPart), "found a part that was parented to workspace")
 		end,
 	},
 
 	getrunningscripts = {
 		Test = function()
-			const RunningScripts = getfenv().getrunningscripts()
+			const Disabled = GetPlayerScripts():FindFirstChildWhichIsA("LocalScript", true):Clone()
 
-			assert(table.find(RunningScripts, Player.PlayerScripts:FindFirstChildWhichIsA("LocalScript", true)), "didn't find a running LocalScript")
+			Disabled.Disabled = true
+			Disabled.Parent = Player:FindFirstChild("PlayerScripts") or Player.PlayerGui
+			AddCleanup(function()
+				Disabled:Destroy()
+			end)
+
+			const RunningScripts = getfenv().getrunningscripts()
+			const FoundDisabled = table.find(RunningScripts, Disabled)
+
+			Disabled:Destroy()
+
+			assert(not FoundDisabled, "found a disabled script")
+
+			local FoundRunning = false
+
+			for _, Descendant in GetPlayerScripts():GetDescendants() do
+				if Descendant:IsA("LocalScript") and table.find(RunningScripts, Descendant) then
+					FoundRunning = true
+					break
+				end
+			end
+
+			assert(FoundRunning, "didn't find a running LocalScript")
 
 			for _, RunningScript in RunningScripts do
 				assert(RunningScript:IsA("LuaSourceContainer"), `'{RunningScript}' isn't a script`)
@@ -2473,47 +2892,41 @@ const Tests: any = {
 	getscriptbytecode = {
 		Test = function()
 			const GetScriptBytecode = getfenv().getscriptbytecode
-			const LocalScript = Player.PlayerScripts:FindFirstChildWhichIsA("LocalScript", true)
-			const Bytecode = GetScriptBytecode(LocalScript)
+			const PlayerModule = GetPlayerModule()
+			const Bytecode = GetScriptBytecode(PlayerModule)
 
 			Formatters.CheckReturnType(Bytecode, "string")
 
 			assert(#Bytecode > 0, "the bytecode is empty")
-
-			for _, Descendant in game:GetDescendants() do
-				if not Descendant:IsA("LocalScript") or Descendant == LocalScript then
-					continue
-				end
-
-				const Success, OtherBytecode = pcall(GetScriptBytecode, Descendant)
-
-				if not Success or not OtherBytecode or OtherBytecode == "" then
-					continue
-				end
-
-				assert(OtherBytecode ~= Bytecode, `'{LocalScript.Name}' and '{Descendant.Name}' gave the same bytecode`)
-				break
-			end
-
+			assert(GetScriptBytecode(PlayerModule.CameraModule) ~= Bytecode, "'PlayerModule' and 'CameraModule' gave the same bytecode")
 		end,
 	},
 
 	getscripthash = {
 		Test = function()
 			const GetScriptHash = getfenv().getscripthash
-			const LocalScript = Player.PlayerScripts:FindFirstChildWhichIsA("LocalScript", true)
+			const LocalScript = GetPlayerScripts():FindFirstChildWhichIsA("LocalScript", true)
 			const Hash = GetScriptHash(LocalScript)
 
 			Formatters.CheckReturnType(Hash, "string")
 
 			assert(#Hash > 0, "the hash is empty")
 			assert(GetScriptHash(LocalScript) == Hash, "hashing the same script twice gave different results")
+			assert(GetScriptHash(GetPlayerModule()) ~= Hash, "two different scripts gave the same hash")
 			assert(#Hash == 96 and Hash:match("^%x+$"), `should be a 96 character sha384 hash, got {#Hash} characters`)
 
 			const Crypt = getfenv().crypt
 			const GetScriptBytecode = getfenv().getscriptbytecode
 
-			if not Crypt or not GetScriptBytecode or #Crypt.hash("abc", "sha384") ~= 96 then
+			if not Crypt or not GetScriptBytecode then
+				return
+			end
+
+			const Supported, IsSha384 = pcall(function()
+				return #Crypt.hash("abc", "sha384") == 96
+			end)
+
+			if not Supported or not IsSha384 then
 				return
 			end
 
@@ -2523,7 +2936,7 @@ const Tests: any = {
 
 	getscriptclosure = {
 		Test = function()
-			const LocalScript = Player.PlayerScripts:FindFirstChildWhichIsA("LocalScript", true)
+			const LocalScript = GetPlayerScripts():FindFirstChildWhichIsA("LocalScript", true)
 			const Closure = getfenv().getscriptclosure(LocalScript)
 
 			Formatters.CheckReturnType(Closure, "function")
@@ -2537,6 +2950,9 @@ const Tests: any = {
 			const HiddenGui = getfenv().gethui()
 			const ScreenGui = Instance.new("ScreenGui")
 			ScreenGui.Parent = HiddenGui
+			AddCleanup(function()
+				ScreenGui:Destroy()
+			end)
 
 			const Parented = Formatters.CheckExist("compareinstances")(ScreenGui.Parent, HiddenGui)
 			const InPlayerGui = ScreenGui:IsDescendantOf(Player.PlayerGui)
@@ -2586,6 +3002,10 @@ const Tests: any = {
 
 			assert(IsExecutorClosure(function() end) == true, "should return true for a function made in the executor")
 			assert(IsExecutorClosure(print) == false, "should return false for print")
+			assert(
+				IsExecutorClosure(require(GetPlayerModule().CommonUtils.CameraWrapper).getCamera) == false,
+				"should return false for a function from the game's PlayerModule"
+			)
 		end,
 	},
 
@@ -2595,6 +3015,7 @@ const Tests: any = {
 
 			assert(IsLuaClosure(function() end) == true, "should return true for a Lua function")
 			assert(IsLuaClosure(print) == false, "should return false for print")
+			assert(IsLuaClosure(math.abs) == false, "should return false for math.abs")
 		end,
 	},
 
@@ -2604,6 +3025,8 @@ const Tests: any = {
 
 			assert(IsNewCClosure(Formatters.CheckExist("newcclosure")(function() end)) == true, "should return true for a newcclosure")
 			assert(IsNewCClosure(print) == false, "should return false for print")
+			assert(IsNewCClosure(assert) == false, "should return false for assert")
+			assert(IsNewCClosure(task.wait) == false, "should return false for task.wait")
 			assert(IsNewCClosure(function() end) == false, "should return false for a Lua function")
 		end,
 	},
@@ -2615,6 +3038,10 @@ const Tests: any = {
 			Formatters.CheckReturnType(Value, "string")
 
 			assert(Value ~= "", "the flag's value is empty")
+
+			const Found, Missing = pcall(getfenv().getfflag, `debUNC{math.random(1, 1e6)}`)
+
+			assert(not Found or Missing == nil, "returned a value for a flag that doesn't exist")
 		end,
 	},
 
@@ -2624,6 +3051,10 @@ const Tests: any = {
 			const SetFastFlag = getfenv().setfflag
 			const Original = GetFastFlag("TaskSchedulerTargetFps")
 			const NewValue = tostring(math.random(100, 200))
+
+			AddCleanup(function()
+				SetFastFlag("TaskSchedulerTargetFps", Original)
+			end)
 
 			SetFastFlag("TaskSchedulerTargetFps", NewValue)
 
@@ -2678,6 +3109,10 @@ const Tests: any = {
 				Packet:Block()
 			end
 
+			AddCleanup(function()
+				RakNet.removereceivehook(OnReceive)
+			end)
+
 			RakNet.addreceivehook(OnReceive)
 			RakNet.receive(Marker)
 
@@ -2719,9 +3154,15 @@ const Tests: any = {
 				return GetCallStack()
 			end
 
-			const CallStack = Inner()
+			const function Outer()
+				const Stack = Inner()
+				return Stack
+			end
+
+			const CallStack = Outer()
 
 			Formatters.CheckReturnType(CallStack, "table")
+			assert(CallStack[1].func == Inner and CallStack[2].func == Outer, "the running functions aren't in order")
 
 			for _, Entry in CallStack do
 				if Entry.func ~= Inner then
@@ -2742,6 +3183,15 @@ const Tests: any = {
 
 			assert(IsValidLevel(1) == true, "level 1 should be valid")
 			assert(IsValidLevel(500) == false, "level 500 shouldn't be valid")
+
+			local Depth = 1
+
+			while debug.info(Depth, "f") do
+				Depth += 1
+			end
+
+			assert(IsValidLevel(Depth - 1) == true, `level {Depth - 1} exists and should be valid`)
+			assert(IsValidLevel(Depth) == false, `level {Depth} is past the end of the stack and shouldn't be valid`)
 		end,
 	},
 
@@ -2759,25 +3209,10 @@ const Tests: any = {
 
 	getallthreads = {
 		Test = function()
-			assert(table.find(getfenv().getallthreads(), coroutine.running()), "didn't find the thread that's running this test")
-		end,
-	},
+			const Threads = getfenv().getallthreads()
 
-	getthreadenvironment = {
-		Test = function()
-			const GetThreadEnvironment = getfenv().getthreadenvironment
-			const Thread = task.spawn(function()
-				task.wait(1)
-			end)
-
-			const Environment = GetThreadEnvironment(Thread)
-
-			task.cancel(Thread)
-
-			Formatters.CheckReturnType(Environment, "table")
-
-			assert(Environment == getfenv(), "a thread started by this script should have the same environment as it")
-			assert(not pcall(GetThreadEnvironment, function() end), "should error when given something that isn't a thread")
+			assert(table.find(Threads, coroutine.running()), "didn't find the thread that's running this test")
+			assert(#Threads > 1, "only found the thread that's running this test")
 		end,
 	},
 
@@ -2832,6 +3267,11 @@ const Tests: any = {
 				"97yD9DBThCSxMpjmqm+xQ+9NWaFJRhdZl0edvC0aPNg=",
 				"the known sha256 hmac"
 			)
+			Formatters.CheckEqual(
+				Hmac("Jefe", "what do ya want for nothing?", "sha256"),
+				"W9zBRr9gdU5qBCQmCJV1x1oAPwidJzmDnexYuWTsOEM=",
+				"the second known sha256 hmac"
+			)
 			assert(Hmac("key", GeneratedString, "sha256") == Hmac("key", GeneratedString, "sha256"), "the same key and data gave different results")
 			assert(Hmac("key", GeneratedString, "sha256") ~= Hmac("other key", GeneratedString, "sha256"), "two different keys gave the same result")
 		end,
@@ -2845,6 +3285,20 @@ const Tests: any = {
 
 			Formatters.CheckEqual(#Bytes, Length, "the length of the random bytes")
 			assert(Random(Length) ~= Bytes, "generated the same bytes twice")
+
+			const Seen = {}
+
+			for Byte in Random(64):gmatch(".") do
+				Seen[Byte] = true
+			end
+
+			local Different = 0
+
+			for _ in Seen do
+				Different += 1
+			end
+
+			assert(Different > 8, `64 random bytes only had {Different} different values`)
 		end,
 	},
 
@@ -2857,9 +3311,7 @@ const Tests: any = {
 
 			Formatters.CheckEqual(Crypt.decrypt(Encrypted, Key, InitializationVector), Text, "the decrypted random text")
 
-			const WrongKeySuccess, WrongKeyResult = pcall(Crypt.decrypt, Encrypted, Crypt.generatekey(), InitializationVector)
-
-			assert(not WrongKeySuccess or WrongKeyResult ~= Text, "decrypting with the wrong key still gave back the original text")
+			CheckWrongKey(Crypt, Encrypted, InitializationVector, Text)
 		end,
 	},
 
@@ -2869,7 +3321,20 @@ const Tests: any = {
 
 			Formatters.CheckReturnType(Modules, "table")
 
-			assert(table.find(Modules, Player.PlayerScripts.PlayerModule), "didn't find PlayerModule, which is always loaded")
+			assert(table.find(Modules, GetPlayerModule()), "didn't find PlayerModule, which is always loaded")
+
+			const NewModule = Instance.new("ModuleScript")
+
+			NewModule.Parent = workspace
+			AddCleanup(function()
+				NewModule:Destroy()
+			end)
+
+			const FoundNew = table.find(getfenv().getmodules(), NewModule)
+
+			NewModule:Destroy()
+
+			assert(FoundNew, "didn't find a new ModuleScript")
 
 			for _, Module in Modules do
 				assert(Module:IsA("ModuleScript"), `'{Module}' isn't a ModuleScript`)
@@ -2883,6 +3348,10 @@ const Tests: any = {
 			const Name = `debUNC{math.random(1, 1e6)}`
 
 			const function OnRenderStep() end
+
+			AddCleanup(function()
+				RunService:UnbindFromRenderStep(Name)
+			end)
 
 			RunService:BindToRenderStep(Name, 123, OnRenderStep)
 
@@ -2910,6 +3379,7 @@ const Tests: any = {
 
 			assert(CanSignalReplicate(Player.Kill) == true, "should return true for Player.Kill")
 			assert(CanSignalReplicate(workspace.ChildAdded) == false, "should return false for workspace.ChildAdded")
+			assert(CanSignalReplicate(Instance.new("Part").Touched) == false, "should return false for a part's Touched")
 		end,
 	},
 
@@ -2919,6 +3389,7 @@ const Tests: any = {
 				RunOnNewActor("Actor:SetAttribute('Matched', getactorfromthread(coroutine.running()) == Actor)").Matched == true,
 				"didn't return the actor that the thread is running on"
 			)
+			assert(getfenv().getactorfromthread(coroutine.running()) == nil, "should return nil for a thread that isn't on an actor")
 		end,
 	},
 
@@ -2943,6 +3414,23 @@ const Tests: any = {
 
 			assert(HookArgument ~= nil, "the hook wasn't called when the signal fired")
 			assert(FiredCount == 0, "returning false from the hook didn't stop the connection from firing")
+
+			const AllowedValue = Instance.new("NumberValue")
+
+			local AllowedCount = 0
+
+			AllowedValue.Changed:Connect(function()
+				AllowedCount += 1
+			end)
+
+			getfenv().hooksignal(AllowedValue.Changed, function()
+				return true
+			end)
+
+			AllowedValue.Value = 1
+			task.wait()
+
+			assert(AllowedCount == 1, "returning true from the hook stopped the connection from firing")
 		end,
 	},
 
@@ -3037,22 +3525,6 @@ const Tests: any = {
 		RunLast = true,
 	},
 
-	runfile = {
-		Test = function()
-			const FileName = `File_{math.random()}.lua`
-			const Value = math.random()
-
-			Formatters.CheckExist("writefile")(FileName, `return {Value}`)
-
-			const Success, Result = pcall(getfenv().runfile, FileName)
-
-			RemovePath("delfile", FileName)
-
-			assert(Success, `errored while running the file with {Result}`)
-			Formatters.CheckEqual(Result, Value, "the value the file returned")
-		end,
-	},
-
 	loadfileasync = {
 		Test = function()
 			const FileName = `File_{math.random()}.lua`
@@ -3094,7 +3566,7 @@ const Tests: any = {
 			const PredictedMegabytes = #game:GetDescendants() * 10 / 1e6
 
 			if PredictedMegabytes > 10 then
-				error({Skipped = `the saved place would be about {math.floor(PredictedMegabytes)} MB, which is too large to test quickly`})
+				error({Skipped = `the saved place would be about {math.floor(PredictedMegabytes)} MB, which is too large to test quickly`, Environment = true})
 			end
 
 			const FileName = getfenv().saveinstance()
@@ -3102,10 +3574,12 @@ const Tests: any = {
 			Formatters.CheckReturnType(FileName, "string")
 
 			const Exists = Formatters.CheckExist("isfile")(FileName)
+			const Size = Exists and #Formatters.CheckExist("readfile")(FileName)
 
 			RemovePath("delfile", FileName)
 
 			assert(Exists, `the saved file '{FileName}' doesn't exist`)
+			assert(Size > 1000, `the saved file is only {Size} bytes, so it can't have the place in it`)
 		end,
 		RunLast = true,
 	},
@@ -3114,9 +3588,7 @@ const Tests: any = {
 		Test = function()
 			const FileName = `File_{math.random()}.png`
 
-			Formatters.CheckExist("writefile")(FileName, buffer.tostring(EncodingService:Base64Decode(buffer.fromstring(
-				"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
-			))))
+			Formatters.CheckExist("writefile")(FileName, TestImage)
 
 			const Success, AssetId = pcall(getfenv().getcustomasset, FileName)
 
@@ -3125,22 +3597,24 @@ const Tests: any = {
 				error(`errored while getting the asset with {AssetId}`)
 			end
 
-			const ImageLabel = Instance.new("ImageLabel")
-			ImageLabel.Image = AssetId
+			const FetchStatus = GetAssetStatus(AssetId)
 
-			local FetchStatus
-
-			game:GetService("ContentProvider"):PreloadAsync({ImageLabel}, function(_, Status)
-				FetchStatus = Status
-			end)
-
-			ImageLabel:Destroy()
 			RemovePath("delfile", FileName)
 
 			Formatters.CheckReturnType(AssetId, "string")
 
 			assert(AssetId:find("^rbxasset://"), `expected an rbxasset:// id, got '{AssetId}'`)
 			Formatters.CheckEqual(FetchStatus, Enum.AssetFetchStatus.Success, "the status of loading the asset")
+
+			const GarbageName = `File_{math.random()}.png`
+
+			Formatters.CheckExist("writefile")(GarbageName, "debUNC")
+
+			const BadStatus = GetAssetStatus(getfenv().getcustomasset(GarbageName))
+
+			RemovePath("delfile", GarbageName)
+
+			assert(BadStatus ~= Enum.AssetFetchStatus.Success, "a file that isn't an image loaded as one, so the file probably wasn't used")
 		end,
 	},
 
@@ -3151,6 +3625,7 @@ const Tests: any = {
 			Formatters.CheckReturnType(Arguments, "table")
 			Formatters.CheckEqual(#Arguments, 1, "the number of arguments Touched has")
 			Formatters.CheckEqual(Arguments[1], "Instance", "the type of Touched's argument")
+			Formatters.CheckEqual(#getfenv().getsignalarguments(UserInputService.InputBegan), 2, "the number of arguments InputBegan has")
 		end,
 	},
 
@@ -3163,6 +3638,11 @@ const Tests: any = {
 			assert(typeof(Info[1]) == "table", `expected a table for each argument, got a {typeof(Info[1])}`)
 			Formatters.CheckEqual(Info[1].Name, "otherPart", "the name of Touched's argument")
 			Formatters.CheckEqual(Info[1].Type, "Instance", "the type of Touched's argument")
+
+			const InputInfo = getfenv().getsignalargumentsinfo(UserInputService.InputBegan)
+
+			Formatters.CheckEqual(#InputInfo, 2, "the number of arguments InputBegan has")
+			Formatters.CheckEqual(InputInfo[2].Name, "gameProcessedEvent", "the name of InputBegan's second argument")
 		end,
 	},
 
@@ -3172,7 +3652,7 @@ const Tests: any = {
 
 			Formatters.CheckReturnType(Whitelist, "table")
 
-			assert(#Whitelist > 0, "the whitelist is empty")
+			assert(#Whitelist > 1, "the whitelist should have more than one signal")
 
 			for _, Entry in Whitelist do
 				assert(
@@ -3249,14 +3729,19 @@ const Tests: any = {
 
 			local Detected
 
+			local FullName
+
 			getmetatable(ProxyTest).__namecall = function()
 				getfenv().setnamecallmethod(NewMethod)
 				Detected = Formatters.CheckExist("getnamecallmethod")()
+				getfenv().setnamecallmethod("GetFullName")
+				FullName = Formatters.CheckExist("getrawmetatable")(game).__namecall(game)
 			end
 
 			ProxyTest:Original()
 
 			Formatters.CheckEqual(Detected, NewMethod, "the namecall method after setting it")
+			Formatters.CheckEqual(FullName, game:GetFullName(), "the result of calling game's __namecall after setting the method")
 		end,
 	},
 
@@ -3282,6 +3767,8 @@ const Tests: any = {
 
 			Formatters.CheckReturnType(Properties, "table")
 			Formatters.CheckEqual(Properties.Size, Size, "the Size in the returned table")
+			Formatters.CheckEqual(Properties.Name, "Part", "the Name in the returned table")
+			Formatters.CheckEqual(getfenv().getproperties(Instance.new("Fire")).Heat, 9, "a Fire's Heat in the returned table")
 		end,
 	},
 
@@ -3309,6 +3796,13 @@ const Tests: any = {
 			end
 
 			assert(FoundHidden, "none of the returned properties are actually hidden")
+
+			const Fire = Instance.new("Fire")
+			const Size = math.random(6, 20)
+
+			Fire.Size = Size
+
+			Formatters.CheckEqual(getfenv().gethiddenproperties(Fire).size_xml, Size, "size_xml")
 		end,
 	},
 
@@ -3336,21 +3830,12 @@ const Tests: any = {
 		Test = function()
 			const IsCoreScript = getfenv().iscorescript
 
-			local CoreScript
+			const CoreScript = game:GetService("CoreGui"):FindFirstChildWhichIsA("ModuleScript", true)
 
-			for _, Descendant in game:GetService("CoreGui"):GetDescendants() do
-				if not Descendant:IsA("LuaSourceContainer") then
-					continue
-				end
-
-				CoreScript = Descendant
-				break
-			end
-
-			assert(IsCoreScript(Player.PlayerScripts.PlayerModule) == false, "should return false for PlayerModule, which isn't a core script")
+			assert(IsCoreScript(GetPlayerModule()) == false, "should return false for PlayerModule, which isn't a core script")
 
 			if not CoreScript then
-				return
+				error({Skipped = "no core script was found to check", Environment = true})
 			end
 
 			assert(IsCoreScript(CoreScript) == true, `should return true for '{CoreScript:GetFullName()}', which is a core script`)
@@ -3402,21 +3887,11 @@ const Tests: any = {
 		Test = function()
 			const FileName = `File_{math.random()}.png`
 
-			const AssetId = getfenv().writecustomasset(FileName, buffer.tostring(EncodingService:Base64Decode(buffer.fromstring(
-				"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
-			))))
+			const AssetId = getfenv().writecustomasset(FileName, TestImage)
 
 			const Exists = Formatters.CheckExist("isfile")(FileName)
-			const ImageLabel = Instance.new("ImageLabel")
-			ImageLabel.Image = AssetId
+			const FetchStatus = GetAssetStatus(AssetId)
 
-			local FetchStatus
-
-			game:GetService("ContentProvider"):PreloadAsync({ImageLabel}, function(_, Status)
-				FetchStatus = Status
-			end)
-
-			ImageLabel:Destroy()
 			RemovePath("delfile", FileName)
 
 			assert(Exists, "the file wasn't written")
@@ -3460,13 +3935,14 @@ const Tests: any = {
 
 			assert(typeof(Sword) == "Instance", `expected an instance, got a {typeof(Sword)}`)
 
-			const ClassName, Name, Parent = Sword.ClassName, Sword.Name, Sword.Parent
+			const ClassName, Name, Parent, HasHandle = Sword.ClassName, Sword.Name, Sword.Parent, Sword:FindFirstChild("Handle") ~= nil
 
 			Sword:Destroy()
 
 			Formatters.CheckEqual(ClassName, "Tool", "the loaded model's class")
 			Formatters.CheckEqual(Name, "LinkedSword", "the loaded model's name")
 			assert(Parent == nil, "the loaded model shouldn't be parented to anything")
+			assert(HasHandle, "the loaded model doesn't have the sword's Handle")
 		end,
 	},
 
@@ -3522,20 +3998,18 @@ const Tests: any = {
 
 	getobjectreferences = {
 		Test = function()
-			const Target = {}
-			const Holder = {Target}
+			const Box = {Holder = {{}}}
+			const References = getfenv().getobjectreferences(Box.Holder[1])
 
-			assert(table.find(getfenv().getobjectreferences(Target), Holder), "didn't find the table holding the object")
+			assert(table.find(References, Box.Holder), "didn't find the table holding the object")
 		end,
 	},
 
 	getfunctionreferences = {
 		Test = function()
-			const function Target() end
+			const Box = {Holder = {function() end}}
 
-			const Holder = {Target}
-
-			assert(table.find(getfenv().getfunctionreferences(Target), Holder), "didn't find the table holding the function")
+			assert(table.find(getfenv().getfunctionreferences(Box.Holder[1]), Box.Holder), "didn't find the table holding the function")
 		end,
 	},
 
@@ -3657,17 +4131,21 @@ Tests["security: request blocks file://"] = {
 			return
 		end
 
-		assert(not pcall(Request, {
+		const Success, Response = pcall(Request, {
 			Url = "file:///C:/",
 			Method = "GET",
-		}), "request can read files on your computer through file://")
+		})
+
+		assert(not Success or not Response or not Response.Success or Response.Body == "", "request can read files on your computer through file://")
 	end,
 	Security = true,
 }
 
 Tests["security: game:HttpGet blocks file://"] = {
 	Test = function()
-		assert(not pcall(game.HttpGet, game, "file:///C:/"), "game:HttpGet can read files on your computer through file://")
+		const Success, Result = pcall(game.HttpGet, game, "file:///C:/")
+
+		assert(not Success or Result == nil or Result == "", "game:HttpGet can read files on your computer through file://")
 	end,
 	Security = true,
 }
@@ -3692,7 +4170,9 @@ for _, Method in {
 			const Success, Result = pcall(function()
 				return Service[MethodName](Service, Argument)
 			end)
+			const NamecallSuccess, NamecallResult = pcall(loadstring(`local Service, Argument = ... return Service:{MethodName}(Argument)`) :: Function, Service, Argument)
 
+			assert(not NamecallSuccess or NamecallResult == nil, `{ServiceName}:{MethodName} can be called with a method call, which lets scripts reach your private account data`)
 			assert(not Success or Result == nil, `{ServiceName}:{MethodName} can be called, which lets scripts reach your private account data`)
 		end,
 		Security = true,
@@ -3747,8 +4227,13 @@ const NoTests: {[string | number]: any} = {
 	"setsimulationradius",
 	"clearqueueonteleport",
 
-	isrbxactive = {ReturnType = "boolean"},
-	iswindowactive = {ReturnType = "boolean"},
+	isrbxactive = {
+		ReturnType = "boolean",
+		Test = function()
+			assert(not MissedFocusLoss, "still returned true after the Roblox window lost focus")
+		end,
+		RunLast = true,
+	},
 }
 
 for Index, Info in NoTests do
@@ -3802,13 +4287,17 @@ const function DisplayMessage(Message: string)
 	game:GetService("TestService"):Message(Message)
 end
 
-const Settings: {[string]: any} = shared.Settings or {
+const Settings: {[string]: any} = {
 	FakeFunctions = false,
 	GetTests = false,
 	GetUnaddedFunctions = false,
 	DebugMode = false,
 	CrashTests = false,
 }
+
+for Name, Value in shared.Settings or {} do
+	Settings[Name] = Value
+end
 
 for Name in Settings do
 	const Saved = shared[Name]
@@ -3823,7 +4312,7 @@ end
 if Settings.CrashTests then
 	Tests["crash: hooking a running proto"] = {
 		Test = function()
-			const RunCode = assert(loadstring([[
+			assert(loadstring([[
 				local Proto
 
 				local function Outer()
@@ -3853,14 +4342,14 @@ if Settings.CrashTests then
 				Proto = debug.getproto(Outer, 1)
 				Running(2)
 				restoreproto(Proto)
-			]]))
-
-			RunCode()
+			]]))()
 		end,
 		Security = true,
 		RunLast = true,
 	}
 end
+
+pcall(game:GetService("StarterGui").SetCore, game:GetService("StarterGui"), "DevConsoleVisible", true)
 
 DisplayMessage("If your Roblox crashes or freezes during these tests, run `shared.DebugMode = true` before debUNC to prevent it or find the crashing function.")
 
@@ -3874,7 +4363,7 @@ if Settings.FakeFunctions then
 	DisplayMessage("[debUNC]: Faking functions is enabled")
 
 	for FunctionName in Tests do
-		if FunctionName == "getgenv" or FunctionName == "getfenv" or FunctionName == "newcclosure" or Tests[FunctionName].Security then
+		if FunctionName == "getgenv" or FunctionName == "newcclosure" or Tests[FunctionName].Security then
 			continue
 		end
 
@@ -3911,6 +4400,8 @@ end
 const function StartCallLogging()
 	const HookFunction = getfenv().hookfunction
 	const WriteFile = getfenv().writefile
+	const AppendFile = getfenv().appendfile
+	const RestoreFunction = getfenv().restorefunction
 
 	if not HookFunction or not WriteFile then
 		return
@@ -3924,10 +4415,13 @@ const function StartCallLogging()
 		"print",
 		"profilebegin",
 		"profileend",
+		"tostring",
+		"wait",
 		"writefile",
 	}
 
 	const HookedTables = {}
+	const HookedFunctions = {}
 
 	local Log = ""
 	local Logging = true
@@ -3968,8 +4462,14 @@ const function StartCallLogging()
 				table.insert(ArgumentNames, tostring(Argument))
 			end
 
-			Log ..= `{Message}{if Arguments[1] then ` with args {table.concat(ArgumentNames, ", ")}` else ""}\n`
-			WriteFile("LogFunctionCalls.txt", Log)
+			const Line = `{Message}{if Arguments[1] then ` with args {table.concat(ArgumentNames, ", ")}` else ""}\n`
+
+			if AppendFile then
+				AppendFile("LogFunctionCalls.txt", Line)
+			else
+				Log ..= Line
+				WriteFile("LogFunctionCalls.txt", Log)
+			end
 
 			Logging = false
 
@@ -3977,8 +4477,11 @@ const function StartCallLogging()
 
 			return Original(...)
 		end)
+
+		HookedFunctions[HookedFunction] = Original
 	end
 
+	WriteFile("LogFunctionCalls.txt", "")
 	print("Starting LogFunctionCalls")
 
 	for Name, GlobalFunction in GetGlobalEnvironment() do
@@ -3988,13 +4491,26 @@ const function StartCallLogging()
 	print("Started LogFunctionCalls")
 
 	Logging = false
+
+	return function()
+		Logging = true
+
+		for HookedFunction, Original in HookedFunctions do
+			if RestoreFunction and pcall(RestoreFunction, HookedFunction) then
+				continue
+			end
+
+			pcall(HookFunction, HookedFunction, Original)
+		end
+	end
 end
+
+local StopCallLogging
 
 if Settings.DebugMode then
 	DisplayMessage("Debug Mode is enabled!")
-	StartCallLogging()
+	StopCallLogging = StartCallLogging()
 end
-
 
 if IsFunctionHooked and not Settings.DebugMode then
 	assert(IsFunctionHooked(pcall) == false, "tests can't run if pcall is hooked")
@@ -4006,6 +4522,7 @@ local CompletedTests = 0
 local FailedTests = 0
 local MissingFunctions = 0
 local UntestableTests = 0
+local EnvironmentSkips = 0
 
 const Results: {[string]: string} = {}
 const FailureMessages: {[string]: string} = {}
@@ -4030,7 +4547,7 @@ const function RunTest(Name: string, Info: any)
 			end
 
 			if Info.ReturnType then
-				Formatters.CheckReturnType(TestedValue(table.unpack(Info.Parameters or {})), Info.ReturnType)
+				Formatters.CheckReturnType(TestedValue(), Info.ReturnType)
 			end
 		end
 
@@ -4042,6 +4559,12 @@ const function RunTest(Name: string, Info: any)
 	end)
 
 	TestThreads[coroutine.running()] = nil
+	RunCleanups(coroutine.running())
+
+	if Results[Name] then
+		return
+	end
+
 	TotalTests += 1
 
 	if Success then
@@ -4055,11 +4578,12 @@ const function RunTest(Name: string, Info: any)
 		warn(`🟠 {Name}: skipped because {ErrorMessage.Skipped}`)
 		Results[Name] = "skipped"
 		UntestableTests += 1
+		EnvironmentSkips += if ErrorMessage.Environment then 1 else 0
 		return
 	end
 
 	if not Settings.DebugMode then
-		ErrorMessage = ErrorMessage:gsub(".*:%d+: ", "")
+		ErrorMessage = tostring(ErrorMessage):gsub("^%S*:%d+: ", "")
 	end
 
 	if Missing then
@@ -4071,6 +4595,38 @@ const function RunTest(Name: string, Info: any)
 
 	Results[Name] = "failed"
 	FailureMessages[Name] = ErrorMessage
+end
+
+const function MarkUnfinished(Name: string)
+	if Results[Name] then
+		return
+	end
+
+	for Thread, TestName in TestThreads do
+		if TestName ~= Name then
+			continue
+		end
+
+		TestThreads[Thread] = nil
+		pcall(task.cancel, Thread)
+		RunCleanups(Thread)
+	end
+
+	TotalTests += 1
+	Results[Name] = "failed"
+	FailureMessages[Name] = `didn't finish within {if Settings.DebugMode then 600 else 60} seconds`
+end
+
+const TestTimeout = if Settings.DebugMode then 600 else 60
+
+const function RunTestAlone(Name: string, Info: any)
+	task.spawn(RunTest, Name, Info)
+
+	WaitFor(function()
+		return Results[Name] ~= nil
+	end, TestTimeout)
+
+	MarkUnfinished(Name)
 end
 
 local TestCount = 0
@@ -4085,7 +4641,7 @@ for Name: string, Info in Tests do
 	end
 
 	if Settings.DebugMode then
-		RunTest(Name, Info)
+		RunTestAlone(Name, Info)
 		task.wait(0.179)
 		continue
 	end
@@ -4096,13 +4652,44 @@ end
 
 const StartTime = tick()
 
-repeat
-	task.wait()
-until TotalTests == TestCount - #LastTests
+WaitFor(function()
+	return TotalTests == TestCount - #LastTests
+end, TestTimeout)
+
+for Name, Info in Tests do
+	if Info.RunLast then
+		continue
+	end
+
+	MarkUnfinished(Name)
+end
+
+DisplayMessage("Don't touch your mouse or keyboard until the tests finish.")
+
+table.insert(LastTests, table.remove(LastTests, table.find(LastTests, "isrbxactive")))
 
 for _, Name in LastTests do
-	RunTest(Name, Tests[Name])
+	RunTestAlone(Name, Tests[Name])
 end
+
+FocusConnection:Disconnect()
+FocusGainedConnection:Disconnect()
+
+if StopCallLogging then
+	StopCallLogging()
+end
+
+pcall(function()
+	for _, Path in getfenv().listfiles("") do
+		const FileName = Path:match("[^/\\]+$")
+
+		if FileName:match("^File_[%d%.e%-]+%.%a+$") then
+			getfenv().delfile(Path)
+		elseif FileName:match("^Folder_[%d%.e%-]+$") then
+			getfenv().delfolder(Path)
+		end
+	end
+end)
 
 for Name, Message in FailureMessages do
 	local BlockingDependency
@@ -4110,9 +4697,7 @@ for Name, Message in FailureMessages do
 
 	for Dependency in Dependencies[Name] or {} do
 		const DependencyResult = Results[Dependency] or if FindFirstFunction(Dependency) then nil else "missing"
-		const DependsBack = Dependencies[Dependency] and Dependencies[Dependency][Name]
-
-		if (DependencyResult ~= "failed" and DependencyResult ~= "missing") or DependsBack then
+		if (DependencyResult ~= "failed" and DependencyResult ~= "missing") or (Dependencies[Dependency] and Dependencies[Dependency][Name]) then
 			continue
 		end
 
@@ -4131,19 +4716,19 @@ for Name, Message in FailureMessages do
 	FailedTests += 1
 end
 
-const EndTime = tick() - StartTime
-const PercentageComplete = math.floor(CompletedTests / (TotalTests - UntestableTests) * 100)
+const ElapsedTime = tick() - StartTime
+const PercentageComplete = math.floor(CompletedTests / math.max(TotalTests - EnvironmentSkips, 1) * 100)
 const MinimumSeconds = 0.1
 
 task.wait(0.5)
 
-if EndTime < MinimumSeconds and PercentageComplete > 80 then
+if ElapsedTime < MinimumSeconds and PercentageComplete > 80 then
 	DisplayMessage(`This test is most likely faked as it took less than {MinimumSeconds} seconds.`)
 end
 
 DisplayMessage("❓ The score below is only for how many custom functions are supported and secure.")
-DisplayMessage(`🔵 debUNC BETA v2.3.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
-DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(EndTime * 100) / 100} seconds)`)
+DisplayMessage(`🔵 debUNC v2.4.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
+DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(ElapsedTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
 DisplayMessage(`🟠 Skipped tests: {UntestableTests}`)
@@ -4207,16 +4792,14 @@ const function GetFromEnvironment(Environment, GetTests: boolean?, Library: stri
 			Name = `{Library}.{Name}`
 		end
 
-		const Skip = not GetTests and (
+		if not GetTests and (
 			Tests[Name]
 			or (Name:find("_") and Tests[(Name:gsub("_", ""))])
 			or (typeof(Value) ~= "function" and typeof(Value) ~= "table")
 			or (not RobloxEnvironment[Name] and FindFirstFunction(Name, RobloxEnvironment))
 			or AlreadyChecked[Name]
 			or table.find(Blacklist, Name)
-		)
-
-		if Skip then
+		) then
 			continue
 		end
 
@@ -4224,8 +4807,8 @@ const function GetFromEnvironment(Environment, GetTests: boolean?, Library: stri
 			continue
 		end
 
-		if typeof(Value) == "table" then
-			GetFromEnvironment(Value, Settings.GetTests, Name)
+		if typeof(Value) == "table" and not Settings.GetTests then
+			GetFromEnvironment(Value, false, Name)
 			continue
 		end
 
@@ -4246,7 +4829,7 @@ else
 end
 
 if Copy == "" then
-	print("Couldn't find anything, this executor is all caught up.")
+	print("No unadded functions found.")
 	Divider()
 	return
 end
