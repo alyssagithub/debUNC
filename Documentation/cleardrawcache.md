@@ -6,6 +6,6 @@ cleardrawcache()
 print(Line.__OBJECT_EXISTS) --> false
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | clear_draw_cache |
+| Name |
+| :- |
+| clear_draw_cache |

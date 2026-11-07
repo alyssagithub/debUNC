@@ -5,9 +5,9 @@ print(islclosure(function() end)) --> true
 print(islclosure(print)) --> false
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | is_l_closure |
+| Name |
+| :- |
+| is_l_closure |
 # Parameters
 | Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

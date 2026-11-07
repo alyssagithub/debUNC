@@ -7,9 +7,9 @@ print(Fire.size_xml) --> 5
 setscriptable(Fire, "size_xml", false)
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | set_scriptable |
+| Name |
+| :- |
+| set_scriptable |
 # Parameters
 | Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Instance with the property.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

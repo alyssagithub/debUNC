@@ -10,9 +10,9 @@ Connection:Fire(5) --> 5
 Connection:Disconnect()
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_connections |
+| Name |
+| :- |
+| get_connections |
 # Parameters
 | Signal: [RBXScriptSignal](https://create.roblox.com/docs/reference/engine/datatypes/RBXScriptSignal)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The signal to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

@@ -8,13 +8,13 @@ end)
 print(typeof(gettenv(Thread))) --> table
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_tenv |
-| | get_thread_env |
-| | get_thread_environment |
-| | getthreadenv |
-| | getthreadenvironment |
+| Name |
+| :- |
+| get_tenv |
+| get_thread_env |
+| get_thread_environment |
+| getthreadenv |
+| getthreadenvironment |
 # Parameters
 | Thread: [thread](https://create.roblox.com/docs/reference/engine/libraries/coroutine)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The thread to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

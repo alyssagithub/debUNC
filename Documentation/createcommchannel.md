@@ -1,6 +1,9 @@
 # createcommchannel: () -> (number, Channel)
 Creates a channel for sending values between Actors and the main script.
 ```lua
+local Actor = Instance.new("Actor")
+Actor.Parent = workspace
+
 local ChannelId, Channel = createcommchannel()
 
 Channel.Event:Connect(function(Message)
@@ -10,9 +13,9 @@ end)
 runonactor(Actor, `getcommchannel({ChannelId}):Fire("Hello world!")`)
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | create_comm_channel |
+| Name |
+| :- |
+| create_comm_channel |
 # Returns
 | [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The id of the channel.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

@@ -5,9 +5,9 @@ local function Greet() end
 print(#getfunctionbytecode(Greet))
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_function_bytecode |
+| Name |
+| :- |
+| get_function_bytecode |
 # Parameters
 | Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

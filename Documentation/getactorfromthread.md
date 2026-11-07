@@ -1,6 +1,9 @@
 # getactorfromthread: (Thread: thread) -> Actor?
 Returns the Actor that a thread belongs to.
 ```lua
+local Actor = Instance.new("Actor")
+Actor.Parent = workspace
+
 runonactor(Actor, "print(getactorfromthread(coroutine.running()))")
 ```
 # Parameters

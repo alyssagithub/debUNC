@@ -11,9 +11,9 @@ end)
 NumberValue.Value = 5
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | hook_signal |
+| Name |
+| :- |
+| hook_signal |
 # Parameters
 | Signal: [RBXScriptSignal](https://create.roblox.com/docs/reference/engine/datatypes/RBXScriptSignal)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The signal to hook.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

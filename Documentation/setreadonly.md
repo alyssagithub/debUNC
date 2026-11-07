@@ -6,9 +6,9 @@ setreadonly(Table, true)
 print(table.isfrozen(Table)) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | set_read_only |
+| Name |
+| :- |
+| set_read_only |
 # Parameters
 | Table: [table](https://create.roblox.com/docs/luau/tables)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The table to change.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

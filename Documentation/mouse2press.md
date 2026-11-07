@@ -6,6 +6,6 @@ task.wait(1)
 mouse2release()
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | mouse_2_press |
+| Name |
+| :- |
+| mouse_2_press |

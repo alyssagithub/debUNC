@@ -1,15 +1,15 @@
 # getsenv: (Script: LuaSourceContainer) -> {[string]: any}
 Returns the environment of a running script.
 ```lua
-local Script = game.Players.LocalPlayer.PlayerScripts:FindFirstChildWhichIsA("LocalScript", true)
+local Script = game.Players.LocalPlayer.Character.Animate
 print(getsenv(Script).script == Script) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_script_environment |
-| | get_senv |
-| | getscriptenvironment |
+| Name |
+| :- |
+| get_script_environment |
+| get_senv |
+| getscriptenvironment |
 # Parameters
 | Script: [LuaSourceContainer](https://create.roblox.com/docs/reference/engine/classes/LuaSourceContainer)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The script to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

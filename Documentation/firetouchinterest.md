@@ -6,9 +6,9 @@ firetouchinterest(workspace.Pad, Root, 0)
 firetouchinterest(workspace.Pad, Root, 1)
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | fire_touch_interest |
+| Name |
+| :- |
+| fire_touch_interest |
 # Parameters
 | Part: [BasePart](https://create.roblox.com/docs/reference/engine/classes/BasePart)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The part being touched.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

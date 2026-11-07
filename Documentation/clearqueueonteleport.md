@@ -5,7 +5,7 @@ queueonteleport("print('Teleported!')")
 clearqueueonteleport()
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | clear_teleport_queue |
-| | clearteleportqueue |
+| Name |
+| :- |
+| clear_teleport_queue |
+| clearteleportqueue |

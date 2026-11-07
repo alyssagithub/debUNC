@@ -5,9 +5,9 @@ local ChannelId, Channel = createcommchannel()
 print(getcommchannel(ChannelId) == Channel) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_comm_channel |
+| Name |
+| :- |
+| get_comm_channel |
 # Parameters
 | ChannelId: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The id of the channel.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

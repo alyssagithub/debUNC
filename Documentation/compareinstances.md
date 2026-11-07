@@ -5,9 +5,9 @@ local Part = Instance.new("Part")
 print(compareinstances(Part, cloneref(Part))) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | compare_instances |
+| Name |
+| :- |
+| compare_instances |
 # Parameters
 | First: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The first Instance.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

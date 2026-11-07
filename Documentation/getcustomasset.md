@@ -5,9 +5,9 @@ local ImageLabel = Instance.new("ImageLabel")
 ImageLabel.Image = getcustomasset("Image.png")
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_custom_asset |
+| Name |
+| :- |
+| get_custom_asset |
 # Parameters
 | Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The path of the file.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

@@ -5,9 +5,9 @@ writefile("Log.txt", "Hello world!")
 print(isfile("Log.txt")) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | is_file |
+| Name |
+| :- |
+| is_file |
 # Parameters
 | Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The path of the file.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

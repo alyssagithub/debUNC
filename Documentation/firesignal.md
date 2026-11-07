@@ -10,9 +10,9 @@ end)
 firesignal(NumberValue.Changed, 5)
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | fire_signal |
+| Name |
+| :- |
+| fire_signal |
 # Parameters
 | Signal: [RBXScriptSignal](https://create.roblox.com/docs/reference/engine/datatypes/RBXScriptSignal)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The signal to fire.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

@@ -5,9 +5,9 @@ local NumberValue = Instance.new("NumberValue")
 print(issignalhooked(NumberValue.Changed)) --> false
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | is_signal_hooked |
+| Name |
+| :- |
+| is_signal_hooked |
 # Parameters
 | Signal: [RBXScriptSignal](https://create.roblox.com/docs/reference/engine/datatypes/RBXScriptSignal)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The signal to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

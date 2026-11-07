@@ -4,6 +4,6 @@ Clicks the left mouse button. The Roblox window has to be focused.
 mouse1click()
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | mouse_1_click |
+| Name |
+| :- |
+| mouse_1_click |

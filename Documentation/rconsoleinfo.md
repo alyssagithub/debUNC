@@ -4,13 +4,13 @@ Prints an info message to the executor's console.
 rconsoleinfo("Hello world!")
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | console_info |
-| | console_sinfo |
-| | consoleinfo |
-| | consolesinfo |
-| | rconsole_info |
+| Name |
+| :- |
+| console_info |
+| console_sinfo |
+| consoleinfo |
+| consolesinfo |
+| rconsole_info |
 # Parameters
 | Text: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The text to print.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

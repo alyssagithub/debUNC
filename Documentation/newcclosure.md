@@ -9,9 +9,9 @@ print(debug.info(Wrapped, "s")) --> [C]
 print(Wrapped()) --> Hello world!
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | new_c_closure |
+| Name |
+| :- |
+| new_c_closure |
 # Parameters
 | Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to wrap.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

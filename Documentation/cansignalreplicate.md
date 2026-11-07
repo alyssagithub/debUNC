@@ -5,9 +5,9 @@ print(cansignalreplicate(game.Players.LocalPlayer.Kill)) --> true
 print(cansignalreplicate(workspace.ChildAdded)) --> false
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | can_signal_replicate |
+| Name |
+| :- |
+| can_signal_replicate |
 # Parameters
 | Signal: [RBXScriptSignal](https://create.roblox.com/docs/reference/engine/datatypes/RBXScriptSignal)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The signal to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

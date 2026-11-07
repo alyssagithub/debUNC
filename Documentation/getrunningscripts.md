@@ -6,9 +6,9 @@ for _, RunningScript in getrunningscripts() do
 end
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_running_scripts |
+| Name |
+| :- |
+| get_running_scripts |
 # Returns
 | {[LuaSourceContainer](https://create.roblox.com/docs/reference/engine/classes/LuaSourceContainer)}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of scripts.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

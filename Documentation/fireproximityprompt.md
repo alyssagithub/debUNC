@@ -5,9 +5,9 @@ local ProximityPrompt = workspace.Door.ProximityPrompt
 fireproximityprompt(ProximityPrompt)
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | fire_proximity_prompt |
+| Name |
+| :- |
+| fire_proximity_prompt |
 # Parameters
 | ProximityPrompt: [ProximityPrompt](https://create.roblox.com/docs/reference/engine/classes/ProximityPrompt)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The ProximityPrompt to trigger.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

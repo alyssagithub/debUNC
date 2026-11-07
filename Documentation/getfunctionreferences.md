@@ -6,9 +6,9 @@ local Holder = {Greet}
 print(table.find(getfunctionreferences(Greet), Holder) ~= nil) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_function_references |
+| Name |
+| :- |
+| get_function_references |
 # Parameters
 | Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to look for.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

@@ -4,8 +4,8 @@ Closes the executor's console window.
 rconsoledestroy()
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | console_destroy |
-| | consoledestroy |
-| | rconsole_destroy |
+| Name |
+| :- |
+| console_destroy |
+| consoledestroy |
+| rconsole_destroy |

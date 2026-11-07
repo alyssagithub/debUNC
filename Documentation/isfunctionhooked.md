@@ -7,9 +7,9 @@ hookfunction(Greet, function() end)
 print(isfunctionhooked(Greet)) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | is_function_hooked |
+| Name |
+| :- |
+| is_function_hooked |
 # Parameters
 | Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

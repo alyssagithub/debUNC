@@ -4,9 +4,9 @@ Returns the types of the arguments a signal fires with.
 print(getsignalarguments(Instance.new("Part").Touched)[1]) --> Instance
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_signal_arguments |
+| Name |
+| :- |
+| get_signal_arguments |
 # Parameters
 | Signal: [RBXScriptSignal](https://create.roblox.com/docs/reference/engine/datatypes/RBXScriptSignal)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The signal to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

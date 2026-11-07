@@ -4,9 +4,9 @@ Sets the frame rate cap, where 0 removes it.
 setfpscap(60)
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | set_fps_cap |
+| Name |
+| :- |
+| set_fps_cap |
 # Parameters
 | FPSCap: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The frame rate cap.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

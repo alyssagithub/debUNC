@@ -5,9 +5,9 @@ print(isnewcclosure(newcclosure(function() end))) --> true
 print(isnewcclosure(print)) --> false
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | is_new_cclosure |
+| Name |
+| :- |
+| is_new_cclosure |
 # Parameters
 | Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

@@ -5,9 +5,9 @@ print(iscclosure(print)) --> true
 print(iscclosure(function() end)) --> false
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | is_c_closure |
+| Name |
+| :- |
+| is_c_closure |
 # Parameters
 | Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

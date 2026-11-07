@@ -5,9 +5,9 @@ print(isrenderobj(Drawing.new("Line"))) --> true
 print(isrenderobj({})) --> false
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | is_render_obj |
+| Name |
+| :- |
+| is_render_obj |
 # Parameters
 | Object: any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The value to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

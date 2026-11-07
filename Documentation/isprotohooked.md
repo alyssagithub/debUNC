@@ -9,9 +9,9 @@ local Proto = debug.getproto(Outer, 1)
 print(isprotohooked(Proto)) --> false
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | is_proto_hooked |
+| Name |
+| :- |
+| is_proto_hooked |
 # Parameters
 | Proto: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The inner function from debug.getproto.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

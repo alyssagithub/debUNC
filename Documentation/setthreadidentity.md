@@ -5,13 +5,13 @@ setthreadidentity(2)
 print(getthreadidentity()) --> 2
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | set_identity |
-| | set_thread_context |
-| | set_thread_identity |
-| | setidentity |
-| | setthreadcontext |
+| Name |
+| :- |
+| set_identity |
+| set_thread_context |
+| set_thread_identity |
+| setidentity |
+| setthreadcontext |
 # Parameters
 | Identity: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The new identity.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

@@ -5,9 +5,9 @@ setfflag("TaskSchedulerTargetFps", "144")
 print(getfflag("TaskSchedulerTargetFps")) --> 144
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | set_fflag |
+| Name |
+| :- |
+| set_fflag |
 # Parameters
 | Flag: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The name of the flag.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

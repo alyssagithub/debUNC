@@ -5,9 +5,9 @@ local Name, Version = identifyexecutor()
 print(Name, Version)
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | identify_executor |
+| Name |
+| :- |
+| identify_executor |
 # Returns
 | [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The executor's name.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

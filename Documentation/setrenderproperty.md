@@ -6,9 +6,9 @@ setrenderproperty(Line, "Thickness", 5)
 print(Line.Thickness) --> 5
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | set_render_property |
+| Name |
+| :- |
+| set_render_property |
 # Parameters
 | Object: DrawingObject&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Drawing object.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

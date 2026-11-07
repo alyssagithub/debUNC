@@ -7,9 +7,9 @@ Actor.Parent = workspace
 runonactor(Actor, "print(...)", "Hello world!") --> Hello world!
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | run_on_actor |
+| Name |
+| :- |
+| run_on_actor |
 # Parameters
 | Actor: [Actor](https://create.roblox.com/docs/reference/engine/classes/Actor)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Actor to run in.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

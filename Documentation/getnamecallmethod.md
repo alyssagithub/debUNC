@@ -8,9 +8,9 @@ Original = hookmetamethod(game, "__namecall", function(...)
 end)
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_namecall_method |
+| Name |
+| :- |
+| get_namecall_method |
 # Returns
 | [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The method's name.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

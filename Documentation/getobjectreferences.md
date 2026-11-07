@@ -6,9 +6,9 @@ local Holder = {Target}
 print(table.find(getobjectreferences(Target), Holder) ~= nil) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_object_references |
+| Name |
+| :- |
+| get_object_references |
 # Parameters
 | Object: any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The object to look for. It can't be a number.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

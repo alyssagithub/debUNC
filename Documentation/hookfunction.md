@@ -13,15 +13,15 @@ print(Greet()) --> Goodbye
 print(Original()) --> Hello
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | hook_closure |
-| | hook_func |
-| | hook_function |
-| | hookclosure |
-| | hookfunc |
-| | replace_closure |
-| | replaceclosure |
+| Name |
+| :- |
+| hook_closure |
+| hook_func |
+| hook_function |
+| hookclosure |
+| hookfunc |
+| replace_closure |
+| replaceclosure |
 # Parameters
 | Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to hook.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

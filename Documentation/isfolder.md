@@ -5,9 +5,9 @@ makefolder("Logs")
 print(isfolder("Logs")) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | is_folder |
+| Name |
+| :- |
+| is_folder |
 # Parameters
 | Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The path of the folder.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

@@ -5,11 +5,11 @@ print(iswriteable({})) --> true
 print(iswriteable(table.freeze({}))) --> false
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | is_writable |
-| | is_write_able |
-| | iswritable |
+| Name |
+| :- |
+| is_writable |
+| is_write_able |
+| iswritable |
 # Parameters
 | Table: [table](https://create.roblox.com/docs/luau/tables)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The table to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

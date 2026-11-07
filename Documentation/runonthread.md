@@ -8,9 +8,9 @@ end)
 runonthread(Thread, "print('Hello world!')") --> Hello world!
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | run_on_thread |
+| Name |
+| :- |
+| run_on_thread |
 # Parameters
 | Thread: [thread](https://create.roblox.com/docs/reference/engine/libraries/coroutine)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The thread to run on.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

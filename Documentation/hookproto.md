@@ -14,9 +14,9 @@ end)
 print(Outer()()) --> Goodbye
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | hook_proto |
+| Name |
+| :- |
+| hook_proto |
 # Parameters
 | Proto: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The inner function from debug.getproto.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

@@ -6,9 +6,9 @@ for _, Path in listfiles("Logs") do
 end
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | list_files |
+| Name |
+| :- |
+| list_files |
 # Parameters
 | Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The path of the folder.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

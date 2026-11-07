@@ -6,9 +6,9 @@ for Name, Value in gethiddenproperties(Instance.new("Part")) do
 end
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_hidden_properties |
+| Name |
+| :- |
+| get_hidden_properties |
 # Parameters
 | Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Instance to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

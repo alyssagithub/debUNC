@@ -5,9 +5,9 @@ local Sword = getobjects("rbxassetid://125013769")[1]
 print(Sword.Name) --> LinkedSword
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_objects |
+| Name |
+| :- |
+| get_objects |
 # Parameters
 | Asset: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The rbxassetid:// id of the asset.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

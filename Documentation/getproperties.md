@@ -5,9 +5,9 @@ local Part = Instance.new("Part")
 print(getproperties(Part).Size == Part.Size) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_properties |
+| Name |
+| :- |
+| get_properties |
 # Parameters
 | Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Instance to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

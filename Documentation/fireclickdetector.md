@@ -5,9 +5,9 @@ local ClickDetector = workspace.Button.ClickDetector
 fireclickdetector(ClickDetector)
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | fire_click_detector |
+| Name |
+| :- |
+| fire_click_detector |
 # Parameters
 | ClickDetector: [ClickDetector](https://create.roblox.com/docs/reference/engine/classes/ClickDetector)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The ClickDetector to fire.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

@@ -5,9 +5,9 @@ local Marker = {Secret = true}
 print(filtergc("table", {Keys = {"Secret"}}, true) == Marker) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | filter_gc |
+| Name |
+| :- |
+| filter_gc |
 # Parameters
 | Type: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Either table or function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

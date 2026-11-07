@@ -4,6 +4,6 @@ Clicks the right mouse button. The Roblox window has to be focused.
 mouse2click()
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | mouse_2_click |
+| Name |
+| :- |
+| mouse_2_click |

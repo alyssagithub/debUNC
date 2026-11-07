@@ -4,9 +4,9 @@ Returns whether or not the client is simulating a part's physics.
 print(isnetworkowner(game.Players.LocalPlayer.Character.HumanoidRootPart)) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | is_network_owner |
+| Name |
+| :- |
+| is_network_owner |
 # Parameters
 | Part: [BasePart](https://create.roblox.com/docs/reference/engine/classes/BasePart)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The part to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

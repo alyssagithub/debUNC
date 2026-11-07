@@ -4,9 +4,9 @@ Returns whether or not a property can be read by scripts.
 print(isscriptable(game, "Parent")) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | is_scriptable |
+| Name |
+| :- |
+| is_scriptable |
 # Parameters
 | Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Instance with the property.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

@@ -5,9 +5,9 @@ local Hash = getscripthash(game.Players.LocalPlayer.PlayerScripts.PlayerModule)
 print(#Hash) --> 96
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_script_hash |
+| Name |
+| :- |
+| get_script_hash |
 # Parameters
 | Script: [LuaSourceContainer](https://create.roblox.com/docs/reference/engine/classes/LuaSourceContainer)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The script to hash.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

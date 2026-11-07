@@ -5,9 +5,9 @@ print(isreadonly({})) --> false
 print(isreadonly(table.freeze({}))) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | is_read_only |
+| Name |
+| :- |
+| is_read_only |
 # Parameters
 | Table: [table](https://create.roblox.com/docs/luau/tables)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The table to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

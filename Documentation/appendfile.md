@@ -6,9 +6,9 @@ appendfile("Log.txt", " world!")
 print(readfile("Log.txt")) --> Hello world!
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | append_file |
+| Name |
+| :- |
+| append_file |
 # Parameters
 | Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The path of the file.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

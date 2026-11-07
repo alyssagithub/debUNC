@@ -10,11 +10,11 @@ end
 print(getcallbackvalue(BindableFunction, "OnInvoke")()) --> Hello world!
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_callback_member |
-| | get_callback_value |
-| | getcallbackmember |
+| Name |
+| :- |
+| get_callback_member |
+| get_callback_value |
+| getcallbackmember |
 # Parameters
 | Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Instance with the callback.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

@@ -5,9 +5,9 @@ local Bytecode = getscriptbytecode(game.Players.LocalPlayer.PlayerScripts.Player
 print(#Bytecode)
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_script_bytecode |
+| Name |
+| :- |
+| get_script_bytecode |
 # Parameters
 | Script: [LuaSourceContainer](https://create.roblox.com/docs/reference/engine/classes/LuaSourceContainer)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The script to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

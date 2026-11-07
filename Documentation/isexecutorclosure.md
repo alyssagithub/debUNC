@@ -5,9 +5,9 @@ print(isexecutorclosure(function() end)) --> true
 print(isexecutorclosure(print)) --> false
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | is_executor_closure |
+| Name |
+| :- |
+| is_executor_closure |
 # Parameters
 | Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

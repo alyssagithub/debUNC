@@ -5,10 +5,10 @@ local PlayerModule = game.Players.LocalPlayer.PlayerScripts.PlayerModule
 print(getmenv(PlayerModule).script == PlayerModule) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_module_environment |
-| | getmoduleenvironment |
+| Name |
+| :- |
+| get_module_environment |
+| getmoduleenvironment |
 # Parameters
 | Module: [ModuleScript](https://create.roblox.com/docs/reference/engine/classes/ModuleScript)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The ModuleScript to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

@@ -6,9 +6,9 @@ delfile("Log.txt")
 print(isfile("Log.txt")) --> false
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | del_file |
+| Name |
+| :- |
+| del_file |
 # Parameters
 | Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The path of the file.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

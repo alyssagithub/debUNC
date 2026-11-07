@@ -15,18 +15,15 @@ reasons why i made this:
 ```lua
 loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.luau"))()
 ```
-# Confirmed results (debUNC v2.4.0)
-![Lucid](https://img.shields.io/badge/Lucid_1.0.0-97%25-brightgreen?style=for-the-badge)
-
-![Synapse Z](https://img.shields.io/badge/Synapse_Z_v1.0.3.9-81%25-yellow?style=for-the-badge)
+# Confirmed results (debUNC v2.5.0)
+![Lucid](https://img.shields.io/badge/Lucid_1.0.0-93%25-brightgreen?style=for-the-badge)
 
 ![Bunni](https://img.shields.io/badge/Bunni_2.0-77%25-yellow?style=for-the-badge)
 
 | Executor | Version | Score | Took | 🟢 Passed | 🔴 Failed | 🟠 Skipped | 🟡 Missing |
 |---|---|:---:|:---:|:---:|:---:|:---:|:---:|
-| Lucid | 1.0.0 | **97%** | 12.42s | 202 | 2 | 0 | 4 |
-| Synapse Z | v1.0.3.9 | **81%** | 16.17s | 169 | 17 | 1 | 21 |
-| Bunni | 2.0 | **77%** | 9.91s | 161 | 19 | 1 | 27 |
+| Lucid | 1.0.0 | **93%** | 14.85s | 196 | 4 | 5 | 4 |
+| Bunni | 2.0 | **77%** | 10.62s | 162 | 19 | 1 | 27 |
 
 <details>
 <summary><b>Lucid details</b></summary>
@@ -34,6 +31,15 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 **🔴 Failed**
 - `getactors`: should return Actor instances, but got a thread (threads are what getactorthreads is for)
 - `identifyexecutor`: the version '1.0.0' never changes between updates, it should be the real version of each release
+- `isrbxactive`: still returned true after the Roblox window lost focus
+- `rconsolecreate`: rconsolehidden returned true after rconsoleshow, so the console didn't open
+
+**🟠 Skipped**
+- `rconsoledestroy`: couldn't be tested because rconsolecreate failed
+- `rconsoleerr`: couldn't be tested because rconsolecreate failed
+- `rconsoleinfo`: couldn't be tested because rconsolecreate failed
+- `rconsoleprint`: couldn't be tested because rconsolecreate failed
+- `rconsolewarn`: couldn't be tested because rconsolecreate failed
 
 **🟡 Missing**
 - `getclipboard`
@@ -42,6 +48,71 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 - `renamefile`
 
 </details>
+
+<details>
+<summary><b>Bunni details</b></summary>
+
+**🔴 Failed**
+- `cansignalreplicate`: should return true for Player.Kill
+- `dofile`: expected the value the file returned to be 0.6385579215606689, got nil
+- `game.HttpGet`: httpgetting a website that doesn't exist should return an error, nil, or an empty string
+- `getactorthreads`: expected at least one actor thread
+- `getfpscap`: expected the fps cap to be 10, got 0
+- `getmodules`: didn't find a new ModuleScript
+- `getsignalarguments`: expected the number of arguments Touched has to be 1, got 125
+- `getsignalargumentsinfo`: expected the name of Touched's argument to be otherPart, got Instance
+- `hooksignal`: returning false from the hook didn't stop the connection from firing
+- `identifyexecutor`: the version '2.0' never changes between updates, it should be the real version of each release
+- `isparallel`: should return false in an actor before it desynchronizes
+- `keyclick`: the key press wasn't detected
+- `keypress`: the input wasn't detected
+- `keyrelease`: the input was never held down, so it can't be released
+- `mousemoveabs`: the mouse went to 439, 280 instead of 448, 312.5
+- `raknet.send`: invalid argument #1 to 'send' (string expected, got buffer)
+- `replicatesignal`: should error on a signal that can't be replicated
+- `saveinstance`: didn't return a string
+- `trampolinecall`: should return true when the function doesn't error, got trampoline_call
+
+**🟠 Skipped**
+- `restoresignal`: couldn't be tested because hooksignal failed
+
+**🟡 Missing**
+- `appendfileasync`
+- `createcommchannel`
+- `debug.getcallstack`
+- `debug.isvalidlevel`
+- `debug.setinfo`
+- `getactorfromthread`
+- `getcommchannel`
+- `getfunctionbytecode`
+- `getfunctionreferences`
+- `gethwid`
+- `getobjectreferences`
+- `gettenv`
+- `hookproto`
+- `iscorescript`
+- `isprotohooked`
+- `issignalhooked`
+- `loadfileasync`
+- `raknet.addreceivehook`
+- `raknet.addsendhook`
+- `raknet.receive`
+- `raknet.removereceivehook`
+- `raknet.removesendhook`
+- `readfileasync`
+- `restoreproto`
+- `runonthread`
+- `writecustomasset`
+- `writefileasync`
+
+</details>
+
+# Confirmed results (debUNC v2.4.0)
+![Synapse Z](https://img.shields.io/badge/Synapse_Z_v1.0.3.9-81%25-yellow?style=for-the-badge)
+
+| Executor | Version | Score | Took | 🟢 Passed | 🔴 Failed | 🟠 Skipped | 🟡 Missing |
+|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| Synapse Z | v1.0.3.9 | **81%** | 16.17s | 169 | 17 | 1 | 21 |
 
 <details>
 <summary><b>Synapse Z details</b></summary>
@@ -88,64 +159,6 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 - `readfileasync`
 - `renamefile`
 - `saveinstance`
-- `writecustomasset`
-- `writefileasync`
-
-</details>
-
-<details>
-<summary><b>Bunni details</b></summary>
-
-**🔴 Failed**
-- `cansignalreplicate`: should return true for Player.Kill
-- `dofile`: expected the value the file returned to be 0.6385579215606689, got nil
-- `game.HttpGet`: httpgetting a website that doesn't exist should return an error, nil, or an empty string
-- `getactorthreads`: expected at least one actor thread
-- `getfpscap`: expected the fps cap to be 10, got 0
-- `getmenv`: .script doesn't point to the module
-- `getmodules`: didn't find a new ModuleScript
-- `getsignalarguments`: expected the number of arguments Touched has to be 1, got 125
-- `getsignalargumentsinfo`: expected the name of Touched's argument to be otherPart, got Instance
-- `hooksignal`: returning false from the hook didn't stop the connection from firing
-- `identifyexecutor`: the version '2.0' never changes between updates, it should be the real version of each release
-- `isparallel`: should return false in an actor before it desynchronizes
-- `keyclick`: the key press wasn't detected
-- `keypress`: the input wasn't detected
-- `keyrelease`: the input was never held down, so it can't be released
-- `mousemoveabs`: the mouse went to 439, 280 instead of 448, 312.5
-- `raknet.send`: invalid argument #1 to 'send' (string expected, got buffer)
-- `replicatesignal`: should error on a signal that can't be replicated
-- `saveinstance`: didn't return a string
-
-**🟠 Skipped**
-- `restoresignal`: couldn't be tested because hooksignal failed
-
-**🟡 Missing**
-- `appendfileasync`
-- `createcommchannel`
-- `debug.getcallstack`
-- `debug.isvalidlevel`
-- `debug.setinfo`
-- `getactorfromthread`
-- `getcommchannel`
-- `getfunctionbytecode`
-- `getfunctionreferences`
-- `gethwid`
-- `getobjectreferences`
-- `gettenv`
-- `hookproto`
-- `iscorescript`
-- `isprotohooked`
-- `issignalhooked`
-- `loadfileasync`
-- `raknet.addreceivehook`
-- `raknet.addsendhook`
-- `raknet.receive`
-- `raknet.removereceivehook`
-- `raknet.removesendhook`
-- `readfileasync`
-- `restoreproto`
-- `runonthread`
 - `writecustomasset`
 - `writefileasync`
 

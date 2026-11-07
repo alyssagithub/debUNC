@@ -5,9 +5,9 @@ local function Greet() end
 print(table.find(getgc(), Greet) ~= nil) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_gc |
+| Name |
+| :- |
+| get_gc |
 # Parameters
 | IncludeTables: [boolean?](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether to include tables.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

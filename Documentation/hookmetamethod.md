@@ -7,9 +7,9 @@ Original = hookmetamethod(game, "__index", function(...)
 end)
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | hook_meta_method |
+| Name |
+| :- |
+| hook_meta_method |
 # Parameters
 | Object: any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The object with the metamethod.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

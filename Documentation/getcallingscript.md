@@ -8,9 +8,9 @@ Original = hookmetamethod(game, "__namecall", function(...)
 end)
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_calling_script |
+| Name |
+| :- |
+| get_calling_script |
 # Returns
 | [Instance?](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The calling script.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

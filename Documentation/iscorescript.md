@@ -4,9 +4,9 @@ Returns whether or not a script is one of Roblox's core scripts.
 print(iscorescript(game.Players.LocalPlayer.PlayerScripts.PlayerModule)) --> false
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | is_core_script |
+| Name |
+| :- |
+| is_core_script |
 # Parameters
 | Script: [LuaSourceContainer](https://create.roblox.com/docs/reference/engine/classes/LuaSourceContainer)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The script to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

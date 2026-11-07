@@ -4,9 +4,9 @@ Returns the value of a FastFlag, which is a setting Roblox uses to control its f
 print(getfflag("TaskSchedulerTargetFps"))
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_fflag |
+| Name |
+| :- |
+| get_fflag |
 # Parameters
 | Flag: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The name of the flag.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

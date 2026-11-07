@@ -6,9 +6,9 @@ print(islclosure(Wrapped)) --> true
 print(Wrapped(-5)) --> 5
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | new_l_closure |
+| Name |
+| :- |
+| new_l_closure |
 # Parameters
 | Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to wrap.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

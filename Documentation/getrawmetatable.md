@@ -5,9 +5,9 @@ local Metatable = getrawmetatable(game)
 print(typeof(Metatable.__index)) --> function
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_raw_metatable |
+| Name |
+| :- |
+| get_raw_metatable |
 # Parameters
 | Object: any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The object to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

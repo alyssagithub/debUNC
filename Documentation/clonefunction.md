@@ -10,11 +10,11 @@ print(Clone == Greet) --> false
 print(Clone()) --> Hello world!
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | clone_closure |
-| | clone_function |
-| | cloneclosure |
+| Name |
+| :- |
+| clone_closure |
+| clone_function |
+| cloneclosure |
 # Parameters
 | Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to copy.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

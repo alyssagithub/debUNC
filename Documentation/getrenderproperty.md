@@ -6,9 +6,9 @@ Line.Thickness = 5
 print(getrenderproperty(Line, "Thickness")) --> 5
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_render_property |
+| Name |
+| :- |
+| get_render_property |
 # Parameters
 | Object: DrawingObject&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Drawing object.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

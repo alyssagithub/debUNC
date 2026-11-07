@@ -6,9 +6,9 @@ delfolder("Logs")
 print(isfolder("Logs")) --> false
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | del_folder |
+| Name |
+| :- |
+| del_folder |
 # Parameters
 | Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The path of the folder.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

@@ -5,9 +5,9 @@ local Info = getsignalargumentsinfo(Instance.new("Part").Touched)[1]
 print(Info.Name, Info.Type) --> otherPart Instance
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_signal_arguments_info |
+| Name |
+| :- |
+| get_signal_arguments_info |
 # Parameters
 | Signal: [RBXScriptSignal](https://create.roblox.com/docs/reference/engine/datatypes/RBXScriptSignal)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The signal to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

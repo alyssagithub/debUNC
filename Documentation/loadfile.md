@@ -5,9 +5,9 @@ writefile("Number.lua", "return 42")
 print(loadfile("Number.lua")()) --> 42
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | load_file |
+| Name |
+| :- |
+| load_file |
 # Parameters
 | Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The path of the file.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

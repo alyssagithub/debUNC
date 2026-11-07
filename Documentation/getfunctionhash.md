@@ -5,9 +5,9 @@ local function Greet() end
 print(getfunctionhash(Greet) == getfunctionhash(Greet)) --> true
 ```
 # Aliases
-| Library | Name |
-| :- | :- |
-| | get_function_hash |
+| Name |
+| :- |
+| get_function_hash |
 # Parameters
 | Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to hash.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
