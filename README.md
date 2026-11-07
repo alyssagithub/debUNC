@@ -15,15 +15,21 @@ reasons why i made this:
 ```lua
 loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.luau"))()
 ```
-# Confirmed results (debUNC v2.5.0)
+# Confirmed results (debUNC v2.6.0)
 ![Lucid](https://img.shields.io/badge/Lucid_1.0.0-93%25-brightgreen?style=for-the-badge)
+
+![Athena](https://img.shields.io/badge/Athena_1.0-85%25-yellow?style=for-the-badge)
+
+![Synapse Z](https://img.shields.io/badge/Synapse_Z_v1.0.3.9-80%25-yellow?style=for-the-badge)
 
 ![Bunni](https://img.shields.io/badge/Bunni_2.0-77%25-yellow?style=for-the-badge)
 
 | Executor | Version | Score | Took | 🟢 Passed | 🔴 Failed | 🟠 Skipped | 🟡 Missing |
 |---|---|:---:|:---:|:---:|:---:|:---:|:---:|
-| Lucid | 1.0.0 | **93%** | 14.85s | 196 | 4 | 5 | 4 |
-| Bunni | 2.0 | **77%** | 10.62s | 162 | 19 | 1 | 27 |
+| Lucid | 1.0.0 | **93%** | 14.46s | 196 | 4 | 5 | 5 |
+| Athena | 1.0 | **85%** | 15.42s | 180 | 4 | 0 | 26 |
+| Synapse Z | v1.0.3.9 | **80%** | 17.72s | 169 | 19 | 1 | 21 |
+| Bunni | 2.0 | **77%** | 11.05s | 162 | 19 | 1 | 28 |
 
 <details>
 <summary><b>Lucid details</b></summary>
@@ -42,10 +48,102 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 - `rconsolewarn`: couldn't be tested because rconsolecreate failed
 
 **🟡 Missing**
+- `DirectoryWatcher.new`
 - `getclipboard`
 - `getfilesize`
 - `movefile`
 - `renamefile`
+
+</details>
+
+<details>
+<summary><b>Athena details</b></summary>
+
+**🔴 Failed**
+- `getactors`: should return Actor instances, but got a MeshPart
+- `isrbxactive`: still returned true after the Roblox window lost focus
+- `loadstring`: the compile error doesn't mention the chunk name, got ':1: Incomplete statement: expected assignment or a function call'
+- `mousemoveabs`: the mouse went to 400, 299 instead of 369, 305.5
+
+**🟡 Missing**
+- `appendfileasync`
+- `getactorfromthread`
+- `getclipboard`
+- `getfilesize`
+- `getfunctionreferences`
+- `getmenv`
+- `getmetafield`
+- `getobjectreferences`
+- `hasmetafield`
+- `hasmetatable`
+- `iscorescript`
+- `iswriteable`
+- `loadfileasync`
+- `makewriteable`
+- `movefile`
+- `raknet.addreceivehook`
+- `raknet.addsendhook`
+- `raknet.receive`
+- `raknet.removereceivehook`
+- `raknet.removesendhook`
+- `raknet.send`
+- `readfileasync`
+- `renamefile`
+- `trampolinecall`
+- `writecustomasset`
+- `writefileasync`
+
+</details>
+
+<details>
+<summary><b>Synapse Z details</b></summary>
+
+**🔴 Failed**
+- `DirectoryWatcher.new`: this crashes Roblox on Synapse Z, so it wasn't run, use shared.CrashTests = true to try it
+- `Drawing.new`: expected a Text object's Font after setting it to 3 to be 3, got DrawFont: 0x9222ab439ac041b4
+- `createcommchannel`: expected a number id, got a string
+- `crypt.encrypt`: invalid argument #2 to 'encrypt' (invalid key size)
+- `crypt.hash`: the sha256 hash of 'abc' was wrong, got 89911f71a4508762a5791590153c68a9bbee326969d37b603697a692b3fdf553
+- `decompile`: couldn't find '__index' in the decompiled 'CameraModule', it started with '-- Decompiled with Medal thread 'main' (21320) panicked at luau-lifter\src\instruction.rs:174:18: internal error: entered unreachable code: 87 note: run with RUST_BACKTRACE=1 environment variable to display a backtrace '
+- `dofile`: expected the value the file returned to be 0.9880614932786582, got File_0.6607736345242193.lua
+- `getcommchannel`: expected a number id, got a string
+- `gethiddenproperties`: expected size_xml to be 10, got nil
+- `getproperties`: expected the Size in the returned table to be 1, 4, 9, got nil
+- `getscripthash`: should be a 96 character sha384 hash, got 64 characters
+- `getsenv`: getsenv returned nil when the parent was nil
+- `hooksignal`: returning false from the hook didn't stop the connection from firing
+- `isparallel`: should return false in an actor before it desynchronizes
+- `mousemoveabs`: the mouse went to 400, 299 instead of 380, 300.5
+- `mousemoverel`: the mouse moved by 20, -1 instead of about 25, 25
+- `mousescroll`: missing argument #2 to 'mousescroll' (number expected)
+- `raknet.receive`: the receive hook didn't see the packet
+- `trampolinecall`: expected the line of the fake caller to be 542, got 4105
+
+**🟠 Skipped**
+- `crypt.decrypt`: couldn't be tested because crypt.encrypt failed
+
+**🟡 Missing**
+- `appendfileasync`
+- `clearqueueonteleport`
+- `comparefunctions`
+- `crypt.hmac`
+- `getactorfromthread`
+- `getactorthreads`
+- `getclipboard`
+- `getfilesize`
+- `getmenv`
+- `getmetafield`
+- `getmodules`
+- `getsignalwhitelist`
+- `hasmetafield`
+- `hasmetatable`
+- `loadfileasync`
+- `movefile`
+- `readfileasync`
+- `renamefile`
+- `saveinstance`
+- `writecustomasset`
+- `writefileasync`
 
 </details>
 
@@ -77,6 +175,7 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 - `restoresignal`: couldn't be tested because hooksignal failed
 
 **🟡 Missing**
+- `DirectoryWatcher.new`
 - `appendfileasync`
 - `createcommchannel`
 - `debug.getcallstack`
@@ -102,63 +201,6 @@ loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.
 - `readfileasync`
 - `restoreproto`
 - `runonthread`
-- `writecustomasset`
-- `writefileasync`
-
-</details>
-
-# Confirmed results (debUNC v2.4.0)
-![Synapse Z](https://img.shields.io/badge/Synapse_Z_v1.0.3.9-81%25-yellow?style=for-the-badge)
-
-| Executor | Version | Score | Took | 🟢 Passed | 🔴 Failed | 🟠 Skipped | 🟡 Missing |
-|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
-| Synapse Z | v1.0.3.9 | **81%** | 16.17s | 169 | 17 | 1 | 21 |
-
-<details>
-<summary><b>Synapse Z details</b></summary>
-
-**🔴 Failed**
-- `createcommchannel`: expected a number id, got a string
-- `crypt.encrypt`: invalid argument #2 to 'encrypt' (invalid key size)
-- `crypt.hash`: the sha256 hash of 'abc' was wrong, got 89911f71a4508762a5791590153c68a9bbee326969d37b603697a692b3fdf553
-- `decompile`: couldn't find '__index' in the decompiled 'CameraModule', it started with '-- Decompiled with Medal thread 'main' (3064) panicked at luau-lifter\src\instruction.rs:174:18: internal error: entered unreachable code: 87 note: run with RUST_BACKTRACE=1 environment variable to display a backtrace'
-- `dofile`: expected the value the file returned to be 0.6094110861208102, got File_0.13667204146883877.lua
-- `Drawing.new`: expected a Text object's Font after setting it to 3 to be 3, got DrawFont: 0x33316ca90b2d9905
-- `getcommchannel`: expected a number id, got a string
-- `gethiddenproperties`: expected size_xml to be 17, got nil
-- `getproperties`: expected the Size in the returned table to be 4, 2, 5, got nil
-- `getscripthash`: should be a 96 character sha384 hash, got 64 characters
-- `getsenv`: getsenv returned nil when the parent was nil
-- `hooksignal`: returning false from the hook didn't stop the connection from firing
-- `isparallel`: should return false in an actor before it desynchronizes
-- `mousemoveabs`: the mouse went to 400, 299 instead of 406, 346.5
-- `mousemoverel`: the mouse moved by -6, -47 instead of about 25, 25
-- `mousescroll`: missing argument #2 to 'mousescroll' (number expected)
-- `raknet.receive`: the receive hook didn't see the packet
-
-**🟠 Skipped**
-- `crypt.decrypt`: couldn't be tested because crypt.encrypt failed
-
-**🟡 Missing**
-- `appendfileasync`
-- `clearqueueonteleport`
-- `comparefunctions`
-- `crypt.hmac`
-- `getactorfromthread`
-- `getactorthreads`
-- `getclipboard`
-- `getfilesize`
-- `getmenv`
-- `getmetafield`
-- `getmodules`
-- `getsignalwhitelist`
-- `hasmetafield`
-- `hasmetatable`
-- `loadfileasync`
-- `movefile`
-- `readfileasync`
-- `renamefile`
-- `saveinstance`
 - `writecustomasset`
 - `writefileasync`
 

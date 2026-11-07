@@ -2,6 +2,7 @@
 Returns whether or not the Roblox window is focused.
 > [!NOTE]
 > To react when focus changes, use [UserInputService.WindowFocused](https://create.roblox.com/docs/reference/engine/classes/UserInputService#WindowFocused) and [UserInputService.WindowFocusReleased](https://create.roblox.com/docs/reference/engine/classes/UserInputService#WindowFocusReleased) instead of checking this in a loop.
+
 ```lua
 print(isrbxactive())
 ```

@@ -3,6 +3,7 @@
 > **Deprecated**
 >
 > This function has been superseded by [EncodingService:Base64Decode](https://create.roblox.com/docs/reference/engine/classes/EncodingService#Base64Decode) which should be used in all new work.
+
 Decodes a string that is encoded in Base64.
 ```lua
 print(base64decode("SGVsbG8gd29ybGQh")) --> Hello world!

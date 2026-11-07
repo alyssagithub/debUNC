@@ -3,6 +3,7 @@
 > **Deprecated**
 >
 > This function has been superseded by [EncodingService:Base64Encode](https://create.roblox.com/docs/reference/engine/classes/EncodingService#Base64Encode) which should be used in all new work.
+
 Encodes a string in Base64.
 ```lua
 print(base64encode("Hello world!")) --> SGVsbG8gd29ybGQh

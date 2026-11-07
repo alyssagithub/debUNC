@@ -4,6 +4,7 @@ Returns the text currently on the clipboard. It only gives the latest copy, not 
 > **For executor developers**
 >
 > Only return text that was copied inside of Roblox or by the executor, so scripts can't log what the user copies in other apps, like passwords.
+
 ```lua
 setclipboard("Hello world!")
 print(getclipboard()) --> Hello world!
