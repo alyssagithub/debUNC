@@ -118,7 +118,7 @@ const FocusConnection = UserInputService.WindowFocusReleased:Connect(function()
 	FocusLost = true
 	HasFocus = false
 
-	const IsRobloxActive = getfenv().isrbxactive
+	const IsRobloxActive = isrbxactive
 
 	if not IsRobloxActive then
 		return
@@ -136,7 +136,7 @@ const FocusGainedConnection = UserInputService.WindowFocused:Connect(function()
 end)
 
 const function CheckInputFree()
-	const IsRobloxActive = getfenv().isrbxactive
+	const IsRobloxActive = isrbxactive
 
 	if IsRobloxActive and not IsRobloxActive() then
 		error({Skipped = "the Roblox window isn't focused", Environment = FocusLost})
@@ -203,7 +203,7 @@ const function WaitForInput(Signal: RBXScriptSignal, Check: (InputObject) -> boo
 end
 
 const function CenterMouse()
-	const MouseMoveAbsolute = getfenv().mousemoveabs
+	const MouseMoveAbsolute = mousemoveabs
 
 	if not MouseMoveAbsolute then
 		return
@@ -285,7 +285,7 @@ const function CheckKey(TestedName: string)
 end
 
 const function CheckPacketHook(Direction: string, CheckRemove: boolean)
-	const RakNet = getfenv().raknet
+	const RakNet = raknet
 
 	local Count = 0
 	local PacketId
@@ -324,7 +324,21 @@ const function CheckPacketHook(Direction: string, CheckRemove: boolean)
 		return
 	end
 
-	task.wait(0.5)
+	local ControlCount = 0
+
+	const function OnControlPacket()
+		ControlCount += 1
+	end
+
+	RakNet[`add{Direction}hook`](OnControlPacket)
+
+	AddCleanup(function()
+		RakNet[`remove{Direction}hook`](OnControlPacket)
+	end)
+
+	WaitFor(function()
+		return ControlCount >= 3
+	end, 3)
 
 	assert(Count == CountAtRemoval, `the {Direction} hook was still called after it was removed`)
 end
@@ -352,7 +366,7 @@ const function RunOnNewActor(Code: string): {[string]: any}
 end
 
 const function CheckOffThreadHook()
-	const OffThreadHooks = getfenv().oth
+	const OffThreadHooks = oth
 	const Target = math.ldexp
 
 	local InHookThread
@@ -385,12 +399,12 @@ const function CheckOffThreadHook()
 	Formatters.CheckEqual(Target(1, 2), 4, "the result after unhooking")
 	assert(InHookThread == true, "is_hook_thread returned false inside the hook")
 	assert(OffThreadHooks.is_hook_thread() == false, "is_hook_thread returned true outside of a hook")
-	assert(typeof(RootCallback) == "function", `get_root_callback should return a function inside the hook, got a {typeof(RootCallback)}`)
+	assert(typeof(RootCallback) == "function", `get_root_callback should return a function inside the hook, got {typeof(RootCallback)}`)
 	assert(OriginalThread == coroutine.running(), "get_original_thread didn't return the thread that called the function")
 	assert(HookThread ~= coroutine.running(), "the hook ran on the same thread as the caller")
-	assert(typeof(OriginalThread) == "thread", `get_original_thread should return a thread inside the hook, got a {typeof(OriginalThread)}`)
+	assert(typeof(OriginalThread) == "thread", `get_original_thread should return a thread inside the hook, got {typeof(OriginalThread)}`)
 
-	const NewCClosure = getfenv().newcclosure
+	const NewCClosure = newcclosure
 
 	if not NewCClosure then
 		return
@@ -424,7 +438,7 @@ const function CheckCommChannel()
 
 	local Received
 
-	assert(typeof(ChannelId) == "number", `expected a number id, got a {typeof(ChannelId)}`)
+	assert(typeof(ChannelId) == "number", `expected a number id, got {typeof(ChannelId)}`)
 	assert(GetCommChannel(ChannelId) == Channel, "getcommchannel didn't return the channel that was made")
 	Formatters.CheckEqual(GetCommChannel(math.random()), nil, "a channel that was never made")
 
@@ -445,8 +459,8 @@ const function CheckCommChannel()
 end
 
 const function CheckConsole()
-	const IsHidden = getfenv().rconsolehidden
-	const Show = getfenv().rconsoleshow
+	const IsHidden = rconsolehidden
+	const Show = rconsoleshow
 
 	if not IsHidden or not Show then
 		return
@@ -455,7 +469,7 @@ const function CheckConsole()
 	Formatters.CheckExist("rconsolecreate")()
 
 	AddCleanup(function()
-		getfenv().rconsoledestroy()
+		rconsoledestroy()
 	end)
 
 	Show()
@@ -463,8 +477,28 @@ const function CheckConsole()
 	assert(IsHidden() ~= true, "rconsolehidden returned true after rconsoleshow, so the console didn't open")
 end
 
+const function CallAsync(Function: (...any) -> ...any, ...: any): ...any
+	local Results
+
+	const Thread = task.spawn(function(...)
+		Results = table.pack(pcall(Function, ...))
+	end, ...)
+
+	assert(coroutine.status(Thread) ~= "dead", "it finished before returning, so it blocks like the normal version instead of running in the background")
+
+	assert(WaitFor(function()
+		return Results ~= nil
+	end, 5), "it never finished")
+
+	if not Results[1] then
+		error(Results[2], 0)
+	end
+
+	return table.unpack(Results, 2, Results.n)
+end
+
 const function CheckClipboard()
-	const GetClipboard = getfenv().getclipboard
+	const GetClipboard = getclipboard
 
 	if not GetClipboard then
 		return
@@ -502,7 +536,7 @@ const function CheckScriptThread()
 		error({Skipped = "no LocalScript has a running thread right now"})
 	end
 
-	assert(typeof(Thread) == "thread", `getscriptthread should return a thread, got a {typeof(Thread)}`)
+	assert(typeof(Thread) == "thread", `getscriptthread should return a thread, got {typeof(Thread)}`)
 	assert(Formatters.CheckExist("getscriptfromthread")(coroutine.running()) == nil, "getscriptfromthread should return nil for the thread running this test")
 	assert(Formatters.CheckExist("getscriptfromthread")(Thread) == LocalScript, "getscriptfromthread didn't give back the script the thread belongs to")
 end
@@ -528,7 +562,7 @@ const function CheckProtoHook()
 			return
 		end
 
-		getfenv().restoreproto(Proto)
+		restoreproto(Proto)
 	end)
 
 	HookProto(Proto, function()
@@ -610,7 +644,7 @@ end
 const Tests: any = {
 	getrenv = {
 		Test = function()
-			const Environment = getfenv().getrenv()
+			const Environment = getrenv()
 
 			for _, Global: string in {
 				"delay",
@@ -640,14 +674,14 @@ const Tests: any = {
 
 			Environment.debUNC = Value
 
-			const Stored = getfenv().getrenv().debUNC
+			const Stored = getrenv().debUNC
 
 			Environment.debUNC = nil
 
 			assert(Environment.game == game, "its 'game' isn't the real game")
 			assert(Environment.print == print, "its 'print' isn't the real print")
 			assert(Environment._G ~= _G, "its _G is the same as the executor's _G")
-			assert(Environment ~= getfenv().getgenv(), "it's the same table as getgenv(), not Roblox's environment")
+			assert(Environment ~= getgenv(), "it's the same table as getgenv(), not Roblox's environment")
 			Formatters.CheckEqual(Stored, Value, "a value written to it")
 		end,
 		ReturnType = "table",
@@ -655,7 +689,7 @@ const Tests: any = {
 
 	getgenv = {
 		Test = function()
-			const Environment = getfenv().getgenv()
+			const Environment = getgenv()
 			const Key = `debUNC{math.random(1, 1e6)}`
 			const Value = math.random()
 
@@ -676,7 +710,7 @@ const Tests: any = {
 
 	gettenv = {
 		Test = function()
-			const GetThreadEnvironment: (thread | () -> ()) -> {[string]: any} = getfenv().gettenv
+			const GetThreadEnvironment: (thread | () -> ()) -> {[string]: any} = gettenv
 
 			assert(not pcall(GetThreadEnvironment, function() end), "expected error when providing a non-thread value")
 
@@ -694,7 +728,7 @@ const Tests: any = {
 
 	readfile = {
 		Test = function()
-			const ReadFile: (Path: string) -> string = getfenv().readfile
+			const ReadFile: (Path: string) -> string = readfile
 
 			assert(not pcall(ReadFile, "doesntexist.txt"), "expected an error when reading a file that doesn't exist")
 
@@ -716,7 +750,7 @@ const Tests: any = {
 			const GeneratedResult = tostring(math.random())
 			const FileName = `File_{math.random()}.txt`
 
-			getfenv().writefile(FileName, GeneratedResult)
+			writefile(FileName, GeneratedResult)
 
 			const Result = Formatters.CheckExist("readfile")(FileName)
 
@@ -733,7 +767,7 @@ const Tests: any = {
 
 			Formatters.CheckExist("writefile")(FileName, "Test")
 
-			const IsFile = getfenv().isfile
+			const IsFile = isfile
 			const Exists = IsFile(FileName)
 
 			RemovePath("delfile", FileName)
@@ -745,7 +779,7 @@ const Tests: any = {
 
 	appendfile = {
 		Test = function()
-			const AppendFile: (Path: string, Data: string) -> () = getfenv().appendfile
+			const AppendFile: (Path: string, Data: string) -> () = appendfile
 			const ReadFile: (Path: string) -> string = Formatters.CheckExist("readfile")
 
 			const GeneratedResult = tostring(math.random())
@@ -770,7 +804,7 @@ const Tests: any = {
 
 	listfiles = {
 		Test = function()
-			const ListFiles: (Path: string) -> {string} = getfenv().listfiles
+			const ListFiles: (Path: string) -> {string} = listfiles
 
 			const FolderName = `Folder_{math.random()}`
 			const FileName = `{FolderName}/File_{math.random()}.txt`
@@ -800,7 +834,7 @@ const Tests: any = {
 
 			assert(IsFile(FileName), "failed to write to the file, can't continue the test")
 
-			getfenv().delfile(FileName)
+			delfile(FileName)
 
 			assert(not IsFile(FileName), "'isfile' returned true after the file was meant to be deleted")
 		end,
@@ -813,7 +847,7 @@ const Tests: any = {
 
 			Formatters.CheckExist("writefile")(FileName, "local Number = ...; return Number + 1")
 
-			const LoadedFunction, ErrorMessage = getfenv().loadfile(FileName)
+			const LoadedFunction, ErrorMessage = loadfile(FileName)
 
 			RemovePath("delfile", FileName)
 
@@ -825,7 +859,7 @@ const Tests: any = {
 		Test = function()
 			const FolderName = `Folder_{math.random()}`
 
-			getfenv().makefolder(FolderName)
+			makefolder(FolderName)
 
 			const Exists = Formatters.CheckExist("isfolder")(FolderName) == true
 
@@ -837,7 +871,7 @@ const Tests: any = {
 
 	isfolder = {
 		Test = function()
-			const IsFolder: (Path: string) -> boolean = getfenv().isfolder
+			const IsFolder: (Path: string) -> boolean = isfolder
 
 			assert(IsFolder(`Missing_{math.random()}`) == false, "didn't return false for a folder that doesn't exist")
 
@@ -863,7 +897,7 @@ const Tests: any = {
 
 			assert(IsFolder(FolderName), "failed to find the folder after it was made")
 
-			getfenv().delfolder(FolderName)
+			delfolder(FolderName)
 
 			assert(not IsFolder(FolderName), "'isfolder' found the folder after it should've been deleted")
 		end,
@@ -871,9 +905,9 @@ const Tests: any = {
 
 	hookfunction = {
 		Test = function()
-			const HookFunction: (FunctionToHook: (...any) -> (...any), Hook: (...any) -> ()) -> () -> () = getfenv().hookfunction
-			const NewCClosure: (((...any) -> ...any) -> (...any) -> ...any)? = getfenv().newcclosure
-			const RestoreFunction = getfenv().restorefunction
+			const HookFunction: (FunctionToHook: (...any) -> (...any), Hook: (...any) -> ()) -> () -> () = hookfunction
+			const NewCClosure: (((...any) -> ...any) -> (...any) -> ...any)? = newcclosure
+			const RestoreFunction = restorefunction
 
 			const function HookAndRestore(CClosure: any, Hook: Function, ...): (boolean, any)
 				const Original = HookFunction(CClosure, Hook)
@@ -983,7 +1017,7 @@ const Tests: any = {
 
 	iscclosure = {
 		Test = function()
-			const IsCClosure: (Function: (any?) -> ()) -> (boolean) = getfenv().iscclosure
+			const IsCClosure: (Function: (any?) -> ()) -> (boolean) = iscclosure
 
 			assert(IsCClosure(assert) == true, "should return true for assert, which is a C closure")
 			assert(IsCClosure(print) == true, "should return true for print, which is a C closure")
@@ -994,7 +1028,7 @@ const Tests: any = {
 
 	clonefunction = {
 		Test = function()
-			const CloneFunction: ((any?) -> any?) -> ((any?) -> any?) = getfenv().clonefunction
+			const CloneFunction: ((any?) -> any?) -> ((any?) -> any?) = clonefunction
 
 			const GeneratedNumber = math.random()
 			const TestEnvironment = {}
@@ -1014,8 +1048,8 @@ const Tests: any = {
 			assert(getfenv(Clone) == TestEnvironment, "didn't clone the function's environment")
 			assert(getfenv(PreviousEnvironmentClone) ~= TestEnvironment, "the earlier clone picked up the original function's new environment")
 
-			const OriginalInfo = {debug.info(Original, "slna")}
-			const ClonedInfo = {debug.info(Clone, "slna")}
+			const OriginalInfo = {Formatters.CheckExist("debug.info")(Original, "slna")}
+			const ClonedInfo = {Formatters.CheckExist("debug.info")(Clone, "slna")}
 
 			for CheckName, Position in {
 				Source = 1,
@@ -1049,7 +1083,7 @@ const Tests: any = {
 			const HttpService = game:GetService("HttpService")
 			const Marker = tostring(math.random(1, 1e9))
 
-			const Success, Result = pcall(getfenv().request, {
+			const Success, Result = pcall(request, {
 				Url = `https://httpbin.org/get?debunc={Marker}`,
 				Method = "GET",
 				Headers = {["X-Debunc"] = Marker},
@@ -1112,7 +1146,7 @@ const Tests: any = {
 				WasClicked = ClickingPlayer == Player
 			end)
 
-			getfenv().fireclickdetector(ClickDetector)
+			fireclickdetector(ClickDetector)
 
 			const Clicked = WaitFor(function()
 				return WasClicked
@@ -1141,7 +1175,7 @@ const Tests: any = {
 				WasTriggered = TriggeringPlayer == Player
 			end)
 
-			getfenv().fireproximityprompt(ProximityPrompt)
+			fireproximityprompt(ProximityPrompt)
 
 			const Triggered = WaitFor(function()
 				return WasTriggered
@@ -1164,7 +1198,7 @@ const Tests: any = {
 				DidChange = Value == GeneratedValue
 			end)
 
-			getfenv().firesignal(NumberValue.Changed, GeneratedValue)
+			firesignal(NumberValue.Changed, GeneratedValue)
 
 			assert(WaitFor(function()
 				return DidChange
@@ -1174,7 +1208,7 @@ const Tests: any = {
 
 	getloadedmodules = {
 		Test = function()
-			const LoadedModules = getfenv().getloadedmodules()
+			const LoadedModules = getloadedmodules()
 
 			Formatters.CheckReturnType(LoadedModules, "table")
 
@@ -1194,7 +1228,7 @@ const Tests: any = {
 				Clone:Destroy()
 			end)
 
-			const FoundClone = table.find(getfenv().getloadedmodules(), Clone)
+			const FoundClone = table.find(getloadedmodules(), Clone)
 
 			Clone:Destroy()
 
@@ -1205,7 +1239,7 @@ const Tests: any = {
 
 	getconnections = {
 		Test = function()
-			const GetConnections = getfenv().getconnections
+			const GetConnections = getconnections
 			const NumberValue = Instance.new("NumberValue")
 			const GeneratedValue = math.random()
 
@@ -1248,7 +1282,7 @@ const Tests: any = {
 
 	getscripts = {
 		Test = function()
-			const Scripts = getfenv().getscripts()
+			const Scripts = getscripts()
 
 			assert(table.find(Scripts, GetPlayerModule()), "didn't find PlayerModule")
 
@@ -1265,7 +1299,7 @@ const Tests: any = {
 
 	setfpscap = {
 		Test = function()
-			const SetFPSCap: (FPSCap: number) -> () = getfenv().setfpscap
+			const SetFPSCap: (FPSCap: number) -> () = setfpscap
 
 			const function MeasureFPS(): number
 				const StartTime = os.clock()
@@ -1287,7 +1321,14 @@ const Tests: any = {
 			end)
 
 			SetFPSCap(FPSCap)
-			task.wait(0.5)
+
+			WaitFor(function()
+				const FrameStart = os.clock()
+
+				task.wait()
+
+				return os.clock() - FrameStart >= 0.8 / FPSCap
+			end, 2)
 
 			const CappedFPS = MeasureFPS()
 
@@ -1306,7 +1347,7 @@ const Tests: any = {
 			const GeneratedString = CreateRandomString(math.random(1, 64))
 
 			Formatters.CheckEqual(
-				getfenv().base64encode(GeneratedString),
+				base64encode(GeneratedString),
 				buffer.tostring(EncodingService:Base64Encode(buffer.fromstring(GeneratedString))),
 				"the encoded random string"
 			)
@@ -1330,7 +1371,7 @@ const Tests: any = {
 
 	getfpscap = {
 		Test = function()
-			const GetFPSCap: () -> number = getfenv().getfpscap
+			const GetFPSCap: () -> number = getfpscap
 			const SetFPSCap: (FPSCap: number) -> () = Formatters.CheckExist("setfpscap")
 
 			AddCleanup(function()
@@ -1354,14 +1395,14 @@ const Tests: any = {
 				return "debunc"
 			end
 
-			const NewClosure = getfenv().newcclosure(TestFunction)
+			const NewClosure = newcclosure(TestFunction)
 
-			assert(debug.info(NewClosure, "s") == "[C]", `expected the returned closure to be in [C], got '{debug.info(NewClosure, "s")}'`)
+			assert(Formatters.CheckExist("debug.info")(NewClosure, "s") == "[C]", `expected the returned closure to be in [C], got '{Formatters.CheckExist("debug.info")(NewClosure, "s")}'`)
 			assert(NewClosure ~= TestFunction, "the returned function is the same as the function given")
 			assert(NewClosure() == "debunc", "failed to return the expected value")
 			assert(NewClosure() == "debunc", "failed to return the expected value on the second call")
 
-			Formatters.CheckEqual(getfenv().newcclosure(function(First, Second)
+			Formatters.CheckEqual(newcclosure(function(First, Second)
 				task.wait()
 				return First + Second
 			end)(2, 3), 5, "a wrapped function that yields")
@@ -1370,7 +1411,7 @@ const Tests: any = {
 
 	isscriptable = {
 		Test = function()
-			const IsScriptable: (Object: Object, Property: string) -> boolean = getfenv().isscriptable
+			const IsScriptable: (Object: Object, Property: string) -> boolean = isscriptable
 
 			assert(IsScriptable(game, "Parent") == true, "should return true for game.Parent")
 
@@ -1386,7 +1427,7 @@ const Tests: any = {
 
 	firetouchinterest = {
 		Test = function()
-			const FireTouchInterest: (FireTouch: BasePart, WithPart: BasePart, Ended: number) -> () = getfenv().firetouchinterest
+			const FireTouchInterest: (FireTouch: BasePart, WithPart: BasePart, Ended: number) -> () = firetouchinterest
 
 			const RootPart = GetRootPart()
 
@@ -1439,7 +1480,7 @@ const Tests: any = {
 			const OriginalIndex = function() end
 			const Metatable = setmetatable({}, {__index = OriginalIndex})
 
-			const HookMetamethod = getfenv().hookmetamethod
+			const HookMetamethod = hookmetamethod
 
 			const Original = HookMetamethod(Metatable, "__index", function()
 				return "debUNC"
@@ -1458,11 +1499,18 @@ const Tests: any = {
 		end,
 	},
 
+	["debug.info"] = {
+		Test = function()
+			assert(typeof(debug.info) == "function", "scripts get a debug library without info, so any script using debug.info breaks")
+			Formatters.CheckEqual(debug.info(print, "s"), "[C]", "the source of print")
+		end,
+	},
+
 	["DirectoryWatcher.new"] = {
 		Test = function()
 			const CrashTests = shared.CrashTests or (shared.Settings and shared.Settings.CrashTests)
 
-			if getfenv().identifyexecutor and getfenv().identifyexecutor() == "Synapse Z" and not CrashTests then
+			if identifyexecutor and identifyexecutor() == "Synapse Z" and not CrashTests then
 				error("this crashes Roblox on Synapse Z, so it wasn't run, use shared.CrashTests = true to try it")
 			end
 
@@ -1473,9 +1521,9 @@ const Tests: any = {
 			const Changed = {}
 
 			Formatters.CheckExist("makefolder")(FolderName)
-			getfenv().makefolder(OtherFolderName)
+			makefolder(OtherFolderName)
 
-			const Watcher = getfenv().DirectoryWatcher.new(FolderName)
+			const Watcher = DirectoryWatcher.new(FolderName)
 
 			AddCleanup(function()
 				Watcher:Destroy()
@@ -1493,7 +1541,7 @@ const Tests: any = {
 			end, 2)
 
 			const Count = #Changed
-			const Control = getfenv().DirectoryWatcher.new(FolderName)
+			const Control = DirectoryWatcher.new(FolderName)
 
 			local ControlFired = false
 
@@ -1521,7 +1569,7 @@ const Tests: any = {
 
 	["WebSocket.connect"] = {
 		Test = function()
-			const Socket = getfenv().WebSocket.connect("wss://echo.websocket.org")
+			const Socket = WebSocket.connect("wss://echo.websocket.org")
 			const Marker = `debUNC {math.random()}`
 
 			local Messaged = false
@@ -1569,7 +1617,7 @@ const Tests: any = {
 			const Container = Instance.new("Folder")
 			const Part = Instance.new("Part", Container)
 
-			getfenv().cache.invalidate(Container:FindFirstChild("Part"))
+			cache.invalidate(Container:FindFirstChild("Part"))
 
 			assert(not rawequal(Part, Container:FindFirstChild("Part")), "the reference to the part couldn't be invalidated")
 		end,
@@ -1577,7 +1625,7 @@ const Tests: any = {
 
 	["cache.iscached"] = {
 		Test = function()
-			const IsCached = getfenv().cache.iscached
+			const IsCached = cache.iscached
 			const Part = Instance.new("Part")
 
 			assert(IsCached(Part), "the part should be cached")
@@ -1596,7 +1644,7 @@ const Tests: any = {
 
 			Part.Parent = Folder
 
-			getfenv().cache.replace(Part, Fire)
+			cache.replace(Part, Fire)
 
 			assert(Folder:FindFirstChildWhichIsA("Instance") == Fire, "looking up the part still gave back the part instead of the fire")
 		end,
@@ -1605,10 +1653,10 @@ const Tests: any = {
 	cloneref = {
 		Test = function()
 			const Part = Instance.new("Part")
-			const ClonedReference = getfenv().cloneref(Part) :: Part
+			const ClonedReference = cloneref(Part) :: Part
 			const NewPosition = Vector3.new(69, 67, 420)
 
-			assert(typeof(ClonedReference) == "Instance", `expected an Instance, got a {typeof(ClonedReference)}`)
+			assert(typeof(ClonedReference) == "Instance", `expected an Instance, got {typeof(ClonedReference)}`)
 			assert(not rawequal(ClonedReference, Part), "the cloned reference shouldn't be the same as the original reference")
 
 			Part.Position = NewPosition
@@ -1626,14 +1674,14 @@ const Tests: any = {
 			const Clone = Formatters.CheckExist("cloneref")(Part)
 
 			assert(not rawequal(Part, Clone), "the clone shouldn't be equal to the original")
-			assert(getfenv().compareinstances(Part, Instance.new("Part")) == false, "two different parts shouldn't be equal")
-			assert(getfenv().compareinstances(Part, Clone), "the clone should be equal to the original when using compareinstances()")
+			assert(compareinstances(Part, Instance.new("Part")) == false, "two different parts shouldn't be equal")
+			assert(compareinstances(Part, Clone), "the clone should be equal to the original when using compareinstances()")
 		end,
 	},
 
 	checkcaller = {
 		Test = function()
-			const CheckCaller = getfenv().checkcaller
+			const CheckCaller = checkcaller
 
 			assert(CheckCaller() == true, "should return true when called by the executor")
 
@@ -1672,8 +1720,8 @@ const Tests: any = {
 
 	isfunctionhooked = {
 		Test = function()
-			const IsFunctionHooked: ((...any?) -> ...any?) -> boolean = getfenv().isfunctionhooked
-			const RestoreFunction = getfenv().restorefunction
+			const IsFunctionHooked: ((...any?) -> ...any?) -> boolean = isfunctionhooked
+			const RestoreFunction = restorefunction
 
 			const function Test()
 				return "debUNC Original"
@@ -1702,7 +1750,7 @@ const Tests: any = {
 			const GeneratedString = CreateRandomString(math.random(1, 64))
 
 			Formatters.CheckEqual(
-				getfenv().base64decode(buffer.tostring(EncodingService:Base64Encode(buffer.fromstring(GeneratedString)))),
+				base64decode(buffer.tostring(EncodingService:Base64Encode(buffer.fromstring(GeneratedString)))),
 				GeneratedString,
 				"the decoded random string"
 			)
@@ -1719,7 +1767,7 @@ const Tests: any = {
 				return "debUNC"
 			end}
 
-			getfenv().setrawmetatable(LockedProxy, MainMetatable)
+			setrawmetatable(LockedProxy, MainMetatable)
 
 			assert(getmetatable(LockedProxy) == MainMetatable, "the new proxy's metatable wasn't set to the expected one")
 
@@ -1732,7 +1780,7 @@ const Tests: any = {
 
 	lz4compress = {
 		Test = function()
-			const Compress = getfenv().lz4compress
+			const Compress = lz4compress
 			const Repeated = string.rep(CreateRandomString(8), 100)
 
 			assert(Compress("debUNC") == "`debUNC", "failed to compress the string with lz4")
@@ -1745,10 +1793,10 @@ const Tests: any = {
 		Test = function()
 			const GeneratedString = CreateRandomString(math.random(16, 256))
 
-			assert(getfenv().lz4decompress("`debUNC", 6) == "debUNC", "failed to decompress the string with lz4")
-			Formatters.CheckEqual(getfenv().lz4decompress("\x1Aa\x01\x00\x50aaaaa", 20), string.rep("a", 20), "a known compressed block")
+			assert(lz4decompress("`debUNC", 6) == "debUNC", "failed to decompress the string with lz4")
+			Formatters.CheckEqual(lz4decompress("\x1Aa\x01\x00\x50aaaaa", 20), string.rep("a", 20), "a known compressed block")
 			Formatters.CheckEqual(
-				getfenv().lz4decompress(Formatters.CheckExist("lz4compress")(GeneratedString), #GeneratedString),
+				lz4decompress(Formatters.CheckExist("lz4compress")(GeneratedString), #GeneratedString),
 				GeneratedString,
 				"the decompressed random string"
 			)
@@ -1757,7 +1805,7 @@ const Tests: any = {
 
 	["debug.getproto"] = {
 		Test = function()
-			const Proto = getfenv().debug.getproto(function()
+			const Proto = debug.getproto(function()
 				const function Inner()
 					return "debUNC"
 				end
@@ -1769,13 +1817,13 @@ const Tests: any = {
 				return
 			end
 
-			Formatters.CheckEqual(debug.info(Proto, "n"), "Inner", "the name of the inner function")
+			Formatters.CheckEqual(Formatters.CheckExist("debug.info")(Proto, "n"), "Inner", "the name of the inner function")
 		end,
 	},
 
 	["debug.getprotos"] = {
 		Test = function()
-			const Protos = getfenv().debug.getprotos(function()
+			const Protos = debug.getprotos(function()
 				const function First()
 					return "debUNC First"
 				end
@@ -1796,14 +1844,14 @@ const Tests: any = {
 					continue
 				end
 
-				Formatters.CheckEqual(debug.info(Protos[Index], "n"), Name, "the name of the inner function")
+				Formatters.CheckEqual(Formatters.CheckExist("debug.info")(Protos[Index], "n"), Name, "the name of the inner function")
 			end
 		end,
 	},
 
 	getnamecallmethod = {
 		Test = function()
-			const GetNamecallMethod: () -> string = getfenv().getnamecallmethod
+			const GetNamecallMethod: () -> string = getnamecallmethod
 
 			const ProxyTest = newproxy(true)
 			local Detected
@@ -1833,7 +1881,7 @@ const Tests: any = {
 			CameraWrapper.getCamera = function(...)
 				CameraWrapper.getCamera = GetCameraOriginal
 				Called = true
-				CallingScript = getfenv().getcallingscript()
+				CallingScript = getcallingscript()
 				return GetCameraOriginal(...)
 			end
 
@@ -1855,7 +1903,7 @@ const Tests: any = {
 	isnetworkowner = {
 		RunLast = true,
 		Test = function()
-			const IsNetworkOwner = getfenv().isnetworkowner
+			const IsNetworkOwner = isnetworkowner
 			const RootPart = GetRootPart()
 			assert(IsNetworkOwner(RootPart) == true, "should return true on your HumanoidRootPart")
 
@@ -1872,7 +1920,7 @@ const Tests: any = {
 
 	replicatesignal = {
 		Test = function()
-			const ReplicateSignal = getfenv().replicatesignal
+			const ReplicateSignal = replicatesignal
 
 			assert(not pcall(ReplicateSignal, workspace.ChildAdded), "should error on a signal that can't be replicated")
 
@@ -1906,7 +1954,7 @@ const Tests: any = {
 
 			assert(
 				not MissingSuccess or not MissingResult or MissingResult == "",
-				"httpgetting a website that doesn't exist should return an error, nil, or an empty string"
+				"game:HttpGet on a website that doesn't exist should return an error, nil, or an empty string"
 			)
 
 			const Marker = tostring(math.random(1, 1e9))
@@ -1924,7 +1972,7 @@ const Tests: any = {
 
 	identifyexecutor = {
 		Test = function()
-			const Name, ExecutorVersion = getfenv().identifyexecutor()
+			const Name, ExecutorVersion = identifyexecutor()
 
 			assert(typeof(Name) == "string", "the first returned value, the executor's name, should be a string")
 			assert(typeof(ExecutorVersion) == "string", "the second returned value, the executor's version, should be a string")
@@ -1935,6 +1983,7 @@ const Tests: any = {
 				ExecutorVersion:lower():gsub("^v", "") ~= ({
 					Lucid = "1.0.0",
 					Bunni = "2.0",
+					athena = "1.0",
 				})[Name],
 				`the version '{ExecutorVersion}' never changes between updates, it should be the real version of each release`
 			)
@@ -1943,9 +1992,9 @@ const Tests: any = {
 
 	gethwid = {
 		Test = function()
-			const GetHardwareId = getfenv().gethwid
+			const GetHardwareId = gethwid
 			const HardwareId = GetHardwareId()
-			const Request = getfenv().request
+			const Request = request
 
 			assert(typeof(HardwareId) == "string", "the returned value (user's hwid/fingerprint) should be a string")
 			assert(HardwareId ~= "", "the hwid is empty")
@@ -1982,7 +2031,7 @@ const Tests: any = {
 
 	getrawmetatable = {
 		Test = function()
-			const GetRawMetatable: (Table: {[any]: any}) -> any = getfenv().getrawmetatable
+			const GetRawMetatable: (Table: {[any]: any}) -> any = getrawmetatable
 
 			const Detector = newproxy(true)
 			const FakeMetatable = {__index = function()
@@ -2033,7 +2082,7 @@ const Tests: any = {
 			xpcall(function()
 				return FirstPart[{}]
 			end, function()
-				IndexMetamethod = debug.info(2, "f")
+				IndexMetamethod = Formatters.CheckExist("debug.info")(2, "f")
 			end)
 
 			assert(
@@ -2071,7 +2120,7 @@ const Tests: any = {
 
 	setreadonly = {
 		Test = function()
-			const SetReadOnly: (Table: any, ReadOnly: boolean) -> () = getfenv().setreadonly
+			const SetReadOnly: (Table: any, ReadOnly: boolean) -> () = setreadonly
 			const ReadOnlyTable = ColorSequence :: any
 
 			const function ReadOnlyEditTest()
@@ -2123,7 +2172,7 @@ const Tests: any = {
 
 	getsenv = {
 		Test = function()
-			const GetScriptEnvironment: (Script: LocalScript) -> any = getfenv().getsenv
+			const GetScriptEnvironment: (Script: LocalScript) -> any = getsenv
 			const PlayerScripts = GetPlayerScripts()
 			const Value = math.random()
 
@@ -2135,7 +2184,7 @@ const Tests: any = {
 
 				local Called = false
 
-				getfenv().require(AtomicBinding).new = function()
+				require(AtomicBinding).new = function()
 					if SetParent then
 						New.Parent = nil
 					end
@@ -2178,8 +2227,8 @@ const Tests: any = {
 
 	decompile = {
 		Test = function()
-			const Decompile = getfenv().decompile
-			const GetScriptClosure = getfenv().getscriptclosure
+			const Decompile = decompile
+			const GetScriptClosure = getscriptclosure
 			const CameraModule = GetPlayerModule().CameraModule
 			const Result = Decompile(CameraModule)
 
@@ -2251,7 +2300,7 @@ const Tests: any = {
 
 			const Target = workspace.CurrentCamera.ViewportSize / 2 + Vector2.new(math.random(-50, 50), math.random(-50, 50))
 
-			getfenv().mousemoveabs(Target.X, Target.Y)
+			mousemoveabs(Target.X, Target.Y)
 
 			assert(WaitFor(function()
 				return (UserInputService:GetMouseLocation() - Target).Magnitude < 2
@@ -2266,7 +2315,7 @@ const Tests: any = {
 
 			const StartLocation = UserInputService:GetMouseLocation()
 
-			getfenv().mousemoverel(25, 25)
+			mousemoverel(25, 25)
 
 			assert(WaitFor(function()
 				return (UserInputService:GetMouseLocation() - StartLocation - Vector2.new(25, 25)).Magnitude < 10
@@ -2279,14 +2328,19 @@ const Tests: any = {
 		Test = function()
 			CheckInputFree()
 
-			const MouseMoveAbsolute = getfenv().mousemoveabs
+			const MouseMoveAbsolute = mousemoveabs
 
 			if MouseMoveAbsolute then
-				MouseMoveAbsolute(workspace.CurrentCamera.ViewportSize.X / 2, 65)
-				task.wait()
+				const Target = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, 65)
+
+				MouseMoveAbsolute(Target.X, Target.Y)
+
+				WaitFor(function()
+					return (UserInputService:GetMouseLocation() - Target).Magnitude < 2
+				end, 2)
 			end
 
-			const MouseScroll = getfenv().mousescroll
+			const MouseScroll = mousescroll
 
 			const Detected = WaitForInput(UserInputService.InputChanged, function(Input)
 				return Input.UserInputType == Enum.UserInputType.MouseWheel and Input.Position.Z > 0
@@ -2326,11 +2380,11 @@ const Tests: any = {
 			const NewValue = math.random(6, 20)
 			const Part = Instance.new("Part")
 
-			getfenv().sethiddenproperty(Part, "Transparency", 0.5)
+			sethiddenproperty(Part, "Transparency", 0.5)
 
 			Formatters.CheckEqual(Part.Transparency, 0.5, "a part's Transparency")
 
-			getfenv().sethiddenproperty(Fire, "size_xml", NewValue)
+			sethiddenproperty(Fire, "size_xml", NewValue)
 
 			Formatters.CheckEqual(Formatters.CheckExist("gethiddenproperty")(Fire, "size_xml"), NewValue, "size_xml")
 		end,
@@ -2343,13 +2397,13 @@ const Tests: any = {
 
 			Fire.Size = Size
 
-			Formatters.CheckEqual(getfenv().gethiddenproperty(Fire, "size_xml"), Size, "size_xml")
+			Formatters.CheckEqual(gethiddenproperty(Fire, "size_xml"), Size, "size_xml")
 		end,
 	},
 
 	setscriptable = {
 		Test = function()
-			const SetScriptable = getfenv().setscriptable
+			const SetScriptable = setscriptable
 			const Fire = Instance.new("Fire")
 
 			const function CanRead()
@@ -2374,7 +2428,7 @@ const Tests: any = {
 
 	getthreadidentity = {
 		Test = function()
-			const GetThreadIdentity = getfenv().getthreadidentity
+			const GetThreadIdentity = getthreadidentity
 			const SetThreadIdentity = Formatters.CheckExist("setthreadidentity")
 			const Original = GetThreadIdentity()
 
@@ -2420,7 +2474,7 @@ const Tests: any = {
 
 	setthreadidentity = {
 		Test = function()
-			const SetThreadIdentity = getfenv().setthreadidentity
+			const SetThreadIdentity = setthreadidentity
 			const Original = Formatters.CheckExist("getthreadidentity")()
 			const CoreGui = game:GetService("CoreGui")
 
@@ -2457,7 +2511,7 @@ const Tests: any = {
 
 			assert(Test() == "debUNC Hooked", "hookfunction didn't hook the function, can't continue the test")
 
-			getfenv().restorefunction(Test)
+			restorefunction(Test)
 
 			assert(Test() == "debUNC Original", "the function didn't return its original value after being restored")
 		end,
@@ -2465,7 +2519,7 @@ const Tests: any = {
 
 	filtergc = {
 		Test = function()
-			const FilterGc = getfenv().filtergc
+			const FilterGc = filtergc
 			const Key = `debUNC {math.random()}`
 			const Table = {[Key] = true}
 
@@ -2486,7 +2540,7 @@ const Tests: any = {
 		Test = function()
 			const CameraWrapper = GetPlayerModule().CommonUtils.CameraWrapper
 			const GetCamera = require(CameraWrapper).getCamera
-			const Environment = getfenv().getmenv(CameraWrapper)
+			const Environment = getmenv(CameraWrapper)
 
 			Formatters.CheckReturnType(Environment, "table")
 
@@ -2499,7 +2553,7 @@ const Tests: any = {
 		Test = function()
 			const Table = table.freeze({})
 
-			getfenv().makewriteable(Table)
+			makewriteable(Table)
 
 			assert(not table.isfrozen(Table), "the table is still frozen")
 			assert(pcall(function()
@@ -2513,7 +2567,7 @@ const Tests: any = {
 			const function Test()
 				local Secret = math.random(1, 1e6) + 0.5
 
-				return table.find(getfenv().debug.getstack(1), Secret), Secret
+				return table.find(debug.getstack(1), Secret), Secret
 			end
 
 			assert(Test(), "couldn't find a local in the stack")
@@ -2529,7 +2583,7 @@ const Tests: any = {
 
 				assert(Index, "couldn't find the local in the stack")
 
-				getfenv().debug.setstack(1, Index, Expected)
+				debug.setstack(1, Index, Expected)
 
 				return Secret, Expected
 			end
@@ -2549,7 +2603,7 @@ const Tests: any = {
 				return First, Second
 			end
 
-			const Upvalues = getfenv().debug.getupvalues(Test)
+			const Upvalues = debug.getupvalues(Test)
 
 			assert(table.find(Upvalues, First) and table.find(Upvalues, Second), "didn't find both upvalues")
 		end,
@@ -2564,7 +2618,7 @@ const Tests: any = {
 				return First, Second
 			end
 
-			const GetUpvalue = getfenv().debug.getupvalue
+			const GetUpvalue = debug.getupvalue
 
 			assert(GetUpvalue(Test, 1) == First, "didn't return the first upvalue")
 			assert(GetUpvalue(Test, 2) == Second, "didn't return the second upvalue")
@@ -2584,7 +2638,7 @@ const Tests: any = {
 				return Upvalue
 			end
 
-			getfenv().debug.setupvalue(Test, 1, "debUNC")
+			debug.setupvalue(Test, 1, "debUNC")
 
 			assert(Test() == "debUNC", "the upvalue wasn't changed")
 			assert(Other() == "debUNC", "another function using the same upvalue didn't see the change")
@@ -2596,7 +2650,7 @@ const Tests: any = {
 			const Constant = `debUNC{math.random(1, 1e6)}`
 			const Test = loadstring(`print("{Constant}")`) :: Function
 
-			Formatters.CheckReturnType(getfenv().debug.getconstants(Test), "table")
+			Formatters.CheckReturnType(debug.getconstants(Test), "table")
 
 			assert(FindConstant(Test, Constant), "didn't find the string constant")
 		end,
@@ -2607,7 +2661,7 @@ const Tests: any = {
 			const Constant = `debUNC{math.random(1, 1e6)}`
 			const Test = loadstring(`print("{Constant}")`) :: Function
 
-			Formatters.CheckEqual(getfenv().debug.getconstant(Test, FindConstant(Test, Constant)), Constant, "the string constant")
+			Formatters.CheckEqual(debug.getconstant(Test, FindConstant(Test, Constant)), Constant, "the string constant")
 		end,
 	},
 
@@ -2616,7 +2670,7 @@ const Tests: any = {
 			const Test = loadstring("local Value = ... return `debUNC Before {Value}`") :: Function
 			const Other = loadstring("local Value = ... return 'debUNC Before' .. Value") :: Function
 
-			getfenv().debug.setconstant(Other, FindConstant(Other, "debUNC Before"), "debUNC After")
+			debug.setconstant(Other, FindConstant(Other, "debUNC Before"), "debUNC After")
 
 			assert(Test("x") == "debUNC Before x", "changing a constant affected a different function")
 			Formatters.CheckEqual(Other("x"), "debUNC Afterx", "the function's result with the changed constant")
@@ -2625,7 +2679,7 @@ const Tests: any = {
 
 	["debug.getregistry"] = {
 		Test = function()
-			const Values = getfenv().debug.getregistry()
+			const Values = debug.getregistry()
 
 			Formatters.CheckReturnType(Values, "table")
 
@@ -2646,7 +2700,7 @@ const Tests: any = {
 
 	["crypt.hash"] = {
 		Test = function()
-			const Hash = getfenv().crypt.hash
+			const Hash = crypt.hash
 			const GeneratedString = CreateRandomString(math.random(1, 64))
 			const RandomHash = Hash(GeneratedString, "sha256")
 
@@ -2672,10 +2726,10 @@ const Tests: any = {
 
 	["crypt.generatekey"] = {
 		Test = function()
-			const Key = getfenv().crypt.generatekey()
+			const Key = crypt.generatekey()
 
 			assert(#Formatters.CheckExist("base64decode")(Key) == 32, "the decoded key should be 32 bytes")
-			assert(Key ~= getfenv().crypt.generatekey(), "generated the same key twice")
+			assert(Key ~= crypt.generatekey(), "generated the same key twice")
 		end,
 	},
 
@@ -2683,13 +2737,13 @@ const Tests: any = {
 		Test = function()
 			const Length = math.random(8, 64)
 
-			assert(#Formatters.CheckExist("base64decode")(getfenv().crypt.generatebytes(Length)) == Length, `the decoded bytes should be {Length} long`)
+			assert(#Formatters.CheckExist("base64decode")(crypt.generatebytes(Length)) == Length, `the decoded bytes should be {Length} long`)
 		end,
 	},
 
 	["crypt.encrypt"] = {
 		Test = function()
-			const Crypt = getfenv().crypt
+			const Crypt = crypt
 			const Key = Crypt.generatekey()
 			const Text = `debUNC {math.random()}`
 			const Encrypted, InitializationVector = Crypt.encrypt(Text, Key)
@@ -2704,12 +2758,12 @@ const Tests: any = {
 
 	["Drawing.new"] = {
 		Test = function()
-			const Line = getfenv().Drawing.new("Line")
+			const Line = Drawing.new("Line")
 			AddCleanup(function()
 				Line:Remove()
 			end)
 
-			assert(not pcall(getfenv().Drawing.new, "debUNC"), "should error on a type that doesn't exist")
+			assert(not pcall(Drawing.new, "debUNC"), "should error on a type that doesn't exist")
 			assert(not pcall(function()
 				Line.Thickness = "debUNC"
 			end), "should error when Thickness is set to a string")
@@ -2717,7 +2771,7 @@ const Tests: any = {
 			const Thickness = Line.Thickness
 			const Visible = Line.Visible
 			const Existed = Line.__OBJECT_EXISTS
-			const Text = getfenv().Drawing.new("Text")
+			const Text = Drawing.new("Text")
 
 			AddCleanup(function()
 				Text:Remove()
@@ -2740,7 +2794,7 @@ const Tests: any = {
 
 	isrenderobj = {
 		Test = function()
-			const IsRenderObject = getfenv().isrenderobj
+			const IsRenderObject = isrenderobj
 			const Line = Formatters.CheckExist("Drawing.new")("Line")
 			AddCleanup(function()
 				Line:Remove()
@@ -2767,7 +2821,7 @@ const Tests: any = {
 
 			Line.Thickness = Thickness
 
-			const Result = getfenv().getrenderproperty(Line, "Thickness")
+			const Result = getrenderproperty(Line, "Thickness")
 
 			Line:Remove()
 
@@ -2783,7 +2837,7 @@ const Tests: any = {
 			end)
 			const Thickness = math.random(2, 9)
 
-			getfenv().setrenderproperty(Line, "Thickness", Thickness)
+			setrenderproperty(Line, "Thickness", Thickness)
 
 			const Result = Line.Thickness
 
@@ -2800,7 +2854,7 @@ const Tests: any = {
 				Line:Remove()
 			end)
 
-			getfenv().cleardrawcache()
+			cleardrawcache()
 
 			assert(Line.__OBJECT_EXISTS == false, "the drawing object still exists")
 		end,
@@ -2814,7 +2868,7 @@ const Tests: any = {
 
 			const Value = math.random()
 
-			getfenv().runonthread(Thread, `shared.debUNCThreadValue = {Value}`)
+			runonthread(Thread, `shared.debUNCThreadValue = {Value}`)
 
 			const Ran = WaitFor(function()
 				return shared.debUNCThreadValue == Value
@@ -2850,14 +2904,14 @@ const Tests: any = {
 			local Actors
 
 			WaitFor(function()
-				Actors = getfenv().getactors()
+				Actors = getactors()
 				return table.find(Actors, Actor) ~= nil
 			end, 2)
 
 			Actor:Destroy()
 
 			for _, Value in Actors do
-				assert(typeof(Value) == "Instance" and Value:IsA("Actor"), `should return Actor instances, but got a {if typeof(Value) == "Instance" then Value.ClassName else typeof(Value)}{if typeof(Value) == "thread" then " (threads are what getactorthreads is for)" else ""}`)
+				assert(typeof(Value) == "Instance" and Value:IsA("Actor"), `should return Actor instances, but got {if typeof(Value) == "Instance" then Value.ClassName else typeof(Value)}{if typeof(Value) == "thread" then " (threads are what getactorthreads is for)" else ""}`)
 			end
 
 			assert(table.find(Actors, Actor), "didn't find a new actor")
@@ -2868,7 +2922,7 @@ const Tests: any = {
 		Test = function()
 			RunOnNewActor("")
 
-			const Threads = getfenv().getactorthreads()
+			const Threads = getactorthreads()
 
 			Formatters.CheckReturnType(Threads, "table")
 
@@ -2876,14 +2930,14 @@ const Tests: any = {
 			assert(not table.find(Threads, coroutine.running()), "the thread running this test isn't on an actor")
 
 			for _, Thread in Threads do
-				assert(typeof(Thread) == "thread", `expected threads, got a {typeof(Thread)}`)
+				assert(typeof(Thread) == "thread", `expected threads, got {typeof(Thread)}`)
 			end
 		end,
 	},
 
 	isparallel = {
 		Test = function()
-			assert(getfenv().isparallel() == false, "should return false outside of an actor")
+			assert(isparallel() == false, "should return false outside of an actor")
 			assert(RunOnNewActor("Actor:SetAttribute('Parallel', isparallel())").Parallel == false, "should return false in an actor before it desynchronizes")
 			assert(
 				RunOnNewActor("task.desynchronize() local Result = isparallel() task.synchronize() Actor:SetAttribute('Parallel', Result)").Parallel == true,
@@ -2895,7 +2949,7 @@ const Tests: any = {
 	getgc = {
 		Test = function()
 			const Holder = {Table = {}, Function = function() end}
-			const GarbageCollected = getfenv().getgc(true)
+			const GarbageCollected = getgc(true)
 
 			Formatters.CheckReturnType(GarbageCollected, "table")
 
@@ -2908,7 +2962,7 @@ const Tests: any = {
 		Test = function()
 			const Holder = {Part = Instance.new("Part")}
 
-			assert(table.find(getfenv().getinstances(), Holder.Part), "didn't find a new part")
+			assert(table.find(getinstances(), Holder.Part), "didn't find a new part")
 		end,
 	},
 
@@ -2921,7 +2975,7 @@ const Tests: any = {
 				ParentedPart:Destroy()
 			end)
 
-			const NilInstances = getfenv().getnilinstances()
+			const NilInstances = getnilinstances()
 
 			ParentedPart:Destroy()
 
@@ -2940,7 +2994,7 @@ const Tests: any = {
 				Disabled:Destroy()
 			end)
 
-			const RunningScripts = getfenv().getrunningscripts()
+			const RunningScripts = getrunningscripts()
 			const FoundDisabled = table.find(RunningScripts, Disabled)
 
 			Disabled:Destroy()
@@ -2966,7 +3020,7 @@ const Tests: any = {
 
 	getscriptbytecode = {
 		Test = function()
-			const GetScriptBytecode = getfenv().getscriptbytecode
+			const GetScriptBytecode = getscriptbytecode
 			const PlayerModule = GetPlayerModule()
 			const Bytecode = GetScriptBytecode(PlayerModule)
 
@@ -2979,7 +3033,7 @@ const Tests: any = {
 
 	getscripthash = {
 		Test = function()
-			const GetScriptHash = getfenv().getscripthash
+			const GetScriptHash = getscripthash
 			const LocalScript = GetPlayerScripts():FindFirstChildWhichIsA("LocalScript", true)
 			const Hash = GetScriptHash(LocalScript)
 
@@ -2990,8 +3044,8 @@ const Tests: any = {
 			assert(GetScriptHash(GetPlayerModule()) ~= Hash, "two different scripts gave the same hash")
 			assert(#Hash == 96 and Hash:match("^%x+$"), `should be a 96 character sha384 hash, got {#Hash} characters`)
 
-			const Crypt = getfenv().crypt
-			const GetScriptBytecode = getfenv().getscriptbytecode
+			const Crypt = crypt
+			const GetScriptBytecode = getscriptbytecode
 
 			if not Crypt or not GetScriptBytecode then
 				return
@@ -3012,7 +3066,7 @@ const Tests: any = {
 	getscriptclosure = {
 		Test = function()
 			const LocalScript = GetPlayerScripts():FindFirstChildWhichIsA("LocalScript", true)
-			const Closure = getfenv().getscriptclosure(LocalScript)
+			const Closure = getscriptclosure(LocalScript)
 
 			Formatters.CheckReturnType(Closure, "function")
 
@@ -3022,7 +3076,7 @@ const Tests: any = {
 
 	gethui = {
 		Test = function()
-			const HiddenGui = getfenv().gethui()
+			const HiddenGui = gethui()
 			const ScreenGui = Instance.new("ScreenGui")
 			ScreenGui.Parent = HiddenGui
 			AddCleanup(function()
@@ -3041,7 +3095,7 @@ const Tests: any = {
 
 	comparefunctions = {
 		Test = function()
-			const CompareFunctions = getfenv().comparefunctions
+			const CompareFunctions = comparefunctions
 
 			const function Test() end
 
@@ -3052,7 +3106,7 @@ const Tests: any = {
 
 	getfunctionhash = {
 		Test = function()
-			const GetFunctionHash = getfenv().getfunctionhash
+			const GetFunctionHash = getfunctionhash
 
 			const function First()
 				return 1
@@ -3073,7 +3127,7 @@ const Tests: any = {
 
 	isexecutorclosure = {
 		Test = function()
-			const IsExecutorClosure = getfenv().isexecutorclosure
+			const IsExecutorClosure = isexecutorclosure
 
 			assert(IsExecutorClosure(function() end) == true, "should return true for a function made in the executor")
 			assert(IsExecutorClosure(print) == false, "should return false for print")
@@ -3086,7 +3140,7 @@ const Tests: any = {
 
 	islclosure = {
 		Test = function()
-			const IsLuaClosure = getfenv().islclosure
+			const IsLuaClosure = islclosure
 
 			assert(IsLuaClosure(function() end) == true, "should return true for a Lua function")
 			assert(IsLuaClosure(print) == false, "should return false for print")
@@ -3096,7 +3150,7 @@ const Tests: any = {
 
 	isnewcclosure = {
 		Test = function()
-			const IsNewCClosure = getfenv().isnewcclosure
+			const IsNewCClosure = isnewcclosure
 
 			assert(IsNewCClosure(Formatters.CheckExist("newcclosure")(function() end)) == true, "should return true for a newcclosure")
 			assert(IsNewCClosure(print) == false, "should return false for print")
@@ -3108,13 +3162,13 @@ const Tests: any = {
 
 	getfflag = {
 		Test = function()
-			const Value = getfenv().getfflag("MaxFrameBufferSize")
+			const Value = getfflag("MaxFrameBufferSize")
 
 			Formatters.CheckReturnType(Value, "string")
 
 			assert(Value ~= "", "the flag's value is empty")
 
-			const Found, Missing = pcall(getfenv().getfflag, `debUNC{math.random(1, 1e6)}`)
+			const Found, Missing = pcall(getfflag, `debUNC{math.random(1, 1e6)}`)
 
 			assert(not Found or Missing == nil, "returned a value for a flag that doesn't exist")
 		end,
@@ -3123,7 +3177,7 @@ const Tests: any = {
 	setfflag = {
 		Test = function()
 			const GetFastFlag = Formatters.CheckExist("getfflag")
-			const SetFastFlag = getfenv().setfflag
+			const SetFastFlag = setfflag
 			const Original = GetFastFlag("TaskSchedulerTargetFps")
 			const NewValue = tostring(math.random(100, 200))
 
@@ -3167,7 +3221,7 @@ const Tests: any = {
 
 	["raknet.receive"] = {
 		Test = function()
-			const RakNet = getfenv().raknet
+			const RakNet = raknet
 			const Marker = `\255debUNC {math.random()}`
 
 			local Received = false
@@ -3207,23 +3261,23 @@ const Tests: any = {
 
 	["raknet.send"] = {
 		Test = function()
-			const RakNet = getfenv().raknet
+			const RakNet = raknet
 			const Marker = `\255debUNC {math.random()}`
 
 			RakNet.send(Marker)
 			RakNet.send(buffer.fromstring(Marker))
 
-			task.wait(1)
+			const Disconnected = RakNet.stats and WaitFor(function()
+				return RakNet.stats().Connected == false
+			end, 1)
 
-			const Stats = RakNet.stats and RakNet.stats()
-
-			assert(not Stats or Stats.Connected ~= false, "got disconnected after sending a packet")
+			assert(not Disconnected, "got disconnected after sending a packet")
 		end,
 	},
 
 	["debug.getcallstack"] = {
 		Test = function()
-			const GetCallStack = getfenv().debug.getcallstack
+			const GetCallStack = debug.getcallstack
 
 			const function Inner()
 				return GetCallStack()
@@ -3254,14 +3308,14 @@ const Tests: any = {
 
 	["debug.isvalidlevel"] = {
 		Test = function()
-			const IsValidLevel = getfenv().debug.isvalidlevel
+			const IsValidLevel = debug.isvalidlevel
 
 			assert(IsValidLevel(1) == true, "level 1 should be valid")
 			assert(IsValidLevel(500) == false, "level 500 shouldn't be valid")
 
 			local Depth = 1
 
-			while debug.info(Depth, "f") do
+			while Formatters.CheckExist("debug.info")(Depth, "f") do
 				Depth += 1
 			end
 
@@ -3276,15 +3330,15 @@ const Tests: any = {
 
 			const Name = `debUNC{math.random(1, 1e6)}`
 
-			getfenv().debug.setinfo(Test, {name = Name})
+			debug.setinfo(Test, {name = Name})
 
-			Formatters.CheckEqual(debug.info(Test, "n"), Name, "the function's name")
+			Formatters.CheckEqual(Formatters.CheckExist("debug.info")(Test, "n"), Name, "the function's name")
 		end,
 	},
 
 	getallthreads = {
 		Test = function()
-			const Threads = getfenv().getallthreads()
+			const Threads = getallthreads()
 
 			assert(table.find(Threads, coroutine.running()), "didn't find the thread that's running this test")
 			assert(#Threads > 1, "only found the thread that's running this test")
@@ -3293,7 +3347,7 @@ const Tests: any = {
 
 	hasmetafield = {
 		Test = function()
-			const HasMetafield = getfenv().hasmetafield
+			const HasMetafield = hasmetafield
 
 			assert(HasMetafield(setmetatable({}, {__index = {}}), "__index") == true, "should return true for a field the metatable has")
 			assert(HasMetafield(setmetatable({}, {}), "__index") == false, "should return false for a field the metatable doesn't have")
@@ -3305,7 +3359,7 @@ const Tests: any = {
 		Test = function()
 			const Table = {}
 
-			getfenv().makereadonly(Table)
+			makereadonly(Table)
 
 			assert(table.isfrozen(Table), "the table wasn't made read-only")
 			assert(not pcall(function()
@@ -3316,7 +3370,7 @@ const Tests: any = {
 
 	iswriteable = {
 		Test = function()
-			const IsWriteable = getfenv().iswriteable
+			const IsWriteable = iswriteable
 
 			assert(IsWriteable({}) == true, "should return true for a normal table")
 			assert(IsWriteable(table.freeze({})) == false, "should return false for a frozen table")
@@ -3325,7 +3379,7 @@ const Tests: any = {
 
 	isreadonly = {
 		Test = function()
-			const IsReadOnly = getfenv().isreadonly
+			const IsReadOnly = isreadonly
 
 			assert(IsReadOnly({}) == false, "should return false for a normal table")
 			assert(IsReadOnly(table.freeze({})) == true, "should return true for a frozen table")
@@ -3334,7 +3388,7 @@ const Tests: any = {
 
 	["crypt.hmac"] = {
 		Test = function()
-			const Hmac = getfenv().crypt.hmac
+			const Hmac = crypt.hmac
 			const GeneratedString = CreateRandomString(math.random(1, 64))
 
 			Formatters.CheckEqual(
@@ -3354,7 +3408,7 @@ const Tests: any = {
 
 	["crypt.random"] = {
 		Test = function()
-			const Random = getfenv().crypt.random
+			const Random = crypt.random
 			const Length = math.random(8, 64)
 			const Bytes = Random(Length)
 
@@ -3379,7 +3433,7 @@ const Tests: any = {
 
 	["crypt.decrypt"] = {
 		Test = function()
-			const Crypt = getfenv().crypt
+			const Crypt = crypt
 			const Key = Crypt.generatekey()
 			const Text = CreateRandomString(math.random(1, 64))
 			const Encrypted, InitializationVector = Formatters.CheckExist("crypt.encrypt")(Text, Key)
@@ -3392,7 +3446,7 @@ const Tests: any = {
 
 	getmodules = {
 		Test = function()
-			const Modules = getfenv().getmodules()
+			const Modules = getmodules()
 
 			Formatters.CheckReturnType(Modules, "table")
 
@@ -3405,7 +3459,7 @@ const Tests: any = {
 				NewModule:Destroy()
 			end)
 
-			const FoundNew = table.find(getfenv().getmodules(), NewModule)
+			const FoundNew = table.find(getmodules(), NewModule)
 
 			NewModule:Destroy()
 
@@ -3430,7 +3484,7 @@ const Tests: any = {
 
 			RunService:BindToRenderStep(Name, 123, OnRenderStep)
 
-			const List = getfenv().getrendersteppedlist()
+			const List = getrendersteppedlist()
 
 			RunService:UnbindFromRenderStep(Name)
 
@@ -3450,7 +3504,7 @@ const Tests: any = {
 
 	cansignalreplicate = {
 		Test = function()
-			const CanSignalReplicate = getfenv().cansignalreplicate
+			const CanSignalReplicate = cansignalreplicate
 
 			assert(CanSignalReplicate(Player.Kill) == true, "should return true for Player.Kill")
 			assert(CanSignalReplicate(workspace.ChildAdded) == false, "should return false for workspace.ChildAdded")
@@ -3464,7 +3518,7 @@ const Tests: any = {
 				RunOnNewActor("Actor:SetAttribute('Matched', getactorfromthread(coroutine.running()) == Actor)").Matched == true,
 				"didn't return the actor that the thread is running on"
 			)
-			assert(getfenv().getactorfromthread(coroutine.running()) == nil, "should return nil for a thread that isn't on an actor")
+			assert(getactorfromthread(coroutine.running()) == nil, "should return nil for a thread that isn't on an actor")
 		end,
 	},
 
@@ -3479,7 +3533,7 @@ const Tests: any = {
 				FiredCount += 1
 			end)
 
-			getfenv().hooksignal(NumberValue.Changed, function(Info)
+			hooksignal(NumberValue.Changed, function(Info)
 				HookArgument = Info
 				return false
 			end)
@@ -3498,7 +3552,7 @@ const Tests: any = {
 				AllowedCount += 1
 			end)
 
-			getfenv().hooksignal(AllowedValue.Changed, function()
+			hooksignal(AllowedValue.Changed, function()
 				return true
 			end)
 
@@ -3511,7 +3565,7 @@ const Tests: any = {
 
 	issignalhooked = {
 		Test = function()
-			const IsSignalHooked = getfenv().issignalhooked
+			const IsSignalHooked = issignalhooked
 			const NumberValue = Instance.new("NumberValue")
 
 			NumberValue.Changed:Connect(function() end)
@@ -3544,7 +3598,7 @@ const Tests: any = {
 
 			assert(HookCount == 1, "hooksignal didn't hook the signal, can't continue the test")
 
-			getfenv().restoresignal(NumberValue.Changed)
+			restoresignal(NumberValue.Changed)
 
 			const FiredBefore = FiredCount
 
@@ -3583,7 +3637,7 @@ const Tests: any = {
 			const Detected = WaitForInput(UserInputService.InputBegan, function(Input)
 				return Input.KeyCode == Enum.KeyCode.J
 			end, function()
-				getfenv().keyclick(0x4A)
+				keyclick(0x4A)
 			end)
 
 			const Released = WaitFor(function()
@@ -3607,7 +3661,7 @@ const Tests: any = {
 
 			Formatters.CheckExist("writefile")(FileName, `return {Value}`)
 
-			const Loaded = getfenv().loadfileasync(FileName)
+			const Loaded = CallAsync(loadfileasync, FileName)
 
 			RemovePath("delfile", FileName)
 
@@ -3624,7 +3678,7 @@ const Tests: any = {
 
 			Formatters.CheckExist("writefile")(FileName, "debUNC")
 
-			getfenv().appendfileasync(FileName, Appended)
+			CallAsync(appendfileasync, FileName, Appended)
 
 			const Found = WaitFor(function()
 				return ReadFile(FileName) == `debUNC{Appended}`
@@ -3644,7 +3698,7 @@ const Tests: any = {
 				error({Skipped = `the saved place would be about {math.floor(PredictedMegabytes)} MB, which is too large to test quickly`, Environment = true})
 			end
 
-			const FileName = getfenv().saveinstance({noscripts = true})
+			const FileName = saveinstance({noscripts = true})
 
 			Formatters.CheckReturnType(FileName, "string")
 
@@ -3665,7 +3719,7 @@ const Tests: any = {
 
 			Formatters.CheckExist("writefile")(FileName, TestImage)
 
-			const Success, AssetId = pcall(getfenv().getcustomasset, FileName)
+			const Success, AssetId = pcall(getcustomasset, FileName)
 
 			if not Success then
 				RemovePath("delfile", FileName)
@@ -3685,7 +3739,7 @@ const Tests: any = {
 
 			Formatters.CheckExist("writefile")(GarbageName, "debUNC")
 
-			const BadStatus = GetAssetStatus(getfenv().getcustomasset(GarbageName))
+			const BadStatus = GetAssetStatus(getcustomasset(GarbageName))
 
 			RemovePath("delfile", GarbageName)
 
@@ -3695,26 +3749,26 @@ const Tests: any = {
 
 	getsignalarguments = {
 		Test = function()
-			const Arguments = getfenv().getsignalarguments(Instance.new("Part").Touched)
+			const Arguments = getsignalarguments(Instance.new("Part").Touched)
 
 			Formatters.CheckReturnType(Arguments, "table")
 			Formatters.CheckEqual(#Arguments, 1, "the number of arguments Touched has")
 			Formatters.CheckEqual(Arguments[1], "Instance", "the type of Touched's argument")
-			Formatters.CheckEqual(#getfenv().getsignalarguments(UserInputService.InputBegan), 2, "the number of arguments InputBegan has")
+			Formatters.CheckEqual(#getsignalarguments(UserInputService.InputBegan), 2, "the number of arguments InputBegan has")
 		end,
 	},
 
 	getsignalargumentsinfo = {
 		Test = function()
-			const Info = getfenv().getsignalargumentsinfo(Instance.new("Part").Touched)
+			const Info = getsignalargumentsinfo(Instance.new("Part").Touched)
 
 			Formatters.CheckReturnType(Info, "table")
 
-			assert(typeof(Info[1]) == "table", `expected a table for each argument, got a {typeof(Info[1])}`)
+			assert(typeof(Info[1]) == "table", `expected a table for each argument, got {typeof(Info[1])}`)
 			Formatters.CheckEqual(Info[1].Name, "otherPart", "the name of Touched's argument")
 			Formatters.CheckEqual(Info[1].Type, "Instance", "the type of Touched's argument")
 
-			const InputInfo = getfenv().getsignalargumentsinfo(UserInputService.InputBegan)
+			const InputInfo = getsignalargumentsinfo(UserInputService.InputBegan)
 
 			Formatters.CheckEqual(#InputInfo, 2, "the number of arguments InputBegan has")
 			Formatters.CheckEqual(InputInfo[2].Name, "gameProcessedEvent", "the name of InputBegan's second argument")
@@ -3723,7 +3777,7 @@ const Tests: any = {
 
 	getsignalwhitelist = {
 		Test = function()
-			const Whitelist = getfenv().getsignalwhitelist()
+			const Whitelist = getsignalwhitelist()
 
 			Formatters.CheckReturnType(Whitelist, "table")
 
@@ -3748,7 +3802,7 @@ const Tests: any = {
 
 	["Drawing.Fonts"] = {
 		Test = function()
-			const Fonts = getfenv().Drawing.Fonts
+			const Fonts = Drawing.Fonts
 
 			for Name, Value in {
 				UI = 0,
@@ -3764,7 +3818,7 @@ const Tests: any = {
 
 	["Signal.new"] = {
 		Test = function()
-			const CreatedSignal = getfenv().Signal.new()
+			const CreatedSignal = Signal.new()
 			const Value = math.random()
 
 			local Received
@@ -3807,9 +3861,9 @@ const Tests: any = {
 			local FullName
 
 			getmetatable(ProxyTest).__namecall = function()
-				getfenv().setnamecallmethod(NewMethod)
+				setnamecallmethod(NewMethod)
 				Detected = Formatters.CheckExist("getnamecallmethod")()
-				getfenv().setnamecallmethod("GetFullName")
+				setnamecallmethod("GetFullName")
 				FullName = Formatters.CheckExist("getrawmetatable")(game).__namecall(game)
 			end
 
@@ -3822,7 +3876,7 @@ const Tests: any = {
 
 	newlclosure = {
 		Test = function()
-			const NewLClosure = getfenv().newlclosure
+			const NewLClosure = newlclosure
 			const Wrapped = NewLClosure(math.abs)
 
 			assert(Wrapped ~= math.abs, "the returned function is the same as the function given")
@@ -3838,19 +3892,19 @@ const Tests: any = {
 
 			Part.Size = Size
 
-			const Properties = getfenv().getproperties(Part)
+			const Properties = getproperties(Part)
 
 			Formatters.CheckReturnType(Properties, "table")
 			Formatters.CheckEqual(Properties.Size, Size, "the Size in the returned table")
 			Formatters.CheckEqual(Properties.Name, "Part", "the Name in the returned table")
-			Formatters.CheckEqual(getfenv().getproperties(Instance.new("Fire")).Heat, 9, "a Fire's Heat in the returned table")
+			Formatters.CheckEqual(getproperties(Instance.new("Fire")).Heat, 9, "a Fire's Heat in the returned table")
 		end,
 	},
 
 	gethiddenproperties = {
 		Test = function()
 			const Part = Instance.new("Part")
-			const Properties = getfenv().gethiddenproperties(Part)
+			const Properties = gethiddenproperties(Part)
 
 			Formatters.CheckReturnType(Properties, "table")
 
@@ -3877,13 +3931,13 @@ const Tests: any = {
 
 			Fire.Size = Size
 
-			Formatters.CheckEqual(getfenv().gethiddenproperties(Fire).size_xml, Size, "size_xml")
+			Formatters.CheckEqual(gethiddenproperties(Fire).size_xml, Size, "size_xml")
 		end,
 	},
 
 	hasmetatable = {
 		Test = function()
-			const HasMetatable = getfenv().hasmetatable
+			const HasMetatable = hasmetatable
 
 			assert(HasMetatable(setmetatable({}, {})) == true, "should return true for a table with a metatable")
 			assert(HasMetatable({}) == false, "should return false for a table without a metatable")
@@ -3893,7 +3947,7 @@ const Tests: any = {
 
 	getmetafield = {
 		Test = function()
-			const GetMetafield = getfenv().getmetafield
+			const GetMetafield = getmetafield
 			const Value = math.random()
 
 			Formatters.CheckEqual(GetMetafield(setmetatable({}, {__index = Value}), "__index"), Value, "the __index field")
@@ -3903,7 +3957,7 @@ const Tests: any = {
 
 	iscorescript = {
 		Test = function()
-			const IsCoreScript = getfenv().iscorescript
+			const IsCoreScript = iscorescript
 
 			const CoreScript = game:GetService("CoreGui"):FindFirstChildWhichIsA("ModuleScript", true)
 
@@ -3932,7 +3986,7 @@ const Tests: any = {
 
 			Formatters.CheckExist("writefile")(FileName, Text)
 
-			const Result = getfenv().readfileasync(FileName)
+			const Result = CallAsync(readfileasync, FileName)
 
 			RemovePath("delfile", FileName)
 
@@ -3946,7 +4000,7 @@ const Tests: any = {
 			const FileName = `File_{math.random()}.txt`
 			const Text = tostring(math.random())
 
-			getfenv().writefileasync(FileName, Text)
+			CallAsync(writefileasync, FileName, Text)
 
 			const Written = WaitFor(function()
 				return pcall(ReadFile, FileName) and ReadFile(FileName) == Text
@@ -3962,7 +4016,7 @@ const Tests: any = {
 		Test = function()
 			const FileName = `File_{math.random()}.png`
 
-			const AssetId = getfenv().writecustomasset(FileName, TestImage)
+			const AssetId = writecustomasset(FileName, TestImage)
 
 			const Exists = Formatters.CheckExist("isfile")(FileName)
 			const FetchStatus = GetAssetStatus(AssetId)
@@ -3978,7 +4032,7 @@ const Tests: any = {
 	dofile = {
 		Test = function()
 			const WriteFile = Formatters.CheckExist("writefile")
-			const DoFile = getfenv().dofile
+			const DoFile = dofile
 			const FileName = `File_{math.random()}.lua`
 			const Value = math.random()
 			const Marker = `debUNC{math.random(1, 1e6)}`
@@ -4002,13 +4056,13 @@ const Tests: any = {
 
 	getobjects = {
 		Test = function()
-			const Objects = getfenv().getobjects("rbxassetid://125013769")
+			const Objects = getobjects("rbxassetid://125013769")
 
 			Formatters.CheckReturnType(Objects, "table")
 
 			const Sword = Objects[1]
 
-			assert(typeof(Sword) == "Instance", `expected an instance, got a {typeof(Sword)}`)
+			assert(typeof(Sword) == "Instance", `expected an instance, got {typeof(Sword)}`)
 
 			const ClassName, Name, Parent, HasHandle = Sword.ClassName, Sword.Name, Sword.Parent, Sword:FindFirstChild("Handle") ~= nil
 
@@ -4035,7 +4089,7 @@ const Tests: any = {
 
 	getcallbackvalue = {
 		Test = function()
-			const GetCallbackValue = getfenv().getcallbackvalue
+			const GetCallbackValue = getcallbackvalue
 			const BindableFunction = Instance.new("BindableFunction")
 
 			const function OnInvoke()
@@ -4052,7 +4106,7 @@ const Tests: any = {
 
 	getfunctionbytecode = {
 		Test = function()
-			const GetFunctionBytecode = getfenv().getfunctionbytecode
+			const GetFunctionBytecode = getfunctionbytecode
 
 			const function First()
 				return 1
@@ -4074,7 +4128,7 @@ const Tests: any = {
 	getobjectreferences = {
 		Test = function()
 			const Box = {Holder = {{}}}
-			const References = getfenv().getobjectreferences(Box.Holder[1])
+			const References = getobjectreferences(Box.Holder[1])
 
 			assert(table.find(References, Box.Holder), "didn't find the table holding the object")
 		end,
@@ -4084,7 +4138,7 @@ const Tests: any = {
 		Test = function()
 			const Box = {Holder = {function() end}}
 
-			assert(table.find(getfenv().getfunctionreferences(Box.Holder[1]), Box.Holder), "didn't find the table holding the function")
+			assert(table.find(getfunctionreferences(Box.Holder[1]), Box.Holder), "didn't find the table holding the function")
 		end,
 	},
 
@@ -4092,11 +4146,11 @@ const Tests: any = {
 		OtherNames = {"trampoline_call", "syn.trampoline_call"},
 		Test = function()
 			const TrampolineCall = FindFirstFunction("trampolinecall") or FindFirstFunction("trampoline_call") or FindFirstFunction("syn.trampoline_call")
-			const GetIdentity = getfenv().getthreadidentity
-			const GetScriptThread = getfenv().getscriptthread
-			const CheckCaller = getfenv().checkcaller
-			const GetCallingScript = getfenv().getcallingscript
-			const GetInfo = debug.info
+			const GetIdentity = getthreadidentity
+			const GetScriptThread = getscriptthread
+			const CheckCaller = checkcaller
+			const GetCallingScript = getcallingscript
+			const GetInfo = Formatters.CheckExist("debug.info")
 			const Line = math.random(100, 999)
 			const Value = math.random()
 
@@ -4111,7 +4165,8 @@ const Tests: any = {
 				},
 			}, {})
 
-			assert(StackSuccess == true, `should return true when the function doesn't error, got {StackSuccess}`)
+			assert(typeof(StackSuccess) == "boolean", `the first value it returns should be whether the call worked, got {typeof(StackSuccess)} instead, so it probably just called the function`)
+			assert(StackSuccess == true, "should return true when the function doesn't error")
 			Formatters.CheckEqual(Name, "FakeCaller", "the name of the fake caller")
 			Formatters.CheckEqual(CurrentLine, Line, "the line of the fake caller")
 
@@ -4184,7 +4239,7 @@ const Tests: any = {
 
 			Formatters.CheckExist("writefile")(FileName, Text)
 
-			const Size = getfenv().getfilesize(FileName)
+			const Size = getfilesize(FileName)
 
 			RemovePath("delfile", FileName)
 
@@ -4201,7 +4256,7 @@ const Tests: any = {
 
 			Formatters.CheckExist("writefile")(OldName, Text)
 
-			getfenv().renamefile(OldName, NewName)
+			renamefile(OldName, NewName)
 
 			const OldExists = IsFile(OldName)
 			const Result = Formatters.CheckExist("readfile")(NewName)
@@ -4222,7 +4277,7 @@ const Tests: any = {
 			Formatters.CheckExist("makefolder")(FolderName)
 			Formatters.CheckExist("writefile")(FileName, Text)
 
-			getfenv().movefile(FileName, `{FolderName}/{FileName}`)
+			movefile(FileName, `{FolderName}/{FileName}`)
 
 			const OldExists = Formatters.CheckExist("isfile")(FileName)
 			const Result = Formatters.CheckExist("readfile")(`{FolderName}/{FileName}`)
@@ -4252,7 +4307,7 @@ end
 
 Tests["security: request hides your login"] = {
 	Test = function()
-		const Request = getfenv().request
+		const Request = request
 
 		if not Request then
 			return
@@ -4279,7 +4334,7 @@ Tests["security: game:HttpGet hides your login"] = {
 
 Tests["security: request blocks file://"] = {
 	Test = function()
-		const Request = getfenv().request
+		const Request = request
 
 		if not Request then
 			return
@@ -4419,14 +4474,14 @@ const NoTests: {[string | number]: any} = {
 			end
 
 			const function CheckInactive()
-				return HasFocus or not getfenv().isrbxactive()
+				return HasFocus or not isrbxactive()
 			end
 
-			const CreateConsole = getfenv().rconsolecreate
+			const CreateConsole = rconsolecreate
 
 			if CreateConsole then
 				AddCleanup(function()
-					getfenv().rconsoledestroy()
+					rconsoledestroy()
 				end)
 
 				pcall(CreateConsole)
@@ -4437,7 +4492,7 @@ const NoTests: {[string | number]: any} = {
 				end
 			end
 
-			const MessageBox = getfenv().messagebox
+			const MessageBox = messagebox
 
 			if not MessageBox then
 				return
@@ -4470,7 +4525,7 @@ for Index, Info in NoTests do
 	Tests[Info] = {}
 end
 
-const GetGlobalEnvironment: () -> {[string]: any} = getfenv().getgenv or function()
+const GetGlobalEnvironment: () -> {[string]: any} = getgenv or function()
 	return {}
 end
 
@@ -4494,7 +4549,7 @@ end
 
 RestoreFunctions()
 
-local ExecutorName, ExecutorVersion = (getfenv().identifyexecutor or function()
+local ExecutorName, ExecutorVersion = (identifyexecutor or function()
 	return "Unknown Executor", "0.0.0"
 end)()
 
@@ -4576,14 +4631,14 @@ pcall(game:GetService("StarterGui").SetCore, game:GetService("StarterGui"), "Dev
 
 DisplayMessage("If your Roblox crashes or freezes during these tests, run `shared.DebugMode = true` before debUNC to prevent it or find the crashing function.")
 
-const IsFunctionHooked = getfenv().isfunctionhooked
+const IsFunctionHooked = isfunctionhooked
 
 if Settings.FakeFunctions then
-	const NewCClosure: ((...any) -> ...any) -> (...any) -> ...any = getfenv().newcclosure
+	const NewCClosure: ((...any) -> ...any) -> (...any) -> ...any = newcclosure
 	const OriginalFunctions = {}
 	const NonExistentFunctions = {}
 
-	DisplayMessage("[debUNC]: Faking functions is enabled")
+	DisplayMessage("Faking functions is enabled")
 
 	for FunctionName in Tests do
 		if FunctionName == "getgenv" or FunctionName == "newcclosure" or Tests[FunctionName].Security then
@@ -4621,10 +4676,11 @@ if Settings.FakeFunctions then
 end
 
 const function StartCallLogging()
-	const HookFunction = getfenv().hookfunction
-	const WriteFile = getfenv().writefile
-	const AppendFile = getfenv().appendfile
-	const RestoreFunction = getfenv().restorefunction
+	const HookFunction = hookfunction
+	const WriteFile = writefile
+	const AppendFile = appendfile
+	const RestoreFunction = restorefunction
+	const CheckCaller = checkcaller
 
 	if not HookFunction or not WriteFile then
 		return
@@ -4663,13 +4719,13 @@ const function StartCallLogging()
 			return
 		end
 
-		if table.find(Blacklist, Name) or typeof(HookedFunction) ~= "function" then
+		if table.find(Blacklist, Name) or typeof(HookedFunction) ~= "function" or HookedFunction == CheckCaller then
 			return
 		end
 
 		local Original
 		Original = HookFunction(HookedFunction, function(...)
-			if Logging or tostring((...)) == "WebSocket" then
+			if Logging or (CheckCaller and not CheckCaller()) or tostring((...)) == "WebSocket" then
 				return Original(...)
 			end
 
@@ -4685,7 +4741,7 @@ const function StartCallLogging()
 				table.insert(ArgumentNames, tostring(Argument))
 			end
 
-			const Line = `{Message}{if Arguments[1] then ` with args {table.concat(ArgumentNames, ", ")}` else ""}\n`
+			const Line = `{Message}{if Arguments[1] then ` with arguments {table.concat(ArgumentNames, ", ")}` else ""}\n`
 
 			if AppendFile then
 				AppendFile("LogFunctionCalls.txt", Line)
@@ -4705,13 +4761,11 @@ const function StartCallLogging()
 	end
 
 	WriteFile("LogFunctionCalls.txt", "")
-	print("Starting LogFunctionCalls")
-
 	for Name, GlobalFunction in GetGlobalEnvironment() do
 		Hook(Name, GlobalFunction)
 	end
 
-	print("Started LogFunctionCalls")
+	print("Started logging function calls")
 
 	Logging = false
 
@@ -4932,13 +4986,13 @@ if StopCallLogging then
 end
 
 pcall(function()
-	for _, Path in getfenv().listfiles("") do
+	for _, Path in listfiles("") do
 		const FileName = Path:match("[^/\\]+$")
 
 		if FileName:match("^File_[%d%.e%-]+%.%a+$") then
-			getfenv().delfile(Path)
+			delfile(Path)
 		elseif FileName:match("^Folder_[%d%.e%-]+$") then
-			getfenv().delfolder(Path)
+			delfolder(Path)
 		end
 	end
 end)
@@ -4979,7 +5033,7 @@ if ElapsedTime < MinimumSeconds and PercentageComplete > 80 then
 end
 
 DisplayMessage("❓ The score below is only for how many custom functions are supported and secure.")
-DisplayMessage(`🔵 debUNC v2.6.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
+DisplayMessage(`🔵 debUNC v2.7.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(ElapsedTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
@@ -5021,7 +5075,7 @@ const Blacklist = {
 	"http.request",
 }
 
-const GetRobloxEnvironment = getfenv().getrenv
+const GetRobloxEnvironment = getrenv
 const RobloxEnvironment = GetRobloxEnvironment and GetRobloxEnvironment() or {}
 const AlreadyChecked = {}
 const VisitedTables = {}
@@ -5048,7 +5102,7 @@ const function GetFromEnvironment(Environment, GetTests: boolean?, Library: stri
 			Tests[Name]
 			or (Name:find("_") and Tests[(Name:gsub("_", ""))])
 			or (typeof(Value) ~= "function" and typeof(Value) ~= "table")
-			or (not RobloxEnvironment[Name] and FindFirstFunction(Name, RobloxEnvironment))
+			or FindFirstFunction(Name, RobloxEnvironment) ~= nil
 			or AlreadyChecked[Name]
 			or table.find(Blacklist, Name)
 		) then
@@ -5088,7 +5142,7 @@ end
 
 Divider()
 
-const SetClipboard = getfenv().setclipboard
+const SetClipboard = setclipboard
 
 if not SetClipboard then
 	return
