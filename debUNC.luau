@@ -1081,6 +1081,7 @@ const Tests: any = {
 
 			assert(FindFingerprintHeader(Headers), `missing the fingerprint (hwid) header, got {table.concat(HeaderNames, ", ")}`)
 		end,
+		Retry = true,
 	},
 
 	require = {
@@ -1457,6 +1458,67 @@ const Tests: any = {
 		end,
 	},
 
+	["DirectoryWatcher.new"] = {
+		Test = function()
+			const CrashTests = shared.CrashTests or (shared.Settings and shared.Settings.CrashTests)
+
+			if getfenv().identifyexecutor and getfenv().identifyexecutor() == "Synapse Z" and not CrashTests then
+				error("this crashes Roblox on Synapse Z, so it wasn't run, use shared.CrashTests = true to try it")
+			end
+
+			const WriteFile = Formatters.CheckExist("writefile")
+			const FolderName = `Folder_{math.random()}`
+			const OtherFolderName = `Folder_{math.random()}`
+			const FileName = `File_{math.random()}.txt`
+			const Changed = {}
+
+			Formatters.CheckExist("makefolder")(FolderName)
+			getfenv().makefolder(OtherFolderName)
+
+			const Watcher = getfenv().DirectoryWatcher.new(FolderName)
+
+			AddCleanup(function()
+				Watcher:Destroy()
+			end)
+
+			Watcher.OnChanged:Connect(function(Path)
+				table.insert(Changed, tostring(Path))
+			end)
+
+			WriteFile(`{OtherFolderName}/{FileName}`, "debUNC")
+			WriteFile(`{FolderName}/{FileName}`, "debUNC")
+
+			const Detected = WaitFor(function()
+				return #Changed > 0
+			end, 2)
+
+			const Count = #Changed
+			const Control = getfenv().DirectoryWatcher.new(FolderName)
+
+			local ControlFired = false
+
+			AddCleanup(function()
+				Control:Destroy()
+			end)
+
+			Control.OnChanged:Connect(function()
+				ControlFired = true
+			end)
+
+			Watcher:Destroy()
+			WriteFile(`{FolderName}/{FileName}`, "debUNC Again")
+
+			WaitFor(function()
+				return ControlFired
+			end, 2)
+
+			assert(Detected, "OnChanged didn't fire after a file in the folder was written")
+			assert(table.concat(Changed, " "):find(FileName, 1, true), `OnChanged didn't give the changed file's path, got '{table.concat(Changed, ", ")}'`)
+			assert(not table.concat(Changed, " "):find(OtherFolderName, 1, true), "OnChanged fired for a file in a different folder")
+			Formatters.CheckEqual(#Changed, Count, "the number of changes after Destroy")
+		end,
+	},
+
 	["WebSocket.connect"] = {
 		Test = function()
 			const Socket = getfenv().WebSocket.connect("wss://echo.websocket.org")
@@ -1499,6 +1561,7 @@ const Tests: any = {
 				return Closed
 			end, 1), "OnClose failed to fire when :Close() was called")
 		end,
+		Retry = true,
 	},
 
 	["cache.invalidate"] = {
@@ -1856,6 +1919,7 @@ const Tests: any = {
 			assert(DecodeSuccess, "the response wasn't the JSON httpbin sends back")
 			assert(Decoded.args and Decoded.args.debunc == Marker, "the query that was sent didn't come back, so the request may not have really gone out")
 		end,
+		Retry = true,
 	},
 
 	identifyexecutor = {
@@ -2793,7 +2857,7 @@ const Tests: any = {
 			Actor:Destroy()
 
 			for _, Value in Actors do
-				assert(typeof(Value) == "Instance" and Value:IsA("Actor"), `should return Actor instances, but got a {typeof(Value)} (threads are what getactorthreads is for)`)
+				assert(typeof(Value) == "Instance" and Value:IsA("Actor"), `should return Actor instances, but got a {if typeof(Value) == "Instance" then Value.ClassName else typeof(Value)}{if typeof(Value) == "thread" then " (threads are what getactorthreads is for)" else ""}`)
 			end
 
 			assert(table.find(Actors, Actor), "didn't find a new actor")
@@ -3580,7 +3644,7 @@ const Tests: any = {
 				error({Skipped = `the saved place would be about {math.floor(PredictedMegabytes)} MB, which is too large to test quickly`, Environment = true})
 			end
 
-			const FileName = getfenv().saveinstance()
+			const FileName = getfenv().saveinstance({noscripts = true})
 
 			Formatters.CheckReturnType(FileName, "string")
 
@@ -4725,6 +4789,22 @@ const function RunTest(Name: string, Info: any)
 			return
 		end
 
+		if not Info.Retry then
+			Info.Test()
+			return
+		end
+
+		const FirstSuccess, FirstError = pcall(Info.Test)
+
+		if FirstSuccess then
+			return
+		end
+
+		if typeof(FirstError) == "table" and FirstError.Skipped then
+			error(FirstError, 0)
+		end
+
+		RunCleanups(coroutine.running())
 		Info.Test()
 	end)
 
@@ -4899,7 +4979,7 @@ if ElapsedTime < MinimumSeconds and PercentageComplete > 80 then
 end
 
 DisplayMessage("❓ The score below is only for how many custom functions are supported and secure.")
-DisplayMessage(`🔵 debUNC v2.5.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
+DisplayMessage(`🔵 debUNC v2.6.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(ElapsedTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
