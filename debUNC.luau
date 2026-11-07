@@ -112,6 +112,7 @@ end
 local FocusLost = false
 local HasFocus = true
 local MissedFocusLoss = false
+local MessageBoxTime = 0
 
 const FocusConnection = UserInputService.WindowFocusReleased:Connect(function()
 	FocusLost = true
@@ -441,6 +442,25 @@ const function CheckCommChannel()
 	Formatters.CheckEqual(Received[1], Marker, "the message from the actor")
 	assert(Received[2] == game, "game sent from the actor didn't arrive as the same game")
 	Formatters.CheckEqual(Received.n, 3, "the number of values sent, counting the nil")
+end
+
+const function CheckConsole()
+	const IsHidden = getfenv().rconsolehidden
+	const Show = getfenv().rconsoleshow
+
+	if not IsHidden or not Show then
+		return
+	end
+
+	Formatters.CheckExist("rconsolecreate")()
+
+	AddCleanup(function()
+		getfenv().rconsoledestroy()
+	end)
+
+	Show()
+
+	assert(IsHidden() ~= true, "rconsolehidden returned true after rconsoleshow, so the console didn't open")
 end
 
 const function CheckClipboard()
@@ -2400,23 +2420,14 @@ const Tests: any = {
 
 	getmenv = {
 		Test = function()
-			const PlayerModule = GetPlayerModule()
-			const CameraModule = PlayerModule.CameraModule
-
-			require(CameraModule)
-
-			const Environment = getfenv().getmenv(CameraModule)
+			const CameraWrapper = GetPlayerModule().CommonUtils.CameraWrapper
+			const GetCamera = require(CameraWrapper).getCamera
+			const Environment = getfenv().getmenv(CameraWrapper)
 
 			Formatters.CheckReturnType(Environment, "table")
 
-			assert(Environment.script == CameraModule, ".script doesn't point to the module")
-
-			const CameraWrapper = PlayerModule.CommonUtils.CameraWrapper
-
-			assert(
-				getfenv().getmenv(CameraWrapper) == getfenv(require(CameraWrapper).getCamera),
-				"didn't return the environment that the module's functions use"
-			)
+			assert(Environment.script == CameraWrapper, ".script doesn't point to the module")
+			assert(Environment == getfenv(GetCamera), "didn't return the environment that the module's functions use")
 		end,
 	},
 
@@ -4013,6 +4024,85 @@ const Tests: any = {
 		end,
 	},
 
+	trampolinecall = {
+		OtherNames = {"trampoline_call", "syn.trampoline_call"},
+		Test = function()
+			const TrampolineCall = FindFirstFunction("trampolinecall") or FindFirstFunction("trampoline_call") or FindFirstFunction("syn.trampoline_call")
+			const GetIdentity = getfenv().getthreadidentity
+			const GetScriptThread = getfenv().getscriptthread
+			const CheckCaller = getfenv().checkcaller
+			const GetCallingScript = getfenv().getcallingscript
+			const GetInfo = debug.info
+			const Line = math.random(100, 999)
+			const Value = math.random()
+
+			const function FakeCaller() end
+
+			const StackSuccess, Name, CurrentLine = TrampolineCall(function()
+				return GetInfo(2, "nl")
+			end, {
+				{
+					func = FakeCaller,
+					currentline = Line,
+				},
+			}, {})
+
+			assert(StackSuccess == true, `should return true when the function doesn't error, got {StackSuccess}`)
+			Formatters.CheckEqual(Name, "FakeCaller", "the name of the fake caller")
+			Formatters.CheckEqual(CurrentLine, Line, "the line of the fake caller")
+
+			const ArgumentSuccess, Result = TrampolineCall(function(Argument)
+				return Argument
+			end, {}, {}, Value)
+
+			assert(ArgumentSuccess == true and Result == Value, "the arguments or return values didn't get passed through")
+
+			const ErrorSuccess, ErrorMessage = TrampolineCall(function()
+				error("debUNC", 0)
+			end, {}, {})
+
+			assert(ErrorSuccess == false, "should return false when the function errors")
+			Formatters.CheckEqual(ErrorMessage, "debUNC", "the error message")
+
+			const EnvironmentSuccess, EnvironmentValue = TrampolineCall(function()
+				return debUNC
+			end, {}, {
+				env = {debUNC = Value},
+			})
+
+			assert(EnvironmentSuccess == true, `the env option errored with {EnvironmentValue}`)
+			Formatters.CheckEqual(EnvironmentValue, Value, "the value in the given environment")
+
+			if GetIdentity then
+				const Identity = GetIdentity()
+				const IdentitySuccess, NewIdentity = TrampolineCall(GetIdentity, {}, {identity = 2})
+
+				assert(IdentitySuccess == true, `the identity option errored with {NewIdentity}`)
+				Formatters.CheckEqual(NewIdentity, 2, "the identity inside of the call")
+				Formatters.CheckEqual(GetIdentity(), Identity, "the identity after the call")
+			end
+
+			if not GetScriptThread or not CheckCaller or not GetCallingScript or not Player.Character then
+				return
+			end
+
+			const Animate = Player.Character:FindFirstChild("Animate")
+			const Thread = Animate and GetScriptThread(Animate)
+
+			if not Thread then
+				return
+			end
+
+			const ThreadSuccess, IsExecutor, CallingScript = TrampolineCall(function()
+				return CheckCaller(), GetCallingScript()
+			end, {}, {thread = Thread})
+
+			assert(ThreadSuccess == true, `the thread option errored with {IsExecutor}`)
+			assert(IsExecutor == false, "checkcaller should return false on a game script's thread")
+			Formatters.CheckEqual(CallingScript, Animate, "the calling script on the game script's thread")
+		end,
+	},
+
 	getclipboard = {
 		Test = CheckClipboard,
 		RunLast = true,
@@ -4217,20 +4307,89 @@ end
 const NoTests: {[string | number]: any} = {
 	"queueonteleport",
 	"setrbxclipboard",
-	"rconsoleinfo",
-	"rconsoleerr",
-	"rconsoledestroy",
-	"rconsolewarn",
-	"rconsoleprint",
-	"rconsolecreate",
 
 	"setsimulationradius",
 	"clearqueueonteleport",
+
+	rconsolecreate = {
+		Test = CheckConsole,
+		RunLast = true,
+	},
+
+	rconsoleprint = {
+		Test = CheckConsole,
+		RunLast = true,
+	},
+
+	rconsoleinfo = {
+		Test = CheckConsole,
+		RunLast = true,
+	},
+
+	rconsolewarn = {
+		Test = CheckConsole,
+		RunLast = true,
+	},
+
+	rconsoleerr = {
+		Test = CheckConsole,
+		RunLast = true,
+	},
+
+	rconsoledestroy = {
+		Test = CheckConsole,
+		RunLast = true,
+	},
 
 	isrbxactive = {
 		ReturnType = "boolean",
 		Test = function()
 			assert(not MissedFocusLoss, "still returned true after the Roblox window lost focus")
+
+			if not HasFocus then
+				return
+			end
+
+			const function CheckLostFocus()
+				return not HasFocus
+			end
+
+			const function CheckInactive()
+				return HasFocus or not getfenv().isrbxactive()
+			end
+
+			const CreateConsole = getfenv().rconsolecreate
+
+			if CreateConsole then
+				AddCleanup(function()
+					getfenv().rconsoledestroy()
+				end)
+
+				pcall(CreateConsole)
+
+				if WaitFor(CheckLostFocus, 1) then
+					assert(WaitFor(CheckInactive, 1), "still returned true after the Roblox window lost focus")
+					return
+				end
+			end
+
+			const MessageBox = getfenv().messagebox
+
+			if not MessageBox then
+				return
+			end
+
+			const BoxStartTime = tick()
+
+			task.spawn(pcall, MessageBox, "debUNC test, you can close this", "debUNC", 0)
+
+			MessageBoxTime = tick() - BoxStartTime
+
+			if not WaitFor(CheckLostFocus, 2) then
+				return
+			end
+
+			assert(WaitFor(CheckInactive, 1), "still returned true after the Roblox window lost focus")
 		end,
 		RunLast = true,
 	},
@@ -4531,10 +4690,21 @@ const function RunTest(Name: string, Info: any)
 	TestThreads[coroutine.running()] = Name
 
 	local Missing = false
+	local TestedAlias = ""
 
 	local Success, ErrorMessage = pcall(function()
 		if not Info.Security then
-			const TestedValue = FindFirstFunction(Name)
+			local TestedValue = FindFirstFunction(Name)
+
+			for _, OtherName in Info.OtherNames or {} do
+				if TestedValue then
+					break
+				end
+
+				TestedValue = FindFirstFunction(OtherName)
+				TestedAlias = if TestedValue then ` ({OtherName})` else ""
+			end
+
 			const ValueType = Info.ValueType or "function"
 
 			Missing = TestedValue == nil
@@ -4568,7 +4738,7 @@ const function RunTest(Name: string, Info: any)
 	TotalTests += 1
 
 	if Success then
-		print(`🟢 {Name}`)
+		print(`🟢 {Name}{TestedAlias}`)
 		Results[Name] = "passed"
 		CompletedTests += 1
 		return
@@ -4666,7 +4836,9 @@ end
 
 DisplayMessage("Don't touch your mouse or keyboard until the tests finish.")
 
-table.insert(LastTests, table.remove(LastTests, table.find(LastTests, "isrbxactive")))
+for _, Name in {"rconsolecreate", "rconsoleprint", "rconsoleinfo", "rconsolewarn", "rconsoleerr", "rconsoledestroy", "isrbxactive"} do
+	table.insert(LastTests, table.remove(LastTests, table.find(LastTests, Name)))
+end
 
 for _, Name in LastTests do
 	RunTestAlone(Name, Tests[Name])
@@ -4716,7 +4888,7 @@ for Name, Message in FailureMessages do
 	FailedTests += 1
 end
 
-const ElapsedTime = tick() - StartTime
+const ElapsedTime = tick() - StartTime - MessageBoxTime
 const PercentageComplete = math.floor(CompletedTests / math.max(TotalTests - EnvironmentSkips, 1) * 100)
 const MinimumSeconds = 0.1
 
@@ -4727,7 +4899,7 @@ if ElapsedTime < MinimumSeconds and PercentageComplete > 80 then
 end
 
 DisplayMessage("❓ The score below is only for how many custom functions are supported and secure.")
-DisplayMessage(`🔵 debUNC v2.4.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
+DisplayMessage(`🔵 debUNC v2.5.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(ElapsedTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
