@@ -1506,6 +1506,82 @@ const Tests: any = {
 		end,
 	},
 
+	setstackhidden = {
+		OtherNames = {"sethiddenstack"},
+		Test = function()
+			const SetStackHidden = setstackhidden or sethiddenstack
+			const GetInfo = Formatters.CheckExist("debug.info")
+
+			const function Inner(Mode: string): any
+				if Mode == "frames" then
+					const Functions = {}
+
+					for Level = 1, 6 do
+						const Function = GetInfo(Level, "f")
+
+						if not Function then
+							break
+						end
+
+						table.insert(Functions, Function)
+					end
+
+					return Functions
+				end
+
+				if Mode == "traceback" then
+					return debug.traceback()
+				end
+
+				error("debUNC", 2)
+			end
+
+			const function HiddenCaller(Mode: string): any
+				return Inner(Mode)
+			end
+
+			AddCleanup(function()
+				SetStackHidden(HiddenCaller, false)
+			end)
+
+			assert(table.find(HiddenCaller("frames"), HiddenCaller), "the function wasn't on the stack before it was hidden")
+
+			SetStackHidden(HiddenCaller, true)
+
+			assert(not table.find(HiddenCaller("frames"), HiddenCaller), "debug.info still found the function on the stack after it was hidden")
+			assert(not HiddenCaller("traceback"):find("HiddenCaller", 1, true), "debug.traceback still shows the function after it was hidden")
+			Formatters.CheckEqual(select(2, pcall(HiddenCaller, "error")), "debUNC", "the error from a hidden function, which shouldn't have its location")
+
+			SetStackHidden(HiddenCaller, false)
+
+			assert(table.find(HiddenCaller("frames"), HiddenCaller), "the function stayed hidden after setting it back to false")
+		end,
+	},
+
+	isstackhidden = {
+		OtherNames = {"ishiddenstack"},
+		Test = function()
+			const IsStackHidden = isstackhidden or ishiddenstack
+			const SetStackHidden = Formatters.CheckExist("setstackhidden")
+
+			const function Target() end
+
+			AddCleanup(function()
+				SetStackHidden(Target, false)
+			end)
+
+			Formatters.CheckEqual(IsStackHidden(Target), false, "the result for a function that isn't hidden")
+
+			SetStackHidden(Target, true)
+
+			Formatters.CheckEqual(IsStackHidden(Target), true, "the result after hiding the function")
+
+			SetStackHidden(Target, false)
+
+			Formatters.CheckEqual(IsStackHidden(Target), false, "the result after showing the function again")
+		end,
+	},
+
 	["DirectoryWatcher.new"] = {
 		Test = function()
 			const CrashTests = shared.CrashTests or (shared.Settings and shared.Settings.CrashTests)
@@ -4305,122 +4381,200 @@ const function CheckLoginHidden(Get: () -> string)
 	)
 end
 
-Tests["security: request hides your login"] = {
-	Test = function()
-		const Request = request
+const function CheckReached(Success: boolean, Result: any): boolean
+	if Success then
+		return Result ~= nil
+	end
 
-		if not Request then
-			return
-		end
+	const Message = tostring(Result)
 
-		CheckLoginHidden(function()
-			return Request({
-				Url = EconomyUrl,
-				Method = "GET",
-			}).Body
-		end)
-	end,
-	Security = true,
-}
-
-Tests["security: game:HttpGet hides your login"] = {
-	Test = function()
-		CheckLoginHidden(function()
-			return game:HttpGet(EconomyUrl)
-		end)
-	end,
-	Security = true,
-}
-
-Tests["security: request blocks file://"] = {
-	Test = function()
-		const Request = request
-
-		if not Request then
-			return
-		end
-
-		const Success, Response = pcall(Request, {
-			Url = "file:///C:/",
-			Method = "GET",
-		})
-
-		assert(not Success or not Response or not Response.Success or Response.Body == "", "request can read files on your computer through file://")
-	end,
-	Security = true,
-}
-
-Tests["security: game:HttpGet blocks file://"] = {
-	Test = function()
-		const Success, Result = pcall(game.HttpGet, game, "file:///C:/")
-
-		assert(not Success or Result == nil or Result == "", "game:HttpGet can read files on your computer through file://")
-	end,
-	Security = true,
-}
-
-for _, Method in {
-	{"MarketplaceService", "GetRobuxBalance"},
-	{"AccountService", "GetCredentialsHeaders"},
-	{"AccountService", "GetDeviceAccessToken"},
-	{"HttpRbxApiService", "GetAsyncFullUrl", EconomyUrl},
-	{"InsertService", "GetLocalFileContents", "rbxasset://fonts/families/SourceSansPro.json"},
-} do
-	const ServiceName, MethodName, Argument = Method[1], Method[2], Method[3]
-
-	Tests[`security: {ServiceName}:{MethodName} is blocked`] = {
-		Test = function()
-			const Found, Service = pcall(game.GetService, game, ServiceName)
-
-			if not Found then
-				return
-			end
-
-			const Success, Result = pcall(function()
-				return Service[MethodName](Service, Argument)
-			end)
-			const NamecallSuccess, NamecallResult = pcall(loadstring(`local Service, Argument = ... return Service:{MethodName}(Argument)`) :: Function, Service, Argument)
-
-			assert(not NamecallSuccess or NamecallResult == nil, `{ServiceName}:{MethodName} can be called with a method call, which lets scripts reach your private account data`)
-			assert(not Success or Result == nil, `{ServiceName}:{MethodName} can be called, which lets scripts reach your private account data`)
-		end,
-		Security = true,
-	}
+	return Message:find("Argument %d+ missing") ~= nil or Message:find("Unable to cast") ~= nil or Message:find("invalid argument") ~= nil
 end
 
-for Name, GetRoot in {
-	["stats().Parent"] = function()
-		return stats().Parent
-	end,
-	["settings().Parent"] = function()
-		return settings().Parent
-	end,
-	["UserSettings().Parent"] = function()
-		return UserSettings().Parent
-	end,
-	["Stats service's Parent"] = function()
-		return game:GetService("Stats").Parent
-	end,
-	["UserGameSettings service's Parent"] = function()
-		return game:GetService("UserGameSettings").Parent
-	end,
-} do
-	Tests[`security: {Name} can't get around blocks`] = {
-		Test = function()
-			const Success, Root = pcall(GetRoot)
+const function CheckMethodsBlocked(Methods: {{any}}, Reason: string)
+	const Unblocked = {}
 
-			if not Success or typeof(Root) ~= "Instance" then
-				return
+	for _, Method in Methods do
+		const ServiceName, MethodName, Argument = Method[1], Method[2], Method[3]
+		const Found, Service = pcall(game.GetService, game, ServiceName)
+
+		if not Found then
+			continue
+		end
+
+		const Reached = CheckReached(pcall(function()
+			return Service[MethodName](Service, Argument)
+		end)) or CheckReached(pcall(loadstring(`local Service, Argument = ... return Service:{MethodName}(Argument)`) :: Function, Service, Argument))
+
+		if Reached then
+			table.insert(Unblocked, `{ServiceName}:{MethodName}`)
+		end
+	end
+
+	assert(#Unblocked == 0, `{table.concat(Unblocked, ", ")} can be called, which lets scripts {Reason}`)
+end
+
+const SecurityTests: {[string]: any} = {
+	["security: purchases need your approval"] = {
+		Test = function()
+			CheckMethodsBlocked({
+				{"MarketplaceService", "PerformPurchase"},
+				{"MarketplaceService", "PerformPurchaseV2"},
+				{"MarketplaceService", "PerformBulkPurchase"},
+				{"MarketplaceService", "PerformSubscriptionPurchase"},
+				{"MarketplaceService", "PerformSubscriptionPurchaseV2"},
+				{"MarketplaceService", "PerformCancelSubscription"},
+				{"MarketplaceService", "PrepareCollectiblesPurchase"},
+			}, "spend your Robux without asking")
+		end,
+	},
+
+	["security: requests can't use your login"] = {
+		Test = function()
+			const Request = request
+
+			if Request then
+				CheckLoginHidden(function()
+					return Request({
+						Url = EconomyUrl,
+						Method = "GET",
+					}).Body
+				end)
 			end
 
-			const Reached, Balance = pcall(function()
-				return Root:GetService("MarketplaceService"):GetRobuxBalance()
+			CheckLoginHidden(function()
+				return game:HttpGet(EconomyUrl)
 			end)
 
-			assert(not Reached or Balance == nil, `{Name} reached a method that's blocked everywhere else`)
+			CheckMethodsBlocked({
+				{"HttpRbxApiService", "GetAsyncFullUrl", EconomyUrl},
+				{"HttpRbxApiService", "GetAsync"},
+				{"HttpRbxApiService", "PostAsync"},
+				{"HttpRbxApiService", "PostAsyncFullUrl"},
+				{"HttpRbxApiService", "RequestAsync"},
+				{"HttpService", "RequestInternal"},
+				{"HttpService", "requestInternal"},
+				{"OpenCloudService", "HttpRequestAsync"},
+			}, "send web requests logged in as you")
 		end,
-		Security = true,
-	}
+	},
+
+	["security: account data and tokens stay private"] = {
+		Test = function()
+			CheckMethodsBlocked({
+				{"MarketplaceService", "GetRobuxBalance"},
+				{"AccountService", "GetCredentialsHeaders"},
+				{"AccountService", "GetDeviceAccessToken"},
+				{"AccountService", "GetDeviceIntegrityToken"},
+				{"AccountService", "GetDeviceIntegrityTokenYield"},
+			}, "reach your private account data")
+		end,
+	},
+
+	["security: scripts can't run things outside Roblox"] = {
+		Test = function()
+			CheckMethodsBlocked({
+				{"LinkingService", "OpenUrl"},
+				{"MessageBusService", "Call"},
+				{"MessageBusService", "Publish"},
+				{"MessageBusService", "MakeRequest"},
+				{"BrowserService", "OpenBrowserWindow"},
+				{"BrowserService", "ExecuteJavaScript"},
+				{"GuiService", "OpenBrowserWindow"},
+				{"ScriptContext", "AddCoreScriptLocal"},
+			}, "open links or run things outside of Roblox")
+		end,
+	},
+
+	["security: your account can't be changed without asking"] = {
+		Test = function()
+			CheckMethodsBlocked({
+				{"AvatarEditorService", "NoPromptApplyProfileConfiguration"},
+				{"AvatarEditorService", "NoPromptCreateOutfit"},
+				{"AvatarEditorService", "NoPromptDeleteOutfit"},
+				{"AvatarEditorService", "NoPromptRenameOutfit"},
+				{"AvatarEditorService", "NoPromptSaveAvatar"},
+				{"AvatarEditorService", "NoPromptSaveAvatarThumbnailCustomization"},
+				{"AvatarEditorService", "NoPromptSetFavorite"},
+				{"AvatarEditorService", "NoPromptUpdateOutfit"},
+				{"AvatarEditorService", "PerformCreateOutfitWithDescription"},
+				{"AvatarEditorService", "PerformRenameOutfit"},
+				{"AvatarEditorService", "PerformSaveAvatarWithDescription"},
+				{"AvatarEditorService", "PerformUpdateOutfit"},
+				{"CaptureService", "CreatePostAsync"},
+				{"Players", "ReportAbuse"},
+				{"Players", "ReportAbuseV3"},
+			}, "change your account without asking")
+		end,
+	},
+
+	["security: file:// is blocked"] = {
+		Test = function()
+			const Request = request
+
+			if Request then
+				const Success, Response = pcall(Request, {
+					Url = "file:///C:/",
+					Method = "GET",
+				})
+
+				assert(not Success or not Response or not Response.Success or Response.Body == "", "request can read files on your computer through file://")
+			end
+
+			const Success, Result = pcall(game.HttpGet, game, "file:///C:/")
+
+			assert(not Success or Result == nil or Result == "", "game:HttpGet can read files on your computer through file://")
+
+			CheckMethodsBlocked({
+				{"InsertService", "GetLocalFileContents", "rbxasset://fonts/families/SourceSansPro.json"},
+			}, "read files on your computer")
+		end,
+	},
+
+	["security: blocks can't be bypassed"] = {
+		Test = function()
+			const Bypasses = {}
+
+			for Name, GetRoot in {
+				["stats().Parent"] = function()
+					return stats().Parent
+				end,
+				["settings().Parent"] = function()
+					return settings().Parent
+				end,
+				["UserSettings().Parent"] = function()
+					return UserSettings().Parent
+				end,
+				["Stats service's Parent"] = function()
+					return game:GetService("Stats").Parent
+				end,
+				["UserGameSettings service's Parent"] = function()
+					return game:GetService("UserGameSettings").Parent
+				end,
+			} do
+				const Success, Root = pcall(GetRoot)
+
+				if not Success or typeof(Root) ~= "Instance" then
+					continue
+				end
+
+				const Reached, Balance = pcall(function()
+					return Root:GetService("MarketplaceService"):GetRobuxBalance()
+				end)
+
+				if Reached and Balance ~= nil then
+					table.insert(Bypasses, Name)
+				end
+			end
+
+			assert(#Bypasses == 0, `{table.concat(Bypasses, ", ")} reached a method that's blocked everywhere else`)
+		end,
+	},
+}
+
+for Name, Info in SecurityTests do
+	Info.Security = true
+	Tests[Name] = Info
 end
 
 const NoTests: {[string | number]: any} = {
@@ -5033,7 +5187,7 @@ if ElapsedTime < MinimumSeconds and PercentageComplete > 80 then
 end
 
 DisplayMessage("❓ The score below is only for how many custom functions are supported and secure.")
-DisplayMessage(`🔵 debUNC v2.7.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
+DisplayMessage(`🔵 debUNC v2.8.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(ElapsedTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
