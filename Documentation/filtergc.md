@@ -1,4 +1,4 @@
-# filtergc: (Type: string, Options: {Keys: {any}?, Name: string?, IgnoreExecutor: boolean?}, ReturnOne: boolean?) -> any
+# filtergc: (Type: string, Options: {Keys: {any}?, Values: {any}?, KeyValuePairs: {[any]: any}?, Metatable: table?, Name: string?, IgnoreExecutor: boolean?}, ReturnOne: boolean?) -> any
 Searches the garbage collector for functions or tables that match the given options.
 ```lua
 local Marker = {Secret = true}
@@ -11,7 +11,7 @@ print(filtergc("table", {Keys = {"Secret"}}, true) == Marker) --> true
 # Parameters
 | Type: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Either table or function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
-| Options: <pre>{<br>&nbsp;&nbsp;&nbsp;&nbsp;Keys: {any}?,<br>&nbsp;&nbsp;&nbsp;&nbsp;Name: string?,<br>&nbsp;&nbsp;&nbsp;&nbsp;IgnoreExecutor: boolean?,<br>}</pre> | What to search for, such as Keys or Name. |
+| Options: <pre>{<br>&nbsp;&nbsp;&nbsp;&nbsp;Keys: {any}?,<br>&nbsp;&nbsp;&nbsp;&nbsp;Values: {any}?,<br>&nbsp;&nbsp;&nbsp;&nbsp;KeyValuePairs: {[any]: any}?,<br>&nbsp;&nbsp;&nbsp;&nbsp;Metatable: table?,<br>&nbsp;&nbsp;&nbsp;&nbsp;Name: string?,<br>&nbsp;&nbsp;&nbsp;&nbsp;IgnoreExecutor: boolean?,<br>}</pre> | What to search for, such as Keys or Name. |
 | ReturnOne: [boolean?](https://create.roblox.com/docs/luau/booleans) | Whether to return the first match only. |
 # Returns
 | any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of matches, or the first match.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
@@ -19,5 +19,8 @@ print(filtergc("table", {Keys = {"Secret"}}, true) == Marker) --> true
 # Options
 | Keys: [table?](https://create.roblox.com/docs/luau/tables)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | For tables, keys that the table has to have.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Values: [table?](https://create.roblox.com/docs/luau/tables) | For tables, values that the table has to have. |
+| KeyValuePairs: [table?](https://create.roblox.com/docs/luau/tables) | For tables, keys that the table has to have with those exact values. |
+| Metatable: [table?](https://create.roblox.com/docs/luau/tables) | For tables, the metatable that the table has to have. |
 | Name: [string?](https://create.roblox.com/docs/luau/strings) | For functions, the name of the function. |
 | IgnoreExecutor: [boolean?](https://create.roblox.com/docs/luau/booleans) | For functions, whether to skip functions made by the executor. They're skipped unless this is false. |
