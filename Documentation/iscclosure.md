@@ -14,3 +14,7 @@ print(iscclosure(function() end)) --> false
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not it's a C function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the iscclosure test, the function must:
+- Return `true` for C closures such as `assert`, `print`, and `task.wait`.
+- Return `false` for a function made in the executor.

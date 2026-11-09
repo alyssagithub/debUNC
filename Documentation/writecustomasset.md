@@ -11,3 +11,9 @@ ImageLabel.Image = writecustomasset("Image.png", ImageData)
 # Returns
 | [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The rbxasset:// id.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the writecustomasset test, the function must:
+- Write the file it's given.
+- Return an `rbxasset://` id for the file.
+- Return an id that loads successfully as an asset.

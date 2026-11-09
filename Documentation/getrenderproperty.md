@@ -16,3 +16,6 @@ print(getrenderproperty(Line, "Thickness")) --> 5
 # Returns
 | any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The property's value.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the getrenderproperty test, the function must:
+- Return the current value of a Drawing object's property, such as a Line's `Thickness`.

@@ -12,3 +12,10 @@ local Encrypted, InitializationVector = crypt.encrypt("Hello world!", Key)
 | [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The encrypted text.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
 | [string](https://create.roblox.com/docs/luau/strings) | The initialization vector, which you need to decrypt the text. |
+# Test requirements
+To pass the crypt.encrypt test, the function must:
+- Return encrypted text that doesn't contain the original text.
+- Return encrypted text and an IV that [crypt.decrypt](decrypt.md) can turn back into the original text.
+- Use a new IV each time, so encrypting the same text twice gives different results.
+- Produce encrypted text that a different key can't decrypt.
+- Support CTR mode and match the published AES-256 CTR test vector.

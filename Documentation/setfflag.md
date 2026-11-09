@@ -12,3 +12,7 @@ print(getfflag("TaskSchedulerTargetFps")) --> 144
 | Flag: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The name of the flag.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
 | Value: [string](https://create.roblox.com/docs/luau/strings) | The new value. |
+
+# Test requirements
+To pass the setfflag test, the function must:
+- Set a fast flag's value, so [getfflag](getfflag.md) returns the new value.

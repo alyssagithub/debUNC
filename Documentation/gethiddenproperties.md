@@ -15,3 +15,11 @@ end
 # Returns
 | {[string]: any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The hidden properties, with each name set to its value.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the gethiddenproperties test, the function must:
+- Return a table.
+- Return at least one property.
+- Leave out properties that aren't hidden, like `Size` on a Part.
+- Include at least one property that can't be read normally.
+- Return the right value for each property, like a Fire's `size_xml` matching its `Size`.

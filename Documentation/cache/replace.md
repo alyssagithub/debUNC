@@ -11,3 +11,6 @@ print(Folder:FindFirstChildWhichIsA("Instance") == Fire) --> true
 | Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Instance to replace.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
 | NewObject: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance) | The Instance to use instead. |
+# Test requirements
+To pass the cache.replace test, the function must:
+- Replace the instance in the cache, so looking up the original instance gives back the new one.

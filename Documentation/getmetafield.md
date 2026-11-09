@@ -10,3 +10,7 @@ print(typeof(getmetafield(game, "__namecall"))) --> function
 # Returns
 | any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The field's value.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the getmetafield test, the function must:
+- Return the value of a field in a table's metatable, such as a number stored in `__index`.
+- Return the `__namecall` function from `game`'s locked metatable.

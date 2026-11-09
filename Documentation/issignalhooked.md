@@ -14,3 +14,8 @@ print(issignalhooked(NumberValue.Changed)) --> false
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not it's hooked.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the issignalhooked test, the function must:
+- Return `false` for a signal that isn't hooked.
+- Return `true` after the signal is hooked with [hooksignal](hooksignal.md).

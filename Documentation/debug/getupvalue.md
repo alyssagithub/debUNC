@@ -22,3 +22,6 @@ print(debug.getupvalue(Greet, 1) == Value) --> true
 # Returns
 | any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The upvalue.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the debug.getupvalue test, the function must:
+- Return the upvalue at the given index, in the order the function uses them.

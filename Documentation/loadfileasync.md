@@ -10,3 +10,9 @@ print(loadfileasync("Number.lua")()) --> 42
 # Returns
 | [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The compiled function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the loadfileasync test, the function must:
+- Run in the background instead of blocking the thread that calls it.
+- Finish within 5 seconds without erroring.
+- Return a function that runs the file's code and returns its result.

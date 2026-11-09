@@ -14,3 +14,9 @@ print(isscriptable(game, "Parent")) --> true
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not it's scriptable.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the isscriptable test, the function must:
+- Return `true` for `game.Parent`.
+- Return `false` or error for `Fire.size_xml`, a hidden property.
+- Return `false` or error for a property that doesn't exist.

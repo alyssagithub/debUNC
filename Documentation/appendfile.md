@@ -13,3 +13,6 @@ print(readfile("Log.txt")) --> Hello world!
 | Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The path of the file.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
 | Data: [string](https://create.roblox.com/docs/luau/strings) | The text to add. |
+# Test requirements
+To pass the appendfile test, the function must:
+- Add the text to the end of the file without changing what was already in it.

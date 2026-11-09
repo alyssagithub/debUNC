@@ -15,3 +15,8 @@ print(getthreadidentity()) --> 2
 # Returns
 | [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The thread's identity.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the getthreadidentity test, the function must:
+- Keep the current thread's identity when another thread changes its own.
+- Return the identity set with [setthreadidentity](setthreadidentity.md), such as 2.
+- Match the identity Roblox's `printidentity()` shows.

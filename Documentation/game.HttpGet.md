@@ -11,3 +11,13 @@ print(Body)
 # Returns
 | [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The body of the response.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the game.HttpGet test, the function must:
+- Error, or return `nil` or an empty string, for a website that doesn't exist.
+- Get a page without erroring.
+- Return the page's real response, including the query that was sent.
+- Return the JSON, HTML, or plain text response without erroring when `NoCache` is `true`.
+- Return a fresh response every time `NoCache` is `true`.
+- Skip the cache when `NoCache` is `true`, even when the same URL gave a cached response before.
+- Cache responses when `NoCache` isn't set, so the same URL can return the same response twice.

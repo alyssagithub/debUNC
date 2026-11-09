@@ -22,3 +22,8 @@ print(getcallbackvalue(BindableFunction, "OnInvoke")()) --> Hello world!
 # Returns
 | [function?](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The assigned function, or nil if there isn't one.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the getcallbackvalue test, the function must:
+- Return `nil` when no callback is set.
+- Return the callback that was set.

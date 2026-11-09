@@ -15,3 +15,9 @@ print(#Compressed < 500) --> true
 # Returns
 | [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The compressed string.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the lz4compress test, the function must:
+- Compress `"debUNC"` to ``"`debUNC"``.
+- Shrink a string that repeats 100 times to less than a quarter of its size.
+- Return data that [lz4decompress](lz4decompress.md) turns back into the original string.

@@ -41,3 +41,13 @@ print(trampolinecall(Target, {}, {thread = getscriptthread(Animate)}, "Hello"))
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether the function ran without erroring.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
 | ...any | What the function returned, or the error message. |
+
+# Test requirements
+To pass the trampolinecall test, the function must:
+- Return whether the call worked as its first value, and `true` when the function doesn't error.
+- Use the fake call stack it's given, so `debug.info` shows the fake caller's name and line.
+- Pass arguments through to the function and return its results.
+- Return `false` and the error message when the function errors.
+- Run the function with the environment given in the `env` option.
+- Run the function at the identity given in the `identity` option, and restore the original identity after the call.
+- Run the function on the thread given in the `thread` option, so [checkcaller](checkcaller.md) returns `false` and [getcallingscript](getcallingscript.md) returns that thread's script.

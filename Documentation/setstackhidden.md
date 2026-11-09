@@ -20,3 +20,10 @@ print(Hook() == "Hook") --> false
 | Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to hide or show.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
 | Hidden: [boolean](https://create.roblox.com/docs/luau/booleans) | Whether to hide it. |
+
+# Test requirements
+To pass the setstackhidden test, the function must:
+- Hide the function from `debug.info` stack levels.
+- Hide the function from `debug.traceback`.
+- Leave out the location in errors raised at the hidden function's level, so the message stays as written.
+- Show the function on the stack again when it's given `false`.

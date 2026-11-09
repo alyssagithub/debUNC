@@ -21,3 +21,6 @@ Greet()
 # Returns
 | any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The stack values, or the single value.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the debug.getstack test, the function must:
+- Include the locals of the function at the given level.

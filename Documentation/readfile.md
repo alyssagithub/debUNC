@@ -14,3 +14,9 @@ print(readfile("Log.txt")) --> Hello world!
 # Returns
 | [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The file's contents.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the readfile test, the function must:
+- Error when the file doesn't exist.
+- Return the exact contents written by [writefile](writefile.md), including null characters.
+- Return an empty string for an empty file.

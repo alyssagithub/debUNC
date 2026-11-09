@@ -14,3 +14,8 @@ print(isreadonly(table.freeze({}))) --> true
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not it's read-only.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the isreadonly test, the function must:
+- Return `false` for a normal table.
+- Return `true` for a frozen table.

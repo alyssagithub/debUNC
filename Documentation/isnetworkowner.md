@@ -13,3 +13,8 @@ print(isnetworkowner(game.Players.LocalPlayer.Character.HumanoidRootPart)) --> t
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not the client owns the part.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the isnetworkowner test, the function must:
+- Return `true` for your character's `HumanoidRootPart`.
+- Return `false` for an anchored part that the server owns.

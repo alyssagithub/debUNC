@@ -14,3 +14,8 @@ print(getmetatable(Proxy) == Metatable) --> true
 | Object: any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The object to change.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
 | Metatable: [table](https://create.roblox.com/docs/luau/tables) | The new metatable. |
+
+# Test requirements
+To pass the setrawmetatable test, the function must:
+- Set the metatable of an object that has none, such as a new proxy.
+- Make the new metatable's metamethods work, so calling the proxy runs `__call` and returns its result.

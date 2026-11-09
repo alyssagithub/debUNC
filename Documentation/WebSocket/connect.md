@@ -34,3 +34,7 @@ Closes the connection.
 ```lua
 Socket:Close()
 ```
+# Test requirements
+To pass the WebSocket.connect test, the function must:
+- Send and receive text with non-ASCII characters, so an echo server's reply reaches `OnMessage` unchanged within 5 seconds.
+- Fire `OnClose` when `:Close()` is called.

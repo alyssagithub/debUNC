@@ -26,3 +26,9 @@ print(Info.what) --> Lua
 | numparams: [number](https://create.roblox.com/docs/luau/numbers) | How many parameters it has. |
 | is_vararg: [number](https://create.roblox.com/docs/luau/numbers) | 1 if it takes ... and 0 if it doesn't. |
 | nups: [number](https://create.roblox.com/docs/luau/numbers) | How many upvalues it has. |
+# Test requirements
+To pass the debug.getinfo test, the function must:
+- Set `what` to "Lua" and `name` to the function's name for a Lua function.
+- Set `what` to "C" and `name` to "wait" for `task.wait`.
+- Set `func` to the function that was passed in.
+- Set `numparams` to the number of named parameters and `is_vararg` to 1 for a variadic function.

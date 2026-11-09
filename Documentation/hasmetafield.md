@@ -11,3 +11,8 @@ print(hasmetafield(setmetatable({}, {}), "__index")) --> false
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not the field exists.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the hasmetafield test, the function must:
+- Return `true` for a field the metatable has.
+- Return `false` for a field the metatable doesn't have.
+- Return `true` for `__namecall` on `game`'s locked metatable.

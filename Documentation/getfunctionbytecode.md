@@ -14,3 +14,9 @@ print(#getfunctionbytecode(Greet))
 # Returns
 | [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function's bytecode.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the getfunctionbytecode test, the function must:
+- Return a string.
+- Return bytecode that isn't empty.
+- Return different bytecode for two different functions.

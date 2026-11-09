@@ -9,3 +9,6 @@ print(Line.__OBJECT_EXISTS) --> false
 | Name |
 | :- |
 | clear_draw_cache |
+# Test requirements
+To pass the cleardrawcache test, the function must:
+- Remove every drawing object, so `__OBJECT_EXISTS` is false afterward.

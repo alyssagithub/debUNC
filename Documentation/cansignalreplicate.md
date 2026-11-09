@@ -14,3 +14,8 @@ print(cansignalreplicate(workspace.ChildAdded)) --> false
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not the signal can be replicated.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the cansignalreplicate test, the function must:
+- Return true for `Player.Kill`.
+- Return false for `workspace.ChildAdded`.
+- Return false for a part's `Touched` event.

@@ -14,3 +14,8 @@ print(islclosure(print)) --> false
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not it's a Lua function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the islclosure test, the function must:
+- Return `true` for a Lua function.
+- Return `false` for C functions like `print` and `math.abs`.

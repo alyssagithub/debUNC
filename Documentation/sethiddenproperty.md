@@ -14,3 +14,8 @@ print(gethiddenproperty(Fire, "size_xml")) --> 10 true
 | :-------- | :------- |
 | Property: [string](https://create.roblox.com/docs/luau/strings) | The name of the property. |
 | Value: any | The new value. |
+
+# Test requirements
+To pass the sethiddenproperty test, the function must:
+- Set a normal property, such as a part's `Transparency`.
+- Set a hidden property, such as `size_xml` on a `Fire`, so [gethiddenproperty](gethiddenproperty.md) returns the new value.

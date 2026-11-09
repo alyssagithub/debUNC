@@ -12,3 +12,7 @@ print(getclipboard()) --> Hello world!
 # Returns
 | [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The clipboard's text, or an empty string if there's no text.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the getclipboard test, the function must:
+- Return the text that was copied with [setclipboard](setclipboard.md) within a second.

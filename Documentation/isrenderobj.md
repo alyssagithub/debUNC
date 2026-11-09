@@ -14,3 +14,8 @@ print(isrenderobj({})) --> false
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not it's a Drawing object.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the isrenderobj test, the function must:
+- Return `true` for a drawing object made with [Drawing.new](Drawing/new.md).
+- Return `false` for a value that isn't a drawing object, like a table, an Instance, or a number.

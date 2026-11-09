@@ -13,3 +13,8 @@ print(getsignalarguments(Instance.new("Part").Touched)[1]) --> Instance
 # Returns
 | {string}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of type names.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the getsignalarguments test, the function must:
+- Return a table.
+- Return one argument for a part's `Touched`, typed as `Instance` or `BasePart`.
+- Return two arguments for `UserInputService.InputBegan`.

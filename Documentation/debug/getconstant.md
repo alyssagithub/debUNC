@@ -20,3 +20,6 @@ print(debug.getconstant(Greet, 3)) --> Hello world!
 # Returns
 | any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The constant.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the debug.getconstant test, the function must:
+- Return the string constant at the index where [debug.getconstants](getconstants.md) lists it.

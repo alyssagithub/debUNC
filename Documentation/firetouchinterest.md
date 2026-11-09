@@ -14,3 +14,8 @@ firetouchinterest(workspace.Pad, Root, 1)
 | :-------- | :------- |
 | OtherPart: [BasePart](https://create.roblox.com/docs/reference/engine/classes/BasePart) | The part touching it. |
 | Ended: [number](https://create.roblox.com/docs/luau/numbers) | 0 to start the touch and 1 to end it. |
+
+# Test requirements
+To pass the firetouchinterest test, the function must:
+- Fire `Touched` with the touching part within 5 seconds when the last argument is 0.
+- Fire `TouchEnded` with the touching part within 5 seconds when the last argument is 1.

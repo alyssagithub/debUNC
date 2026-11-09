@@ -12,3 +12,8 @@ print(table.isfrozen(Table)) --> true
 # Parameters
 | Table: [table](https://create.roblox.com/docs/luau/tables)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The table to change.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the makereadonly test, the function must:
+- Freeze the table.
+- Error when something writes to the table afterward.

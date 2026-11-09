@@ -16,3 +16,7 @@ print(cache.iscached(Part)) --> false
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not the Instance is cached.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the cache.iscached test, the function must:
+- Return true for a newly created instance.
+- Return false after the instance is removed with [cache.invalidate](invalidate.md).

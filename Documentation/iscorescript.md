@@ -13,3 +13,7 @@ print(iscorescript(game.Players.LocalPlayer.PlayerScripts.PlayerModule)) --> fal
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not it's a core script.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the iscorescript test, the function must:
+- Return `false` for the PlayerModule, which isn't a core script.
+- Return `true` for a ModuleScript in CoreGui.

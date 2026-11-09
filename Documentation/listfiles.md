@@ -15,3 +15,10 @@ end
 # Returns
 | {string}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of paths.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the listfiles test, the function must:
+- Return a table, even for an empty folder.
+- Include files in the folder.
+- Include folders in the folder.
+- List only the folder's direct children, not files inside its sub-folders.

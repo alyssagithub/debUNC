@@ -18,3 +18,11 @@ end)
 # Returns
 | (...any) -> ...any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | A function that runs the original. Give it the same values you'd give the original.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the hookmetamethod test, the function must:
+- Return the original metamethod function.
+- Make the object return the hook's result.
+- Replace only the metamethod's proto, so the metatable keeps the same function.
+- Undo the hook when the metamethod is hooked back to the returned original.
+- Catch a `game:GetService` call made by the executor when `game`'s `__namecall` is hooked, with [getnamecallmethod](getnamecallmethod.md) giving `GetService`.
+- Return the right result from `game:GetService` while the hook calls the original.

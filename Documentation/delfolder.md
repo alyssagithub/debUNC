@@ -12,3 +12,7 @@ print(isfolder("Logs")) --> false
 # Parameters
 | Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The path of the folder.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the delfolder test, the function must:
+- Delete the folder even when it has a file in it, so [isfolder](isfolder.md) returns `false` for it afterward.

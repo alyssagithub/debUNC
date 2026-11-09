@@ -14,3 +14,7 @@ print(typeof(getscriptthread(Script))) --> thread
 # Returns
 | [thread](https://create.roblox.com/docs/reference/engine/libraries/coroutine)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The script's thread.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the getscriptthread test, the function must:
+- Return a thread for a running LocalScript.
+- Return a thread that [getscriptfromthread](getscriptfromthread.md) maps back to that LocalScript.

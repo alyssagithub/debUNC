@@ -18,3 +18,8 @@ print(compareinstances(Part, Clone)) --> true
 # Returns
 | [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The new reference.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the cloneref test, the function must:
+- Return an Instance.
+- Return a reference that isn't the same as the original reference.
+- Point to the same instance, so changing the original's `Position` also changes the clone's.

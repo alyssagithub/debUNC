@@ -58,3 +58,9 @@ Signal:Fire("Hello world!")
 ### Parameters
 | ...: any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The values to fire it with.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the Signal.new test, the function must:
+- Pass every value given to `:Fire()` to connected functions.
+- Stop calling a connection after `:Disconnect()`.
+- Call a `:Once()` connection only one time.
+- Return the fired value from `:Wait()`.

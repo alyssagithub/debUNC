@@ -14,3 +14,8 @@ print(isfolder("Logs")) --> true
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not the folder exists.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the isfolder test, the function must:
+- Return `false` for a folder that doesn't exist.
+- Return `true` for a folder after it's made.
+- Return `false` for a file.

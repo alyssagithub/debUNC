@@ -15,3 +15,7 @@ print(table.find(getfunctionreferences(Greet), Holder) ~= nil) --> true
 # Returns
 | {table \| function \| thread}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of what references the function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the getfunctionreferences test, the function must:
+- Include the table that holds the function.

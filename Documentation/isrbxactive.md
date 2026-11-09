@@ -16,3 +16,8 @@ print(isrbxactive())
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not the window is focused.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the isrbxactive test, the function must:
+- Return a boolean.
+- Return `false` within a second after the Roblox window loses focus.

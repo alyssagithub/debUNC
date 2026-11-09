@@ -21,3 +21,8 @@ print(Greet()) --> Hello
 | :-------- | :------- |
 | Index: [number](https://create.roblox.com/docs/luau/numbers) | The index of the upvalue. |
 | Value: any | The new value. |
+
+# Test requirements
+To pass the debug.setupvalue test, the function must:
+- Change the upvalue at the given index, so the function returns the new value.
+- Change the shared upvalue, so other functions that use the same upvalue see the new value too.

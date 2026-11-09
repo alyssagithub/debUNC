@@ -14,3 +14,7 @@ print(getscriptfromthread(getscriptthread(Script)) == Script) --> true
 # Returns
 | [Instance?](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The script.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the getscriptfromthread test, the function must:
+- Return `nil` for a thread that doesn't belong to a script.
+- Return the LocalScript that a thread from [getscriptthread](getscriptthread.md) belongs to.

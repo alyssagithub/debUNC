@@ -10,3 +10,8 @@ print(hasmetatable({})) --> false
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not it has a metatable.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the hasmetatable test, the function must:
+- Return `true` for a table with a metatable.
+- Return `false` for a table without a metatable.
+- Return `true` for `game`, which has a locked metatable.

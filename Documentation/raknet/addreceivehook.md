@@ -17,3 +17,9 @@ raknet.addreceivehook(OnReceive)
 # Returns
 | (Packet: [Packet](Packet.md)) -> ()&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The same function that was given.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the raknet.addreceivehook test, the function must:
+- Call the hook for an incoming packet within 3 seconds.
+- Pass a packet whose `PacketId` is a number.
+- Pass a packet whose `Size`, `AsString`, and `AsBuffer` all match each other.

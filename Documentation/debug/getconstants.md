@@ -21,3 +21,7 @@ end
 # Returns
 | {[number]: any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function's constants by index. Some indexes can be empty.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the debug.getconstants test, the function must:
+- Return a table.
+- Include the function's string constants.

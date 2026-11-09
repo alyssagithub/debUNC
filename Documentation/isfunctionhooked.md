@@ -16,3 +16,8 @@ print(isfunctionhooked(Greet)) --> true
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not it's hooked.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the isfunctionhooked test, the function must:
+- Return `false` for a function that isn't hooked.
+- Return `true` for a function hooked with [hookfunction](hookfunction.md).
+- Return `false` after the function is restored with [restorefunction](restorefunction.md).

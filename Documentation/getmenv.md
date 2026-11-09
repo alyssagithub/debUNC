@@ -15,3 +15,8 @@ print(getmenv(PlayerModule).script == PlayerModule) --> true
 # Returns
 | {[string]: any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The module's environment.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the getmenv test, the function must:
+- Return a table for the PlayerModule's CameraWrapper ModuleScript.
+- Set `script` in the returned environment to that module.
+- Return the same environment that the module's functions use.

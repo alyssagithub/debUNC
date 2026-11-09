@@ -73,3 +73,12 @@ The same as Remove.
 ```lua
 Line:Destroy()
 ```
+# Test requirements
+To pass the Drawing.new test, the function must:
+- Error when it's given a type that doesn't exist.
+- Error when `Thickness` is set to a string.
+- Keep a Text object's `Font` at 3 after it's set to 3.
+- Create Line, Text, Image, Circle, Square, Quad, and Triangle objects with `Visible` set to false.
+- Keep decimal values, so `Thickness` stays 2.5 and `Transparency` stays 0.25 after they're set.
+- Give `Thickness` as a number and `Visible` as a boolean.
+- Set `__OBJECT_EXISTS` to true while the object exists and to false after `:Remove()` is called.

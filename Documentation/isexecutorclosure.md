@@ -14,3 +14,8 @@ print(isexecutorclosure(print)) --> false
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not the executor made it.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the isexecutorclosure test, the function must:
+- Return `true` for a function made in the executor.
+- Return `false` for `print`.
+- Return `false` for a function from the game's PlayerModule.

@@ -10,3 +10,6 @@ print(#base64decode(Bytes)) --> 16
 # Returns
 | [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The bytes encoded in Base64.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the crypt.generatebytes test, the function must:
+- Return a base64 string that decodes to the requested number of bytes.

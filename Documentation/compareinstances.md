@@ -15,3 +15,7 @@ print(compareinstances(Part, cloneref(Part))) --> true
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not they're the same Instance.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the compareinstances test, the function must:
+- Return false for two different parts.
+- Return true for an instance and its [cloneref](cloneref.md) clone.

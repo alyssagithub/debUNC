@@ -13,3 +13,9 @@ print(getfflag("TaskSchedulerTargetFps"))
 # Returns
 | [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The flag's value.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the getfflag test, the function must:
+- Return a string for `MaxFrameBufferSize`.
+- Return a value that isn't empty.
+- Error or return `nil` for a flag that doesn't exist.

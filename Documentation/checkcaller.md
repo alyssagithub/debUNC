@@ -10,3 +10,7 @@ print(checkcaller()) --> true
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not the caller is the executor.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the checkcaller test, the function must:
+- Return true when it's called from the executor.
+- Return false when it's called from a game script, such as a hooked function that `BaseCamera` calls.

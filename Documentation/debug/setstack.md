@@ -21,3 +21,7 @@ Greet()
 | :-------- | :------- |
 | Index: [number](https://create.roblox.com/docs/luau/numbers) | The index of the value. |
 | Value: any | The new value. |
+
+# Test requirements
+To pass the debug.setstack test, the function must:
+- Change the value of a local at the given stack level and index, so the function sees the new value when it keeps running.

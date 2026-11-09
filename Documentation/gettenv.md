@@ -21,3 +21,9 @@ print(typeof(gettenv(Thread))) --> table
 # Returns
 | {[string]: any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The thread's environment.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the gettenv test, the function must:
+- Return the current environment, like `getfenv`, when no thread is given.
+- Return a table for a given thread.
+- Return this script's environment for a thread started by this script.
+- Only include globals that `getfenv()` also has.

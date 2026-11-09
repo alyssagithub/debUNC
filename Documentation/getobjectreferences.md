@@ -15,3 +15,6 @@ print(table.find(getobjectreferences(Target), Holder) ~= nil) --> true
 # Returns
 | {table \| function \| thread}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of what references the object.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the getobjectreferences test, the function must:
+- Find the table that holds a given table.

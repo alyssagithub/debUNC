@@ -14,3 +14,9 @@ print(Sword.Name) --> LinkedSword
 # Returns
 | {[Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of Instances.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the getobjects test, the function must:
+- Return a table for `rbxassetid://125013769`.
+- Return an instance as the first value.
+- Load that asset as a Tool named `LinkedSword` with its `Handle`.
+- Leave the loaded model unparented.

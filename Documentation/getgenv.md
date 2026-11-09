@@ -13,3 +13,9 @@ print(Greeting) --> Hello world!
 # Returns
 | {[string]: any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The executor's global environment.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the getgenv test, the function must:
+- Return a table.
+- Share globals set in it with other chunks, so a chunk run with `loadstring` can read them.
+- Hold every function in the executor's environment.

@@ -10,3 +10,8 @@ mousescroll(120)
 # Parameters
 | Delta: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | How far to scroll, positive for up and negative for down.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the mousescroll test, the function must:
+- Fire a mouse wheel input that scrolls up for a positive amount.
+- Fire a mouse wheel input that scrolls down for a negative amount.

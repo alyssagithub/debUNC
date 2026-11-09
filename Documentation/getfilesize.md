@@ -10,3 +10,7 @@ print(getfilesize("Log.txt")) --> 5
 # Returns
 | [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The file's size in bytes.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the getfilesize test, the function must:
+- Return the file's size in bytes.

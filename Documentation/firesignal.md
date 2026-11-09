@@ -17,3 +17,8 @@ firesignal(NumberValue.Changed, 5)
 | Signal: [RBXScriptSignal](https://create.roblox.com/docs/reference/engine/datatypes/RBXScriptSignal)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The signal to fire.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
 | ...: any | The values to fire it with. |
+
+# Test requirements
+To pass the firesignal test, the function must:
+- Fire the signal's connections with the values it's given.
+- Pass every value, even when the first one is `nil`, so a connection gets 2 values for `nil, 2`.

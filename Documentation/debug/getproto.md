@@ -20,3 +20,7 @@ print(debug.getproto(Outer, 1))
 # Returns
 | [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The inner function. Some executors give a ProtoProxy instead of a normal function, which can still be called.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the debug.getproto test, the function must:
+- Return the inner function at the given index.
+- Return a function with the inner function's name.

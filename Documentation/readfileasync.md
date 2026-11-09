@@ -10,3 +10,9 @@ print(readfileasync("Log.txt")) --> Hello world!
 # Returns
 | [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The file's contents.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the readfileasync test, the function must:
+- Run in the background instead of blocking until it finishes.
+- Finish within 5 seconds without erroring.
+- Return the file's text.

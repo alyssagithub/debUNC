@@ -14,3 +14,8 @@ print(table.isfrozen(Table)) --> false
 # Parameters
 | Table: [table](https://create.roblox.com/docs/luau/tables)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The table to change.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the makewriteable test, the function must:
+- Unfreeze a frozen table.
+- Allow writing to the table afterward.

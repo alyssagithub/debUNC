@@ -26,3 +26,9 @@ Stops watching the folder, so `OnChanged` won't fire anymore.
 ```lua
 Watcher:Destroy()
 ```
+# Test requirements
+To pass the DirectoryWatcher.new test, the function must:
+- Fire `OnChanged` after a file inside the watched folder is written.
+- Pass the changed file's path to `OnChanged`.
+- Ignore changes to files in other folders.
+- Stop firing `OnChanged` after the watcher is destroyed with `:Destroy()`.

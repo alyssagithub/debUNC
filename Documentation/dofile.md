@@ -15,3 +15,10 @@ print(dofile("Number.lua")) --> 42
 # Returns
 | any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | What the file returned.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the dofile test, the function must:
+- Run the file without erroring.
+- Return the value the file returns.
+- Pass an error from inside the file up to the caller.
+- Keep the file's original error message.

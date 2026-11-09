@@ -15,3 +15,7 @@ print(typeof(Registry)) --> table
 # Returns
 | {[number]: any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The registry, which holds values like functions, tables and threads.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the debug.getregistry test, the function must:
+- Return a table.
+- Include at least one thread.

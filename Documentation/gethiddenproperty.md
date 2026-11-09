@@ -14,3 +14,7 @@ print(gethiddenproperty(game.Players.LocalPlayer, "SimulationRadius"))
 # Returns
 | any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The property's value.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the gethiddenproperty test, the function must:
+- Return the value of a hidden property, like a Fire's `size_xml` matching its `Size`.

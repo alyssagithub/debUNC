@@ -32,3 +32,10 @@ Channel:Fire("Hello world!")
 ### Parameters
 | ...: any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The values to send.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the createcommchannel test, the function must:
+- Return a number id along with the channel.
+- Make the channel available through [getcommchannel](getcommchannel.md) with that id.
+- Fire the channel's `Event` with a message sent from an Actor.
+- Keep the values sent from an Actor, so `game` arrives as the same instance.
+- Keep `nil` values sent from an Actor, so all 3 values arrive.

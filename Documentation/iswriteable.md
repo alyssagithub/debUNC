@@ -16,3 +16,8 @@ print(iswriteable(table.freeze({}))) --> false
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not it can be written to.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the iswriteable test, the function must:
+- Return `true` for a normal table.
+- Return `false` for a frozen table.

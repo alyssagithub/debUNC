@@ -14,3 +14,9 @@ print(getproperties(Part).Size == Part.Size) --> true
 # Returns
 | {[string]: any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The properties, with each name set to its value.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the getproperties test, the function must:
+- Return a table.
+- Include a part's current `Size`.
+- Include a part's `Name`.
+- Include a Fire's default `Heat` of 9.

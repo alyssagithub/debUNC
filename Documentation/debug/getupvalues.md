@@ -21,3 +21,7 @@ print(debug.getupvalues(Greet)[1] == Value) --> true
 # Returns
 | {any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of the function's upvalues.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the debug.getupvalues test, the function must:
+- Return a table that holds every upvalue the function uses, including ones it only reaches after an error.

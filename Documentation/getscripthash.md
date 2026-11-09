@@ -14,3 +14,11 @@ print(#Hash) --> 96
 # Returns
 | [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The hash in hexadecimal.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the getscripthash test, the function must:
+- Return a string for a LocalScript.
+- Return a hash that isn't empty.
+- Return the same hash each time for the same script.
+- Return different hashes for different scripts.
+- Return a 96 character hexadecimal SHA-384 hash.
+- Match the SHA-384 of the script's bytecode from [getscriptbytecode](getscriptbytecode.md).

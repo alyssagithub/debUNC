@@ -34,3 +34,16 @@ print(Response.Body)
 | StatusMessage: [string](https://create.roblox.com/docs/luau/strings) | The status message, such as OK. |
 | Headers: [table](https://create.roblox.com/docs/luau/tables) | The headers that came back. |
 | Body: [string](https://create.roblox.com/docs/luau/strings) | The body that came back. |
+
+# Test requirements
+To pass the request test, the function must:
+- Send a GET request with headers and a query without erroring.
+- Return a table with a `StatusCode` of 200, a `StatusMessage` of `"OK"`, and a string `Body`.
+- Send the headers and query it's given, so the server echoes them back.
+- Send a fingerprint (HWID) header.
+- Send POST, PUT, PATCH, and DELETE requests with the method they're given.
+- Return a response with `Success` set to `false` and a `StatusCode` of 404 for a missing page, along with its `Headers` table.
+- Return the full body for 1,024 random bytes.
+- Follow redirects, returning a `StatusCode` of 200 after 2 redirects.
+- Decode gzip responses.
+- Keep the game running while it waits for a slow response.

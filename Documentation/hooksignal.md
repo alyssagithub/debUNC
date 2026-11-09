@@ -23,3 +23,8 @@ NumberValue.Value = 5
 | :-------- | :------- |
 | Function: [function](https://create.roblox.com/docs/luau/functions) | The function that's connected. |
 | Index: [number](https://create.roblox.com/docs/luau/numbers) | The connection's position in the signal, starting at 0. Newer connections come first. |
+# Test requirements
+To pass the hooksignal test, the function must:
+- Call the hook when the signal fires.
+- Stop the signal's connections from firing when the hook returns `false`.
+- Let the signal's connections fire when the hook returns `true`.

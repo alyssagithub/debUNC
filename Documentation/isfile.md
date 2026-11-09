@@ -14,3 +14,8 @@ print(isfile("Log.txt")) --> true
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not the file exists.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the isfile test, the function must:
+- Return `true` for a file that exists.
+- Return `false` for a file that doesn't exist.
+- Return `false` for a folder.

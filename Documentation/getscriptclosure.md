@@ -14,3 +14,7 @@ print(getfenv(getscriptclosure(Script)).script == Script) --> true
 # Returns
 | [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The script's function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the getscriptclosure test, the function must:
+- Return a function for a LocalScript.
+- Return a function whose environment's `script` is that LocalScript.

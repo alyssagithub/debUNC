@@ -14,3 +14,10 @@ print(Info.Name, Info.Type) --> otherPart Instance
 # Returns
 | <pre>{<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Name: string,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type: string,<br>&nbsp;&nbsp;&nbsp;&nbsp;},<br>}</pre>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of the signal's arguments.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the getsignalargumentsinfo test, the function must:
+- Return a table.
+- Return a table for each argument.
+- Name the argument of a part's `Touched` as `otherPart`, typed as `Instance` or `BasePart`.
+- Return two arguments for `UserInputService.InputBegan`.
+- Name the second argument of `InputBegan` as `gameProcessedEvent`.

@@ -18,3 +18,10 @@ print(isprotohooked(Proto)) --> false
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not it's hooked.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the isprotohooked test, the function must:
+- Return `false` for a proto that isn't hooked.
+- Return `true` after the proto is hooked with [hookproto](hookproto.md).
+- Make new closures made from a hooked proto return the hook's result.
+- Return `false` after [restoreproto](restoreproto.md), and make new closures return the original result again.

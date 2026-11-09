@@ -24,3 +24,12 @@ print(filtergc("table", {Keys = {"Secret"}}, true) == Marker) --> true
 | Metatable: [table?](https://create.roblox.com/docs/luau/tables) | For tables, the metatable that the table has to have. |
 | Name: [string?](https://create.roblox.com/docs/luau/strings) | For functions, the name of the function. |
 | IgnoreExecutor: [boolean?](https://create.roblox.com/docs/luau/booleans) | For functions, whether to skip functions made by the executor. They're skipped unless this is false. |
+
+# Test requirements
+To pass the filtergc test, the function must:
+- Find a table by one of its keys, and return just that table when the third argument is `true`.
+- Find a table by one of its values.
+- Find a table by a key and value pair.
+- Find a table by its metatable.
+- Return exactly one table when only one table has the given key.
+- Find a function by its name.

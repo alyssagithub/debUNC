@@ -19,3 +19,8 @@ print(Greet()) --> Goodbye
 | :-------- | :------- |
 | Index: [number](https://create.roblox.com/docs/luau/numbers) | The index of the constant. |
 | Value: any | The new value. |
+
+# Test requirements
+To pass the debug.setconstant test, the function must:
+- Change the constant in the function it's given, so the function returns the new value.
+- Leave other functions that use the same constant unchanged.

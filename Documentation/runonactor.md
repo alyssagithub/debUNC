@@ -15,3 +15,9 @@ runonactor(Actor, "print(...)", "Hello world!") --> Hello world!
 | :-------- | :------- |
 | Code: [string](https://create.roblox.com/docs/luau/strings) | The code to run. |
 | ...: any | The values to pass to the code. |
+
+# Test requirements
+To pass the runonactor test, the function must:
+- Run the code it's given on the actor, passing along the arguments it's given.
+- Give the code access to executor functions like [getgenv](getgenv.md) and [hookfunction](hookfunction.md).
+- Run the code as executor code, so [checkcaller](checkcaller.md) returns `true`.

@@ -9,3 +9,8 @@ mouse1release()
 | Name |
 | :- |
 | mouse_1_press |
+
+# Test requirements
+To pass the mouse1press test, the function must:
+- Fire a `MouseButton1` input that Roblox detects (or a touch, for the left button).
+- Hold the left mouse button down until [mouse1release](mouse1release.md) releases it.

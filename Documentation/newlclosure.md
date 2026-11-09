@@ -15,3 +15,9 @@ print(Wrapped(-5)) --> 5
 # Returns
 | [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The wrapped function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the newlclosure test, the function must:
+- Return a new function, not the one it was given.
+- Return a Lua closure, so [islclosure](islclosure.md) returns `true` for it, even when given a C function.
+- Return the wrapped function's result, so a wrapped `math.abs(-5)` returns `5`.

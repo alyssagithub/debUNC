@@ -15,3 +15,8 @@ setscriptable(Fire, "size_xml", false)
 | :-------- | :------- |
 | Property: [string](https://create.roblox.com/docs/luau/strings) | The name of the property. |
 | Scriptable: [boolean](https://create.roblox.com/docs/luau/booleans) | Whether or not it should be scriptable. |
+
+# Test requirements
+To pass the setscriptable test, the function must:
+- Let a property that normally can't be read, such as `size_xml` on a `Fire`, be read when it's given `true`.
+- Make the property unreadable again when it's given `false`.

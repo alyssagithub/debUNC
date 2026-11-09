@@ -11,3 +11,8 @@ mousemoverel(25, 25)
 | X: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | How far to move on the X axis.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
 | Y: [number](https://create.roblox.com/docs/luau/numbers) | How far to move on the Y axis. |
+
+# Test requirements
+To pass the mousemoverel test, the function must:
+- Move the mouse by the given amount from where it is, the same amount on both axes.
+- Move it twice as far when the amount is doubled.

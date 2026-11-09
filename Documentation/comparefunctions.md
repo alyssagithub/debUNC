@@ -12,3 +12,7 @@ print(comparefunctions(Greet, print)) --> false
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not they're the same function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+# Test requirements
+To pass the comparefunctions test, the function must:
+- Return true when a function is compared with itself.
+- Return false for two different functions.

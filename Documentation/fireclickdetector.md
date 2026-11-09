@@ -14,3 +14,10 @@ fireclickdetector(ClickDetector, 0, "RightMouseClick")
 | :-------- | :------- |
 | Distance: [number?](https://create.roblox.com/docs/luau/numbers) | How far away the click comes from. |
 | Event: [string?](https://create.roblox.com/docs/luau/strings) | Which event to fire: MouseClick, RightMouseClick, MouseHoverEnter or MouseHoverLeave. Defaults to MouseClick. |
+
+# Test requirements
+To pass the fireclickdetector test, the function must:
+- Fire `MouseClick` with the local player.
+- Fire `RightMouseClick`, `MouseHoverEnter`, and `MouseHoverLeave` when they're passed as the event.
+- Fire for a ClickDetector 10,000 studs away.
+- Leave the ClickDetector's `MaxActivationDistance` unchanged after firing.

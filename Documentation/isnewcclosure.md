@@ -14,3 +14,9 @@ print(isnewcclosure(print)) --> false
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not newcclosure made it.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the isnewcclosure test, the function must:
+- Return `true` for a function made with [newcclosure](newcclosure.md).
+- Return `false` for C functions like `print`, `assert`, and `task.wait`.
+- Return `false` for a Lua function.

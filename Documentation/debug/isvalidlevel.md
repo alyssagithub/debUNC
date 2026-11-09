@@ -16,3 +16,10 @@ print(debug.isvalidlevel(500)) --> false
 # Returns
 | [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not the level exists.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+
+# Test requirements
+To pass the debug.isvalidlevel test, the function must:
+- Return `true` for level 1.
+- Return `false` for level 500.
+- Return `true` for the deepest level that exists on the current stack.
+- Return `false` for the first level past the end of the stack.
