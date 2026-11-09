@@ -135,11 +135,33 @@ const FocusGainedConnection = UserInputService.WindowFocused:Connect(function()
 	HasFocus = true
 end)
 
-const function CheckInputFree()
+const InputTests: {[string]: boolean} = {}
+
+const function IsRobloxFocused(): boolean
 	const IsRobloxActive = isrbxactive
 
-	if IsRobloxActive and not IsRobloxActive() then
-		error({Skipped = "the Roblox window isn't focused", Environment = FocusLost})
+	if IsRobloxActive then
+		const Success, Active = pcall(IsRobloxActive)
+
+		if Success then
+			return Active == true
+		end
+	end
+
+	return HasFocus
+end
+
+const function CheckInputFree()
+	const TestName = TestThreads[coroutine.running()]
+
+	if TestName then
+		InputTests[TestName] = true
+	end
+
+	const IdentifyExecutor = identifyexecutor
+
+	if IdentifyExecutor and tostring((IdentifyExecutor())):lower() == "athena" and not IsRobloxFocused() then
+		error({Skipped = "the Roblox window isn't focused, and Athena sends input to whatever window is focused", Environment = FocusLost})
 	end
 
 	if not WaitFor(function()
@@ -264,13 +286,32 @@ end
 const function CheckMouseButton(Button: number, TestedName: string)
 	const InputType = if Button == 1 then Enum.UserInputType.MouseButton1 else Enum.UserInputType.MouseButton2
 
+	local TouchHeld = false
+
+	if Button == 1 then
+		const Connections = {
+			UserInputService.InputBegan:Connect(function(Input)
+				TouchHeld = TouchHeld or Input.UserInputType == Enum.UserInputType.Touch
+			end),
+			UserInputService.InputEnded:Connect(function(Input)
+				TouchHeld = TouchHeld and Input.UserInputType ~= Enum.UserInputType.Touch
+			end),
+		}
+
+		AddCleanup(function()
+			for _, Connection in Connections do
+				Connection:Disconnect()
+			end
+		end)
+	end
+
 	CheckInputFree()
 	CenterMouse()
 
 	CheckPressAndRelease(`mouse{Button}press`, `mouse{Button}release`, TestedName, function()
-		return UserInputService:IsMouseButtonPressed(InputType)
+		return UserInputService:IsMouseButtonPressed(InputType) or TouchHeld
 	end, function(Input)
-		return Input.UserInputType == InputType
+		return Input.UserInputType == InputType or (Button == 1 and Input.UserInputType == Enum.UserInputType.Touch)
 	end)
 end
 
@@ -710,11 +751,19 @@ const Tests: any = {
 
 	gettenv = {
 		Test = function()
-			const GetThreadEnvironment: (thread | () -> ()) -> {[string]: any} = gettenv
+			const GetThreadEnvironment: (thread?) -> {[string]: any} = gettenv
 
-			assert(not pcall(GetThreadEnvironment, function() end), "expected error when providing a non-thread value")
+			assert(GetThreadEnvironment() == getfenv(), "with no thread given, it should return the current environment like getfenv")
 
-			const ThreadEnvironment = GetThreadEnvironment(task.spawn(function() end))
+			const Thread = task.spawn(function()
+				task.wait(1)
+			end)
+
+			AddCleanup(function()
+				task.cancel(Thread)
+			end)
+
+			const ThreadEnvironment = GetThreadEnvironment(Thread)
 
 			Formatters.CheckReturnType(ThreadEnvironment, "table")
 
@@ -732,7 +781,7 @@ const Tests: any = {
 
 			assert(not pcall(ReadFile, "doesntexist.txt"), "expected an error when reading a file that doesn't exist")
 
-			const GeneratedResult = tostring(math.random())
+			const GeneratedResult = `{math.random()}\0debUNC`
 			const FileName = `File_{math.random()}.txt`
 
 			Formatters.CheckExist("writefile")(FileName, GeneratedResult)
@@ -747,7 +796,7 @@ const Tests: any = {
 
 	writefile = {
 		Test = function()
-			const GeneratedResult = tostring(math.random())
+			const GeneratedResult = `{math.random()}\0debUNC`
 			const FileName = `File_{math.random()}.txt`
 
 			writefile(FileName, GeneratedResult)
@@ -1152,9 +1201,27 @@ const Tests: any = {
 				return WasClicked
 			end, 1)
 
-			Part:Destroy()
-
 			assert(Clicked, "the connection wasn't fired")
+
+			for _, EventName in {"RightMouseClick", "MouseHoverEnter"} do
+				local Fired = false
+
+				const Connection = (ClickDetector :: any)[EventName]:Once(function()
+					Fired = true
+				end)
+
+				fireclickdetector(ClickDetector, 0, EventName)
+
+				const Worked = WaitFor(function()
+					return Fired
+				end, 1)
+
+				Connection:Disconnect()
+
+				assert(Worked, `{EventName} didn't fire when it was passed as the event`)
+			end
+
+			Part:Destroy()
 		end,
 	},
 
@@ -1212,6 +1279,15 @@ const Tests: any = {
 
 			Formatters.CheckReturnType(LoadedModules, "table")
 
+			const SeenModules = {}
+
+			for _, Module in LoadedModules do
+				assert(typeof(Module) == "Instance" and Module:IsA("ModuleScript"), `'{Module}' isn't a ModuleScript`)
+				assert(not SeenModules[Module], `'{Module}' is in the returned table more than once`)
+
+				SeenModules[Module] = true
+			end
+
 			assert(
 				not table.find(LoadedModules, game:GetService("StarterPlayer").StarterPlayerScripts:FindFirstChild("PlayerModule") or false),
 				"StarterPlayerScripts.PlayerModule shouldn't be in the returned table"
@@ -1244,12 +1320,16 @@ const Tests: any = {
 			const GeneratedValue = math.random()
 
 			local DidChange = false
+			local Calls = 0
+			local WrongValue
 
 			const function OnChanged(Value)
-				assert(
-					GeneratedValue == Value,
-					`the connection was fired with the wrong value, expected number '{GeneratedValue}' and got {typeof(Value)} '{Value}'`
-				)
+				Calls += 1
+
+				if Value ~= GeneratedValue then
+					WrongValue = WrongValue or Value
+					return
+				end
 
 				DidChange = true
 			end
@@ -1267,7 +1347,31 @@ const Tests: any = {
 
 			assert(WaitFor(function()
 				return DidChange
-			end, 1), "the connection wasn't fired")
+			end, 1), if WrongValue ~= nil then `the connection was fired with the wrong value, expected number '{GeneratedValue}' and got {typeof(WrongValue)} '{WrongValue}'` else "the connection wasn't fired")
+
+			assert(typeof(Connections[1].Thread) == "thread", `.Thread should be a thread, got {typeof(Connections[1].Thread)}`)
+			assert(Connections[1].Enabled == true, ".Enabled should be true for an active connection")
+
+			Connections[1]:Disable()
+
+			assert(Connections[1].Enabled == false, ".Enabled should be false after :Disable()")
+
+			const CallsBeforeDisabled = Calls
+
+			NumberValue.Value = GeneratedValue + 1
+			task.wait()
+
+			assert(Calls == CallsBeforeDisabled, "the connection still fired after :Disable()")
+
+			Connections[1]:Enable()
+
+			assert(Connections[1].Enabled == true, ".Enabled should be true after :Enable()")
+
+			NumberValue.Value = GeneratedValue + 2
+
+			assert(WaitFor(function()
+				return Calls > CallsBeforeDisabled
+			end, 1), "the connection didn't fire again after :Enable()")
 
 			Connections[1]:Disconnect()
 			DidChange = false
@@ -1333,6 +1437,10 @@ const Tests: any = {
 			const CappedFPS = MeasureFPS()
 
 			SetFPSCap(0)
+
+			if CappedFPS <= FPSCap * 1.2 and MeasureFPS() <= FPSCap * 1.5 then
+				error({Skipped = "the frame rate stayed low after the cap was removed, so the cap can't be told apart from lag", Environment = true})
+			end
 
 			assert(
 				CappedFPS <= FPSCap * 1.2,
@@ -1646,7 +1754,7 @@ const Tests: any = {
 	["WebSocket.connect"] = {
 		Test = function()
 			const Socket = WebSocket.connect("wss://echo.websocket.org")
-			const Marker = `debUNC {math.random()}`
+			const Marker = `debUNC {math.random()} привет ✓`
 
 			local Messaged = false
 			local Closed = false
@@ -2042,6 +2150,30 @@ const Tests: any = {
 
 			assert(DecodeSuccess, "the response wasn't the JSON httpbin sends back")
 			assert(Decoded.args and Decoded.args.debunc == Marker, "the query that was sent didn't come back, so the request may not have really gone out")
+
+			local Cached = false
+
+			for _, Page in {
+				{Kind = "JSON", Url = `https://httpbin.org/uuid?debunc={math.random(1, 1e9)}`},
+				{Kind = "HTML", Url = `https://www.random.org/integers/?num=1&min=1&max=1000000000&col=1&base=10&format=html&rnd=new&debunc={math.random(1, 1e9)}`},
+				{Kind = "plain text", Url = `https://www.random.org/integers/?num=1&min=1&max=1000000000&col=1&base=10&format=plain&rnd=new&debunc={math.random(1, 1e9)}`},
+			} do
+				const First = game:HttpGet(Page.Url)
+				const Second = game:HttpGet(Page.Url)
+				const NoCacheSuccess, Fresh = pcall(game.HttpGet, game, Page.Url, true)
+
+				assert(NoCacheSuccess, `passing true for NoCache errored with {Fresh}`)
+				assert(typeof(Fresh) == "string" and #Fresh > 0, `passing true for NoCache didn't return the {Page.Kind} response`)
+				assert(game:HttpGet(Page.Url, true) ~= Fresh, `two {Page.Kind} requests with NoCache set to true gave the same cached response, so true may be treated as cache instead of no cache`)
+
+				if First == Second then
+					Cached = true
+
+					assert(Fresh ~= First, `the same {Page.Kind} url gave a cached response even with NoCache set to true`)
+				end
+			end
+
+			assert(Cached, "requesting the same url twice never gave a cached response, so NoCache has nothing to skip")
 		end,
 		Retry = true,
 	},
@@ -2374,13 +2506,36 @@ const Tests: any = {
 		Test = function()
 			CheckInputFree()
 
-			const Target = workspace.CurrentCamera.ViewportSize / 2 + Vector2.new(math.random(-50, 50), math.random(-50, 50))
+			const Center = workspace.CurrentCamera.ViewportSize / 2
 
-			mousemoveabs(Target.X, Target.Y)
+			const function MoveTo(Target: Vector2): Vector2
+				const Before = UserInputService:GetMouseLocation()
 
-			assert(WaitFor(function()
-				return (UserInputService:GetMouseLocation() - Target).Magnitude < 2
-			end, 1), `the mouse went to {UserInputService:GetMouseLocation()} instead of {Target}`)
+				mousemoveabs(Target.X, Target.Y)
+
+				WaitFor(function()
+					return UserInputService:GetMouseLocation() ~= Before
+				end, 1)
+
+				return UserInputService:GetMouseLocation()
+			end
+
+			const FirstTarget = Center - Vector2.new(math.random(30, 60), math.random(30, 60))
+			const SecondTarget = Center + Vector2.new(math.random(30, 60), math.random(30, 60))
+			const LastTarget = Center + Vector2.new(math.random(-50, 50), math.random(-50, 50))
+			const First = MoveTo(FirstTarget)
+			const Second = MoveTo(SecondTarget)
+			const Scale = (Second - First) / (SecondTarget - FirstTarget)
+
+			assert(
+				Scale.X > 0 and math.abs(Scale.X - Scale.Y) < Scale.X * 0.02,
+				`the mouse went to {First} then {Second}, which doesn't match moving to {FirstTarget} then {SecondTarget}`
+			)
+
+			const Expected = First + (LastTarget - FirstTarget) * Scale.X
+			const Last = MoveTo(LastTarget)
+
+			assert((Last - Expected).Magnitude < 2, `the mouse went to {Last} instead of {Expected}`)
 		end,
 		RunLast = true,
 	},
@@ -2388,14 +2543,27 @@ const Tests: any = {
 	mousemoverel = {
 		Test = function()
 			CheckInputFree()
+			CenterMouse()
 
-			const StartLocation = UserInputService:GetMouseLocation()
+			const function MoveBy(Amount: number): Vector2
+				const Before = UserInputService:GetMouseLocation()
 
-			mousemoverel(25, 25)
+				mousemoverel(Amount, Amount)
 
-			assert(WaitFor(function()
-				return (UserInputService:GetMouseLocation() - StartLocation - Vector2.new(25, 25)).Magnitude < 10
-			end, 1), `the mouse moved by {UserInputService:GetMouseLocation() - StartLocation} instead of about 25, 25`)
+				WaitFor(function()
+					return UserInputService:GetMouseLocation() ~= Before
+				end, 1)
+
+				return UserInputService:GetMouseLocation() - Before
+			end
+
+			const FirstMove = MoveBy(25)
+			const SecondMove = MoveBy(50)
+
+			assert(
+				FirstMove.X > 0 and math.abs(FirstMove.X - FirstMove.Y) < 2 and (SecondMove - FirstMove * 2).Magnitude < 3,
+				`the mouse moved by {FirstMove} then {SecondMove}, but moving by 25 then 50 should go the same way twice as far`
+			)
 		end,
 		RunLast = true,
 	},
@@ -2603,7 +2771,15 @@ const Tests: any = {
 				return Key
 			end
 
+			const PairKey = `debUNC pair {math.random()}`
+			const PairValue = `debUNC value {math.random()}`
+			const Metatable = {}
+			const Marked = setmetatable({[PairKey] = PairValue}, Metatable)
+
 			assert(FilterGc("table", {Keys = {Key}}, true) == Table, "didn't find the table by its key")
+			assert(table.find(FilterGc("table", {Values = {PairValue}}), Marked), "didn't find the table by its value")
+			assert(table.find(FilterGc("table", {KeyValuePairs = {[PairKey] = PairValue}}), Marked), "didn't find the table by its key and value pair")
+			assert(table.find(FilterGc("table", {Metatable = Metatable}), Marked), "didn't find the table by its metatable")
 			Formatters.CheckEqual(#FilterGc("table", {Keys = {Key}}), 1, "the number of tables with that key")
 			assert(table.find(FilterGc("function", {
 				Name = "TestFunction",
@@ -2968,6 +3144,7 @@ const Tests: any = {
 	getactors = {
 		Test = function()
 			const RunOnActor = Formatters.CheckExist("runonactor")
+			const GetActorFromThread = getactorfromthread
 			const Actor = Instance.new("Actor")
 
 			Actor.Parent = workspace
@@ -2975,22 +3152,37 @@ const Tests: any = {
 				Actor:Destroy()
 			end)
 
+			const CountBefore = #getactors()
+
 			RunOnActor(Actor, "")
 
 			local Actors
 
-			WaitFor(function()
+			const function FindNewActor(): boolean
+				for _, Value in Actors do
+					if Value == Actor or (typeof(Value) == "thread" and GetActorFromThread and GetActorFromThread(Value) == Actor) then
+						return true
+					end
+				end
+
+				return typeof(Actors[1]) == "thread" and #Actors > CountBefore
+			end
+
+			const Found = WaitFor(function()
 				Actors = getactors()
-				return table.find(Actors, Actor) ~= nil
+				return FindNewActor()
 			end, 2)
 
 			Actor:Destroy()
 
 			for _, Value in Actors do
-				assert(typeof(Value) == "Instance" and Value:IsA("Actor"), `should return Actor instances, but got {if typeof(Value) == "Instance" then Value.ClassName else typeof(Value)}{if typeof(Value) == "thread" then " (threads are what getactorthreads is for)" else ""}`)
+				assert(
+					typeof(Value) == "thread" or (typeof(Value) == "Instance" and Value:IsA("Actor")),
+					`should return Actors or actor threads, but got {if typeof(Value) == "Instance" then Value.ClassName else typeof(Value)}`
+				)
 			end
 
-			assert(table.find(Actors, Actor), "didn't find a new actor")
+			assert(Found, "didn't find the new actor")
 		end,
 	},
 
@@ -3088,8 +3280,13 @@ const Tests: any = {
 
 			assert(FoundRunning, "didn't find a running LocalScript")
 
+			const SeenScripts = {}
+
 			for _, RunningScript in RunningScripts do
 				assert(RunningScript:IsA("LuaSourceContainer"), `'{RunningScript}' isn't a script`)
+				assert(not SeenScripts[RunningScript], `'{RunningScript}' is in the returned table more than once`)
+
+				SeenScripts[RunningScript] = true
 			end
 		end,
 	},
@@ -3192,12 +3389,17 @@ const Tests: any = {
 				return "debUNC"
 			end
 
+			const function SameAsFirst()
+				return 1
+			end
+
 			const Hash = GetFunctionHash(First)
 
 			Formatters.CheckReturnType(Hash, "string")
 
 			assert(GetFunctionHash(First) == Hash, "hashing the same function twice gave different results")
 			assert(GetFunctionHash(Second) ~= Hash, "two different functions gave the same hash")
+			assert(GetFunctionHash(SameAsFirst) == Hash, "two functions with the same code gave different hashes, so it may not be hashing the function's code")
 		end,
 	},
 
@@ -3510,11 +3712,19 @@ const Tests: any = {
 	["crypt.decrypt"] = {
 		Test = function()
 			const Crypt = crypt
+			const Encrypt = Formatters.CheckExist("crypt.encrypt")
 			const Key = Crypt.generatekey()
-			const Text = CreateRandomString(math.random(1, 64))
-			const Encrypted, InitializationVector = Formatters.CheckExist("crypt.encrypt")(Text, Key)
 
-			Formatters.CheckEqual(Crypt.decrypt(Encrypted, Key, InitializationVector), Text, "the decrypted random text")
+			for _ = 1, 50 do
+				const Text = CreateRandomString(math.random(1, 64))
+				const Encrypted, InitializationVector = Encrypt(Text, Key)
+				const Decrypted = Crypt.decrypt(Encrypted, Key, InitializationVector)
+
+				assert(Decrypted == Text, `decrypting {#Text} bytes of random text gave back {#Decrypted} bytes that don't match`)
+			end
+
+			const Text = CreateRandomString(math.random(1, 64))
+			const Encrypted, InitializationVector = Encrypt(Text, Key)
 
 			CheckWrongKey(Crypt, Encrypted, InitializationVector, Text)
 		end,
@@ -3829,7 +4039,7 @@ const Tests: any = {
 
 			Formatters.CheckReturnType(Arguments, "table")
 			Formatters.CheckEqual(#Arguments, 1, "the number of arguments Touched has")
-			Formatters.CheckEqual(Arguments[1], "Instance", "the type of Touched's argument")
+			assert(Arguments[1] == "Instance" or Arguments[1] == "BasePart", `expected the type of Touched's argument to be Instance or BasePart, got {Arguments[1]}`)
 			Formatters.CheckEqual(#getsignalarguments(UserInputService.InputBegan), 2, "the number of arguments InputBegan has")
 		end,
 	},
@@ -3842,7 +4052,7 @@ const Tests: any = {
 
 			assert(typeof(Info[1]) == "table", `expected a table for each argument, got {typeof(Info[1])}`)
 			Formatters.CheckEqual(Info[1].Name, "otherPart", "the name of Touched's argument")
-			Formatters.CheckEqual(Info[1].Type, "Instance", "the type of Touched's argument")
+			assert(Info[1].Type == "Instance" or Info[1].Type == "BasePart", `expected the type of Touched's argument to be Instance or BasePart, got {Info[1].Type}`)
 
 			const InputInfo = getsignalargumentsinfo(UserInputService.InputBegan)
 
@@ -4383,7 +4593,7 @@ end
 
 const function CheckReached(Success: boolean, Result: any): boolean
 	if Success then
-		return Result ~= nil
+		return Result ~= nil and Result ~= ""
 	end
 
 	const Message = tostring(Result)
@@ -4425,6 +4635,24 @@ const SecurityTests: {[string]: any} = {
 				{"MarketplaceService", "PerformSubscriptionPurchaseV2"},
 				{"MarketplaceService", "PerformCancelSubscription"},
 				{"MarketplaceService", "PrepareCollectiblesPurchase"},
+				{"MarketplaceService", "PromptPurchase"},
+				{"MarketplaceService", "PromptProductPurchase"},
+				{"MarketplaceService", "PromptGamePassPurchase"},
+				{"MarketplaceService", "PromptBundlePurchase"},
+				{"MarketplaceService", "PromptBulkPurchase"},
+				{"MarketplaceService", "PromptPremiumPurchase"},
+				{"MarketplaceService", "PromptSubscriptionPurchase"},
+				{"MarketplaceService", "PromptCancelSubscription"},
+				{"MarketplaceService", "PromptRobloxSubscriptionPurchase"},
+				{"MarketplaceService", "PromptVIPServerPurchase"},
+				{"MarketplaceService", "PromptCollectiblesPurchase"},
+				{"MarketplaceService", "PromptNativePurchase"},
+				{"MarketplaceService", "PromptNativePurchaseWithContext"},
+				{"MarketplaceService", "PromptNativePurchaseWithLocalPlayer"},
+				{"MarketplaceService", "PromptNativePurchaseWithLocalPlayerWithPaymentSessionId"},
+				{"MarketplaceService", "PromptNativePurchaseWithPaymentSessionId"},
+				{"MarketplaceService", "PromptRobloxPurchase"},
+				{"MarketplaceService", "PromptThirdPartyPurchase"},
 			}, "spend your Robux without asking")
 		end,
 	},
@@ -4455,6 +4683,9 @@ const SecurityTests: {[string]: any} = {
 				{"HttpService", "RequestInternal"},
 				{"HttpService", "requestInternal"},
 				{"OpenCloudService", "HttpRequestAsync"},
+				{"ContentProvider", "SetBaseUrl"},
+				{"OpenCloudService", "InvokeAsync"},
+				{"OpenCloudService", "GetApiV1"},
 			}, "send web requests logged in as you")
 		end,
 	},
@@ -4467,6 +4698,10 @@ const SecurityTests: {[string]: any} = {
 				{"AccountService", "GetDeviceAccessToken"},
 				{"AccountService", "GetDeviceIntegrityToken"},
 				{"AccountService", "GetDeviceIntegrityTokenYield"},
+				{"MarketplaceService", "GetUserSubscriptionPaymentHistoryAsync"},
+				{"MarketplaceService", "GetUserSubscriptionDetailsInternalAsync"},
+				{"CaptureService", "RetrieveCaptures"},
+				{"CaptureService", "GetCaptureUploadDataAsync"},
 			}, "reach your private account data")
 		end,
 	},
@@ -4482,6 +4717,12 @@ const SecurityTests: {[string]: any} = {
 				{"BrowserService", "ExecuteJavaScript"},
 				{"GuiService", "OpenBrowserWindow"},
 				{"ScriptContext", "AddCoreScriptLocal"},
+				{"MessageBusService", "PublishProtocolMethodRequest"},
+				{"MessageBusService", "PublishProtocolMethodResponse"},
+				{"MessageBusService", "Subscribe"},
+				{"MessageBusService", "GetLast"},
+				{"BrowserService", "OpenNativeOverlay"},
+				{"GuiService", "OpenNativeOverlay"},
 			}, "open links or run things outside of Roblox")
 		end,
 	},
@@ -4504,6 +4745,11 @@ const SecurityTests: {[string]: any} = {
 				{"CaptureService", "CreatePostAsync"},
 				{"Players", "ReportAbuse"},
 				{"Players", "ReportAbuseV3"},
+				{"AvatarEditorService", "SetAllowInventoryReadAccess"},
+				{"AvatarEditorService", "PerformDeleteOutfit"},
+				{"AvatarEditorService", "PerformSetFavorite"},
+				{"CaptureService", "DeleteCapture"},
+				{"CaptureService", "DeleteCapturesAsync"},
 			}, "change your account without asking")
 		end,
 	},
@@ -4525,9 +4771,31 @@ const SecurityTests: {[string]: any} = {
 
 			assert(not Success or Result == nil or Result == "", "game:HttpGet can read files on your computer through file://")
 
+			for Name, Read in {
+				["game:HttpGetAsync"] = function()
+					return game:HttpGetAsync("file:///C:/")
+				end,
+				["game:HttpPost"] = function()
+					return game:HttpPost("file:///C:/", "")
+				end,
+			} do
+				const ReadSuccess, ReadResult = pcall(Read)
+
+				assert(not ReadSuccess or ReadResult == nil or ReadResult == "", `{Name} can read files on your computer through file://`)
+			end
+
 			CheckMethodsBlocked({
 				{"InsertService", "GetLocalFileContents", "rbxasset://fonts/families/SourceSansPro.json"},
 			}, "read files on your computer")
+		end,
+	},
+
+	["security: bytecode can't be loaded"] = {
+		Test = function()
+			const Bytecode = Formatters.CheckExist("getscriptbytecode")(GetPlayerScripts():FindFirstChildWhichIsA("LocalScript", true))
+
+			assert(typeof(Bytecode) == "string" and #Bytecode > 0, "couldn't get any bytecode to test with")
+			assert(loadstring(Bytecode) == nil, "loadstring ran raw bytecode, which lets scripts break out of the sandbox")
 		end,
 	},
 
@@ -4716,7 +4984,9 @@ const function DisplayMessage(Message: string)
 		return
 	end
 
-	game:GetService("TestService"):Message(Message)
+	if not pcall(game:GetService("TestService").Message, game:GetService("TestService"), Message) then
+		print(Message)
+	end
 end
 
 const Settings: {[string]: any} = {
@@ -5040,8 +5310,16 @@ const function RunTest(Name: string, Info: any)
 		return
 	end
 
+	if not Missing and InputTests[Name] and not IsRobloxFocused() then
+		warn(`🟠 {Name}: skipped because the Roblox window isn't focused`)
+		Results[Name] = "skipped"
+		UntestableTests += 1
+		EnvironmentSkips += if FocusLost then 1 else 0
+		return
+	end
+
 	if not Settings.DebugMode then
-		ErrorMessage = tostring(ErrorMessage):gsub("^%S*:%d+: ", "")
+		ErrorMessage = tostring(ErrorMessage):gsub("^.-:%d+: ", "")
 	end
 
 	if Missing then
@@ -5187,7 +5465,7 @@ if ElapsedTime < MinimumSeconds and PercentageComplete > 80 then
 end
 
 DisplayMessage("❓ The score below is only for how many custom functions are supported and secure.")
-DisplayMessage(`🔵 debUNC v2.8.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
+DisplayMessage(`🔵 debUNC v2.9.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(ElapsedTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
