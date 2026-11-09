@@ -109,6 +109,16 @@ const function CreateRandomString(Length: number): string
 	return table.concat(Characters)
 end
 
+const AllBytes = (function()
+	const Characters = table.create(256)
+
+	for Byte = 0, 255 do
+		Characters[Byte + 1] = string.char(Byte)
+	end
+
+	return table.concat(Characters)
+end)()
+
 local FocusLost = false
 local HasFocus = true
 local MissedFocusLoss = false
@@ -723,6 +733,7 @@ const Tests: any = {
 			assert(Environment.print == print, "its 'print' isn't the real print")
 			assert(Environment._G ~= _G, "its _G is the same as the executor's _G")
 			assert(Environment ~= getgenv(), "it's the same table as getgenv(), not Roblox's environment")
+			assert(Environment.getgenv == nil and Environment.hookfunction == nil, "it has executor functions in it, so game scripts can find them")
 			Formatters.CheckEqual(Stored, Value, "a value written to it")
 		end,
 		ReturnType = "table",
@@ -788,9 +799,14 @@ const Tests: any = {
 
 			const Result = ReadFile(FileName)
 
+			Formatters.CheckExist("writefile")(FileName, "")
+
+			const EmptyResult = ReadFile(FileName)
+
 			RemovePath("delfile", FileName)
 
 			assert(Result == GeneratedResult, "the test file didn't return what was written into it")
+			Formatters.CheckEqual(EmptyResult, "", "an empty file's contents")
 		end,
 	},
 
@@ -803,10 +819,24 @@ const Tests: any = {
 
 			const Result = Formatters.CheckExist("readfile")(FileName)
 
+			writefile(FileName, "debUNC")
+
+			const ShorterResult = Formatters.CheckExist("readfile")(FileName)
+
+			RemovePath("delfile", FileName)
+
+			const Large = string.rep(CreateRandomString(1024), 1024)
+
+			writefile(FileName, Large)
+
+			const LargeIntact = Formatters.CheckExist("readfile")(FileName) == Large
+
 			RemovePath("delfile", FileName)
 
 			assert(typeof(Result) == "string", "'readfile' failed to read the file, can't continue the test")
 			assert(Result == GeneratedResult, "'writefile' didn't write to the file")
+			assert(LargeIntact, "a 1 MB file didn't read back the same as what was written")
+			Formatters.CheckEqual(ShorterResult, "debUNC", "the file after writing shorter text over it")
 		end,
 	},
 
@@ -823,6 +853,16 @@ const Tests: any = {
 
 			assert(Exists, "failed to find the file")
 			assert(IsFile(`Missing_{math.random()}.txt`) == false, "found a file that doesn't exist")
+
+			const FolderName = `Folder_{math.random()}`
+
+			Formatters.CheckExist("makefolder")(FolderName)
+
+			const FolderIsFile = IsFile(FolderName)
+
+			RemovePath("delfolder", FolderName)
+
+			assert(FolderIsFile == false, "said a folder is a file")
 		end,
 	},
 
@@ -864,12 +904,25 @@ const Tests: any = {
 
 			Formatters.CheckExist("writefile")(FileName, tostring(math.random()))
 
+			const InnerFolder = `{FolderName}/Inner`
+
+			Formatters.CheckExist("makefolder")(InnerFolder)
+			Formatters.CheckExist("writefile")(`{InnerFolder}/Deeper.txt`, "debUNC")
+
 			const Result = ListFiles(FolderName)
 
 			RemovePath("delfolder", FolderName)
 
+			const Found = {}
+
+			for _, Path in Result do
+				Found[(Path:gsub("\\", "/"):gsub("/$", ""))] = true
+			end
+
 			assert(ReturnedTable, "didn't return a table")
-			assert(#Result == 1 and Result[1]:gsub("\\", "/") == FileName, "didn't find the written file")
+			assert(Found[FileName], "didn't find the written file")
+			assert(Found[InnerFolder], "didn't find the folder inside it")
+			Formatters.CheckEqual(#Result, 2, "the number of things listed, since only the folder's direct children should be there,")
 		end,
 	},
 
@@ -915,6 +968,24 @@ const Tests: any = {
 			RemovePath("delfolder", FolderName)
 
 			assert(Exists, "failed to find the folder after it was made")
+
+			const FileName = `File_{math.random()}.txt`
+
+			Formatters.CheckExist("writefile")(FileName, "debUNC")
+			AddCleanup(function()
+				RemovePath("delfile", FileName)
+				RemovePath("delfolder", FileName)
+			end)
+			pcall(makefolder, FileName)
+
+			const Success, Contents = pcall(Formatters.CheckExist("readfile"), FileName)
+
+			RemovePath("delfile", FileName)
+			RemovePath("delfolder", FileName)
+
+			assert(Success, "the file was gone after makefolder was called on its path")
+
+			Formatters.CheckEqual(Contents, "debUNC", "a file after makefolder was called on its path")
 		end,
 	},
 
@@ -933,6 +1004,16 @@ const Tests: any = {
 			RemovePath("delfolder", FolderName)
 
 			assert(Exists, "the folder wasn't found after it was made")
+
+			const FileName = `File_{math.random()}.txt`
+
+			Formatters.CheckExist("writefile")(FileName, "debUNC")
+
+			const FileIsFolder = IsFolder(FileName)
+
+			RemovePath("delfile", FileName)
+
+			assert(FileIsFolder == false, "said a file is a folder")
 		end,
 	},
 
@@ -946,9 +1027,10 @@ const Tests: any = {
 
 			assert(IsFolder(FolderName), "failed to find the folder after it was made")
 
+			Formatters.CheckExist("writefile")(`{FolderName}/File.txt`, "debUNC")
 			delfolder(FolderName)
 
-			assert(not IsFolder(FolderName), "'isfolder' found the folder after it should've been deleted")
+			assert(not IsFolder(FolderName), "'isfolder' found a folder with a file in it after it should've been deleted")
 		end,
 	},
 
@@ -991,6 +1073,43 @@ const Tests: any = {
 				assert(HookedResult == false, "the hooked function didn't return the hook's result")
 				assert(FirstFunction() == true, "hooking the function back to the returned original didn't restore it")
 			end
+
+			do
+				const function Target(...)
+					return select("#", ...)
+				end
+
+				local FirstOriginal
+				FirstOriginal = HookFunction(Target, function(...)
+					task.wait()
+					return FirstOriginal(...) + 1
+				end)
+
+				Formatters.CheckEqual(Target(1, nil, nil), 4, "a function with a yielding hook, given 3 arguments ending in nils,")
+
+				local SecondOriginal
+				SecondOriginal = HookFunction(Target, function(...)
+					return SecondOriginal(...) * 10
+				end)
+
+				Formatters.CheckEqual(Target(1, nil, nil), 40, "a function hooked twice, where the second hook's original should call the first hook,")
+			end
+
+			do
+				const ErrorObject = {}
+				const function Target() end
+
+				HookFunction(Target, function()
+					error(ErrorObject)
+				end)
+
+				const Success, Caught = pcall(Target)
+
+				assert(not Success and Caught == ErrorObject, "an error object thrown inside a hook didn't reach the caller unchanged")
+			end
+
+			assert(not pcall(HookFunction, function() end), "hooking a function without giving a hook should error")
+			assert(not pcall(HookFunction, 1, function() end), "hooking something that isn't a function should error")
 
 			do
 				const function LuaClosure()
@@ -1054,6 +1173,7 @@ const Tests: any = {
 				end)
 
 				assert(HookedNewCClosure() == true, "expected NewCClosure to return a boolean when hooked as a LuaClosure that returns true")
+				assert(Formatters.CheckExist("debug.info")(HookedNewCClosure, "s") == "[C]", "a C function hooked with a LuaClosure stopped showing as [C]")
 			end
 
 			const HookedNewCClosure = NewCClosure(function() end)
@@ -1163,6 +1283,53 @@ const Tests: any = {
 			end
 
 			assert(FindFingerprintHeader(Headers), `missing the fingerprint (hwid) header, got {table.concat(HeaderNames, ", ")}`)
+
+			const function Send(Options: {[string]: any}): {[string]: any}
+				for Attempt = 1, 3 do
+					const Response = request(Options)
+
+					if typeof(Response.StatusCode) ~= "number" or Response.StatusCode ~= 429 and Response.StatusCode < 500 then
+						return Response
+					end
+
+					task.wait(Attempt)
+				end
+
+				error({Skipped = "httpbin.org kept rate limiting or failing the requests", Environment = true})
+			end
+
+			for _, Method in {"POST", "PUT", "PATCH", "DELETE"} do
+				const MethodResult = Send({Url = "https://httpbin.org/anything", Method = Method, Body = Marker})
+
+				assert(MethodResult.StatusCode == 200 and HttpService:JSONDecode(MethodResult.Body).method == Method, `a {Method} request didn't go out as {Method}, got status {MethodResult.StatusCode}`)
+			end
+
+			const Missing = Send({Url = "https://httpbin.org/status/404", Method = "GET"})
+
+			assert(Missing.StatusCode == 404 and Missing.Success == false, `a 404 should come back as a response with Success set to false, got status {Missing.StatusCode} and Success {Missing.Success}`)
+			assert(typeof(Missing.Headers) == "table", "the response doesn't have its headers")
+
+			Formatters.CheckEqual(#Send({Url = "https://httpbin.org/bytes/1024", Method = "GET"}).Body, 1024, "the length of 1024 random bytes")
+			Formatters.CheckEqual(Send({Url = "https://httpbin.org/redirect/2", Method = "GET"}).StatusCode, 200, "the status after following 2 redirects")
+			const Gzip = Send({Url = "https://httpbin.org/gzip", Method = "GET"})
+			const GzipSuccess, GzipDecoded = pcall(HttpService.JSONDecode, HttpService, Gzip.Body)
+
+			assert(GzipSuccess and GzipDecoded.gzipped == true, `a gzip response wasn't decoded, got status {Gzip.StatusCode} and body '{tostring(Gzip.Body):sub(1, 40)}'`)
+
+			local Frames = 0
+			const StartTime = os.clock()
+			const Connection = game:GetService("RunService").Heartbeat:Connect(function()
+				Frames += 1
+			end)
+
+			AddCleanup(function()
+				Connection:Disconnect()
+			end)
+
+			Send({Url = "https://httpbin.org/delay/2", Method = "GET"})
+			Connection:Disconnect()
+
+			assert(Frames > (os.clock() - StartTime) * 5, `the game froze while waiting for a request, only {Frames} frames ran`)
 		end,
 		Retry = true,
 	},
@@ -1203,7 +1370,7 @@ const Tests: any = {
 
 			assert(Clicked, "the connection wasn't fired")
 
-			for _, EventName in {"RightMouseClick", "MouseHoverEnter"} do
+			for _, EventName in {"RightMouseClick", "MouseHoverEnter", "MouseHoverLeave"} do
 				local Fired = false
 
 				const Connection = (ClickDetector :: any)[EventName]:Once(function()
@@ -1221,7 +1388,25 @@ const Tests: any = {
 				assert(Worked, `{EventName} didn't fire when it was passed as the event`)
 			end
 
+			Part.Position = Vector3.new(0, 10000, 0)
+
+			const MaxActivationDistance = ClickDetector.MaxActivationDistance
+			local FarClicked = false
+
+			ClickDetector.MouseClick:Once(function()
+				FarClicked = true
+			end)
+
+			fireclickdetector(ClickDetector)
+
+			const FiredFar = WaitFor(function()
+				return FarClicked
+			end, 1)
+
 			Part:Destroy()
+
+			assert(FiredFar, "didn't fire for a ClickDetector 10000 studs away")
+			Formatters.CheckEqual(ClickDetector.MaxActivationDistance, MaxActivationDistance, "MaxActivationDistance after firing")
 		end,
 	},
 
@@ -1233,8 +1418,19 @@ const Tests: any = {
 				Part:Destroy()
 			end)
 
+			Part.Anchored = true
+			Part.Position = Vector3.new(0, 10000, 0)
+
 			const ProximityPrompt = Instance.new("ProximityPrompt")
+			ProximityPrompt.HoldDuration = 5
 			ProximityPrompt.Parent = Part
+
+			const Before = {
+				HoldDuration = ProximityPrompt.HoldDuration,
+				MaxActivationDistance = ProximityPrompt.MaxActivationDistance,
+				RequiresLineOfSight = ProximityPrompt.RequiresLineOfSight,
+				Enabled = ProximityPrompt.Enabled,
+			}
 
 			local WasTriggered = false
 
@@ -1248,9 +1444,13 @@ const Tests: any = {
 				return WasTriggered
 			end, 1)
 
+			for Property, Value in Before do
+				assert((ProximityPrompt :: any)[Property] == Value, `left the prompt's {Property} changed after firing it`)
+			end
+
 			Part:Destroy()
 
-			assert(Triggered, "the connection wasn't fired")
+			assert(Triggered, "didn't fire within a second for a prompt 10000 studs away with a 5 second HoldDuration")
 		end,
 	},
 
@@ -1270,6 +1470,23 @@ const Tests: any = {
 			assert(WaitFor(function()
 				return DidChange
 			end, 1), "the connection wasn't fired")
+
+			const Event = Instance.new("BindableEvent")
+			local Count
+
+			Event.Event:Once(function(...)
+				Count = select("#", ...)
+			end)
+
+			firesignal(Event.Event, nil, 2)
+
+			WaitFor(function()
+				return Count ~= nil
+			end, 1)
+
+			Event:Destroy()
+
+			Formatters.CheckEqual(Count, 2, "the number of values passed when the first one is nil")
 		end,
 	},
 
@@ -1381,6 +1598,11 @@ const Tests: any = {
 
 			assert(not DidChange, "the connection still fired after :Disconnect()")
 			assert(#GetConnections(NumberValue.Changed) == 0, "the connection is still listed after :Disconnect()")
+
+			const OnceConnection = NumberValue.Changed:Once(function() end)
+
+			Formatters.CheckEqual(#GetConnections(NumberValue.Changed), 1, "the number of connections after connecting with :Once()")
+			OnceConnection:Disconnect()
 		end,
 	},
 
@@ -1459,6 +1681,12 @@ const Tests: any = {
 				buffer.tostring(EncodingService:Base64Encode(buffer.fromstring(GeneratedString))),
 				"the encoded random string"
 			)
+			Formatters.CheckEqual(
+				base64encode(AllBytes),
+				buffer.tostring(EncodingService:Base64Encode(buffer.fromstring(AllBytes))),
+				"every byte from 0 to 255 encoded"
+			)
+			Formatters.CheckEqual(base64encode(""), "", "an empty string encoded")
 		end,
 	},
 
@@ -1474,6 +1702,29 @@ const Tests: any = {
 
 			assert(Compiled == nil, "bad code compiled into a function")
 			assert(tostring(CompileError):find(ChunkName, 1, true), `the compile error doesn't mention the chunk name, got '{CompileError}'`)
+			assert(loadstring("return game")() == game, "the loaded code can't see the game global")
+
+			const WithEnvironment = loadstring("return DebuncValue")
+
+			setfenv(WithEnvironment, {DebuncValue = 5})
+
+			Formatters.CheckEqual(WithEnvironment(), 5, "a value read after setfenv")
+
+			const Modern, ModernError = loadstring([[
+				--!strict
+				type Pair<T> = {First: T, Second: T}
+				local Total = 0
+				for Index = 1, 4 do
+					if Index == 2 then
+						continue
+					end
+					Total += Index // 1
+				end
+				return if Total > 0 then `total {Total}` else ""
+			]])
+
+			assert(Modern, `current Luau syntax failed to compile with '{ModernError}'`)
+			Formatters.CheckEqual(Modern(), "total 8", "the result of current Luau syntax")
 		end,
 	},
 
@@ -1514,6 +1765,22 @@ const Tests: any = {
 				task.wait()
 				return First + Second
 			end)(2, 3), 5, "a wrapped function that yields")
+
+			Formatters.CheckEqual(select("#", newcclosure(function(...)
+				return ...
+			end)(1, nil, nil)), 3, "the number of values passed through with trailing nils")
+
+			if identifyexecutor and identifyexecutor() == "Delta" and not (shared.CrashTests or (shared.Settings and shared.Settings.CrashTests)) then
+				error("catching an error thrown after a yield crashes Roblox on Delta, so it wasn't run, use shared.CrashTests = true to try it")
+			end
+
+			const ErrorObject = {}
+			const Success, Caught = pcall(newcclosure(function()
+				task.wait()
+				error(ErrorObject)
+			end))
+
+			assert(not Success and Caught == ErrorObject, "an error object thrown after a yield didn't come back unchanged")
 		end,
 	},
 
@@ -1604,6 +1871,37 @@ const Tests: any = {
 			assert(HookedValue == "debUNC", "indexing the metatable failed to return the hooked value")
 			assert(KeptProto, "replaced the metamethod's function instead of its proto")
 			assert(Metatable.yay == nil, "hooking __index back to the returned original didn't undo the hook")
+
+			const CheckCaller = Formatters.CheckExist("checkcaller")
+			const GetNamecallMethod = Formatters.CheckExist("getnamecallmethod")
+
+			local Seen = 0
+			local Restored = false
+			local GameOriginal
+
+			GameOriginal = HookMetamethod(game, "__namecall", (newcclosure or function(Function)
+				return Function
+			end)(function(Self, ...)
+				if CheckCaller() and Self == game and GetNamecallMethod() == "GetService" then
+					Seen += 1
+				end
+
+				return GameOriginal(Self, ...)
+			end))
+
+			AddCleanup(function()
+				if not Restored then
+					HookMetamethod(game, "__namecall", GameOriginal)
+				end
+			end)
+
+			const Service = game:GetService("Workspace")
+
+			HookMetamethod(game, "__namecall", GameOriginal)
+			Restored = true
+
+			assert(Seen > 0, "hooking game's __namecall didn't catch a game:GetService call")
+			assert(Service == workspace, "game:GetService gave the wrong result while __namecall was hooked")
 		end,
 	},
 
@@ -1938,6 +2236,8 @@ const Tests: any = {
 				GeneratedString,
 				"the decoded random string"
 			)
+			assert(base64decode(buffer.tostring(EncodingService:Base64Encode(buffer.fromstring(AllBytes)))) == AllBytes, "decoding every byte from 0 to 255 didn't give them all back unchanged")
+			Formatters.CheckEqual(base64decode(""), "", "an empty string decoded")
 		end,
 	},
 
@@ -1984,6 +2284,7 @@ const Tests: any = {
 				GeneratedString,
 				"the decompressed random string"
 			)
+			assert(lz4decompress(Formatters.CheckExist("lz4compress")(AllBytes), #AllBytes) == AllBytes, "every byte from 0 to 255 didn't survive compressing and decompressing")
 		end,
 	},
 
@@ -2049,6 +2350,16 @@ const Tests: any = {
 
 			assert(Success, `errored while calling the new proxy with namecall, got {Result}`)
 			Formatters.CheckEqual(Detected, Method, "the namecall method inside __namecall")
+
+			local Outside = Method
+
+			task.spawn(function()
+				const Success, Result = pcall(GetNamecallMethod)
+
+				Outside = if Success then Result else nil
+			end)
+
+			Formatters.CheckEqual(Outside, nil, "the namecall method on a new thread that never made a namecall")
 		end,
 	},
 
@@ -2130,6 +2441,23 @@ const Tests: any = {
 			end, game:GetService("Players").RespawnTime + 10)
 		end,
 		RunLast = true,
+	},
+
+	["game.HttpPost"] = {
+		Test = function()
+			const Marker = `debUNC {math.random(1, 1e9)}`
+			const Success, Result = pcall(game.HttpPost, game, "https://httpbin.org/post", Marker, "text/plain")
+
+			assert(Success, `failed to post to httpbin with the error {Result}`)
+			Formatters.CheckReturnType(Result, "string")
+
+			const DecodeSuccess, Decoded = pcall(game:GetService("HttpService").JSONDecode, game:GetService("HttpService"), Result)
+
+			assert(DecodeSuccess, `httpbin didn't answer with its JSON echo, so the request may not have gone out as a POST, got '{Result:sub(1, 80)}'`)
+			Formatters.CheckEqual(Decoded.data, Marker, "the body httpbin got")
+			assert(tostring(Decoded.headers["Content-Type"]):find("text/plain", 1, true), `the content type wasn't sent, httpbin got '{Decoded.headers["Content-Type"]}'`)
+		end,
+		Retry = true,
 	},
 
 	["game.HttpGet"] = {
@@ -2269,6 +2597,13 @@ const Tests: any = {
 			DetectorMetatable.__index = NewIndexFunction
 
 			assert(NewIndexFunction == RawDetectorMetatable.__index, `changed __index to {NewIndexFunction} but it still returns the old one`)
+			assert(getmetatable(Detector) == FakeMetatable, "getmetatable stopped returning the locked __metatable value")
+
+			const StringMetatable = GetRawMetatable("")
+
+			assert(typeof(StringMetatable) == "table" and StringMetatable.__index == string, "didn't return the string metatable")
+			assert(typeof(GetRawMetatable(Vector3.zero)) == "table", "didn't return a Vector3's metatable")
+			assert(GetRawMetatable({}) == nil, "returned a metatable for a table that doesn't have one")
 
 			const FirstPart = Instance.new("Part") :: any
 			const FirstPartMetatable = GetRawMetatable(FirstPart)
@@ -2375,6 +2710,29 @@ const Tests: any = {
 			assert(WriteSuccess, `failed to write after unfreezing, got {WriteError}`)
 			assert(Unfrozen, "the table still looks frozen after unfreezing")
 			assert(not StillWritable, "the table didn't become read-only again")
+
+			const Plain = {}
+
+			SetReadOnly(Plain, true)
+
+			assert(not pcall(function()
+				Plain.debUNC = true
+			end), "a normal table could still be written to after making it read-only")
+
+			const GameMetatable = Formatters.CheckExist("getrawmetatable")(game)
+
+			AddCleanup(function()
+				SetReadOnly(GameMetatable, true)
+			end)
+
+			SetReadOnly(GameMetatable, false)
+
+			const GameUnlocked = not table.isfrozen(GameMetatable)
+
+			SetReadOnly(GameMetatable, true)
+
+			assert(GameUnlocked, "game's metatable stayed read-only after unlocking it")
+			assert(table.isfrozen(GameMetatable), "game's metatable didn't become read-only again")
 		end,
 	},
 
@@ -2736,28 +3094,166 @@ const Tests: any = {
 
 			const ReadAtEight = CanReadCoreGui()
 
+			local Inherited
+			local AfterYield
+
+			task.spawn(function()
+				SetThreadIdentity(2)
+				task.spawn(function()
+					Inherited = Formatters.CheckExist("getthreadidentity")()
+				end)
+				task.wait()
+				AfterYield = Formatters.CheckExist("getthreadidentity")()
+			end)
+
+			const MainIdentity = Formatters.CheckExist("getthreadidentity")()
+
+			WaitFor(function()
+				return AfterYield ~= nil
+			end, 2)
+
 			SetThreadIdentity(Original)
 
 			assert(not ReadAtTwo, "CoreGui could still be read at identity 2")
 			assert(ReadAtEight, "CoreGui couldn't be read at identity 8")
+			Formatters.CheckEqual(MainIdentity, 8, "this thread's identity after another thread changed its own")
+			Formatters.CheckEqual(Inherited, 2, "the identity of a thread started from an identity 2 thread")
+			Formatters.CheckEqual(AfterYield, 2, "the identity after a yield")
 		end,
 	},
 
 	restorefunction = {
 		Test = function()
-			const function Test()
+			const HookFunction = Formatters.CheckExist("hookfunction")
+			const GetInfo = Formatters.CheckExist("debug.info")
+			const NewCClosure = newcclosure
+			const Frexp = math.frexp
+			const FrexpError = select(2, pcall(Frexp, "debUNC"))
+
+			AddCleanup(function()
+				pcall(restorefunction, Frexp)
+			end)
+
+			const Targets = {
+				{Name = "a LuaClosure", Expected = "debUNC Original", Create = function()
+					return function()
+						return "debUNC Original"
+					end
+				end},
+				{Name = "a C function", Expected = 0.5, Create = function()
+					return Frexp
+				end},
+			}
+			const Hooks = {
+				{Name = "a LuaClosure", Expected = "debUNC Hooked", Hook = function()
+					return "debUNC Hooked"
+				end},
+				{Name = "a C function", Expected = 1, Hook = math.sign},
+			}
+
+			if NewCClosure then
+				table.insert(Targets, {Name = "a NewCClosure", Expected = "debUNC Original", Create = function()
+					return NewCClosure(function()
+						return "debUNC Original"
+					end)
+				end})
+				table.insert(Hooks, {Name = "a NewCClosure", Expected = "debUNC Hooked", Hook = NewCClosure(function()
+					return "debUNC Hooked"
+				end)})
+			end
+
+			for _, Target in Targets do
+				for _, Hook in Hooks do
+					const Function = Target.Create()
+					const Source = GetInfo(Function, "s")
+					const Pair = `{Target.Name} hooked with {Hook.Name}`
+
+					HookFunction(Function, Hook.Hook)
+
+					const HookedResult = Function(8)
+
+					restorefunction(Function)
+
+					assert(HookedResult == Hook.Expected, `hookfunction didn't hook {Pair}, can't check restoring it`)
+					Formatters.CheckEqual(Function(8), Target.Expected, `the result of {Pair} after restoring it`)
+					Formatters.CheckEqual(GetInfo(Function, "s"), Source, `the source of {Pair} after restoring it`)
+				end
+			end
+
+			Formatters.CheckEqual(select(2, pcall(Frexp, "debUNC")), FrexpError, "math.frexp's error after hooking and restoring it")
+
+			const function Again()
 				return "debUNC Original"
 			end
 
-			Formatters.CheckExist("hookfunction")(Test, function()
+			for Round = 1, 2 do
+				HookFunction(Again, function()
+					return "debUNC Hooked"
+				end)
+
+				const Hooked = Again() == "debUNC Hooked"
+
+				restorefunction(Again)
+
+				assert(Hooked, `hooking a restored function again didn't work on round {Round}`)
+			end
+
+			assert(Again() == "debUNC Original", "hooking and restoring the same function twice didn't bring back the original")
+
+			const function First()
+				return "debUNC First"
+			end
+
+			const function Second()
+				return "debUNC Second"
+			end
+
+			for _, Function in {First, Second} do
+				HookFunction(Function, function()
+					return "debUNC Hooked"
+				end)
+			end
+
+			restorefunction(First)
+
+			const SecondStillHooked = Second() == "debUNC Hooked"
+
+			restorefunction(Second)
+
+			Formatters.CheckEqual(First(), "debUNC First", "the restored function's result")
+			assert(SecondStillHooked, "restoring one function also restored a different one")
+
+			const function Stacked()
+				return "debUNC Original"
+			end
+
+			for Layer = 1, 2 do
+				Formatters.CheckExist("hookfunction")(Stacked, function()
+					return `debUNC Hook {Layer}`
+				end)
+			end
+
+			restorefunction(Stacked)
+
+			assert(Stacked() == "debUNC Original", "restoring a function that was hooked twice didn't bring back the original")
+
+			const function OriginalIndex()
+				return "debUNC Original"
+			end
+
+			const Proxy = newproxy(true)
+
+			getmetatable(Proxy).__index = OriginalIndex
+			Formatters.CheckExist("hookmetamethod")(Proxy, "__index", function()
 				return "debUNC Hooked"
 			end)
 
-			assert(Test() == "debUNC Hooked", "hookfunction didn't hook the function, can't continue the test")
+			assert(Proxy.debUNC == "debUNC Hooked", "hookmetamethod didn't hook __index, can't check restoring it")
 
-			restorefunction(Test)
+			restorefunction(OriginalIndex)
 
-			assert(Test() == "debUNC Original", "the function didn't return its original value after being restored")
+			Formatters.CheckEqual(Proxy.debUNC, "debUNC Original", "a hooked __index after restoring its original function")
+			assert(not pcall(restorefunction, 1), "restoring something that isn't a function should error")
 		end,
 	},
 
@@ -2964,6 +3460,23 @@ const Tests: any = {
 			assert(Hash(GeneratedString, "sha256") == RandomHash, "hashing the same random string twice gave different results")
 			assert(Hash(`{GeneratedString}x`, "sha256") ~= RandomHash, "two different strings gave the same hash")
 
+			for Algorithm, Expected in {
+				md5 = "900150983cd24fb0d6963f7d28e17f72",
+				sha1 = "a9993e364706816aba3e25717850c26c9cd0d89d",
+				sha384 = "cb00753f45a35e8bb5a03d699ac65007272c32ab0eded1631a8b605a43ff5bed8086072ba1e7cc2358baeca134c825a7",
+				sha512 = "ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f",
+			} do
+				const Success, Result = pcall(Hash, "abc", Algorithm)
+
+				assert(Success and typeof(Result) == "string" and Result:lower() == Expected, `the {Algorithm} hash of 'abc' was wrong, got {Result}`)
+			end
+
+			Formatters.CheckEqual(Hash("", "sha256"):lower(), "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "the sha256 hash of an empty string")
+
+			const MadeUpSuccess, MadeUpResult = pcall(Hash, "abc", "debunc")
+
+			assert(not MadeUpSuccess or MadeUpResult == nil, `hashing with an algorithm that doesn't exist gave '{MadeUpResult}' instead of erroring`)
+
 			const Expected = EncodingService:ComputeBufferHash(buffer.fromstring(GeneratedString), Enum.HashAlgorithm.Sha256)
 
 			Formatters.CheckEqual(
@@ -3005,6 +3518,12 @@ const Tests: any = {
 			assert(Crypt.encrypt(Text, Key) ~= Encrypted, "encrypting the same text twice gave the same result, so it isn't using a new iv each time")
 
 			CheckWrongKey(Crypt, Encrypted, InitializationVector, Text)
+
+			const Plain = buffer.tostring(EncodingService:Base64Decode(buffer.fromstring("a8G+4i5An5bpPX4Rc5MXKg==")))
+			const Success, Result = pcall(Crypt.encrypt, Plain, "YD3rEBXKcb4rc67whX13gR81LAc7YQjXLZgQowkU3/Q=", "8PHy8/T19vf4+fr7/P3+/w==", "CTR")
+
+			assert(Success, `encrypting in CTR mode errored with {Result}`)
+			Formatters.CheckEqual(Result, "YB7DE3dXiaW3p/UEu/PSKA==", "the published AES-256 CTR test vector")
 		end,
 	},
 
@@ -3037,6 +3556,28 @@ const Tests: any = {
 			Text:Remove()
 
 			Formatters.CheckEqual(AppliedFont, 3, "a Text object's Font after setting it to 3")
+
+			for _, Type in {"Line", "Text", "Image", "Circle", "Square", "Quad", "Triangle"} do
+				const Object = Drawing.new(Type)
+				const StartedVisible = Object.Visible
+
+				Object:Remove()
+
+				Formatters.CheckEqual(StartedVisible, false, `a new {Type}'s Visible`)
+			end
+
+			const Decimal = Drawing.new("Line")
+
+			Decimal.Thickness = 2.5
+			Decimal.Transparency = 0.25
+
+			const KeptThickness = Decimal.Thickness
+			const KeptTransparency = Decimal.Transparency
+
+			Decimal:Remove()
+
+			Formatters.CheckEqual(KeptThickness, 2.5, "Thickness after setting it to 2.5")
+			Formatters.CheckEqual(KeptTransparency, 0.25, "Transparency after setting it to 0.25")
 			assert(typeof(Thickness) == "number", "Thickness should be a number")
 			assert(typeof(Visible) == "boolean", "Visible should be a boolean")
 			assert(Existed == true, "__OBJECT_EXISTS should be true before :Remove()")
@@ -3137,7 +3678,11 @@ const Tests: any = {
 		Test = function()
 			const Value = math.random()
 
-			assert(RunOnNewActor(`Actor:SetAttribute("Value", {Value})`).Value == Value, "the code didn't run on the actor")
+			const Attributes = RunOnNewActor(`Actor:SetAttribute("Value", {Value}) Actor:SetAttribute("HasExecutor", typeof(getgenv) == "function" and typeof(hookfunction) == "function") Actor:SetAttribute("IsExecutor", checkcaller and checkcaller() == true)`)
+
+			assert(Attributes.Value == Value, "the code didn't run on the actor")
+			assert(Attributes.HasExecutor, "executor functions like getgenv and hookfunction aren't there inside the actor")
+			assert(Attributes.IsExecutor, "checkcaller didn't return true for executor code running on the actor")
 		end,
 	},
 
@@ -3291,9 +3836,55 @@ const Tests: any = {
 		end,
 	},
 
+	isexecutorthread = {
+		Test = function()
+			const IsExecutorThread = isexecutorthread or isourthread
+			const Animate = Player.Character and Player.Character:FindFirstChild("Animate")
+			const GameThread = Animate and Formatters.CheckExist("getscriptthread")(Animate)
+
+			assert(IsExecutorThread(coroutine.running()) == true, "returned false for the thread running this test")
+			assert(IsExecutorThread(task.spawn(function() end)) == true, "returned false for a thread this test started")
+			assert(GameThread, "couldn't find the Animate script's thread to test with")
+			assert(IsExecutorThread(GameThread) == false, "returned true for a game script's thread")
+			assert(not pcall(IsExecutorThread, 1), "should error when given something that isn't a thread")
+		end,
+		OtherNames = {"isourthread"},
+	},
+
+	["Regex.new"] = {
+		Test = function()
+			const Pattern = Regex.new("d(e+)b")
+			const Match = Pattern:Match("xdeeeb deb")
+
+			assert(typeof(Match) == "table" and typeof(Match.Captures) == "table", if typeof(Match) == "table" then "Match returned a table without a Captures field" else `Match should return a table with Captures, got {typeof(Match)}`)
+			Formatters.CheckEqual(Match.Captures[1], "deeeb", "the whole match")
+			Formatters.CheckEqual(Match.Captures[2], "eee", "the first capture group")
+			Formatters.CheckEqual(Pattern:Match("xyz"), nil, "Match on text with no match")
+			Formatters.CheckEqual(Pattern:Replace("deb deeb", "Z"), "Z Z", "Replace on text with two matches")
+		end,
+	},
+
+	["Regex.Escape"] = {
+		Test = function()
+			const Escaped = Regex.Escape("a.b*c")
+
+			assert(Formatters.CheckExist("Regex.new")(Escaped):Match("a.b*c"), "the escaped pattern didn't match the text it was made from")
+			assert(Formatters.CheckExist("Regex.new")(Escaped):Match("axb*c") == nil, `the escaped pattern '{Escaped}' still treats '.' as any character`)
+		end,
+	},
+
+	getfflagtype = {
+		Test = function()
+			const GetFFlagType = getfflagtype
+
+			Formatters.CheckEqual(GetFFlagType("DebugGraphicsPreferVulkan"), "bool", "the type of a true or false flag")
+			Formatters.CheckEqual(GetFFlagType("TaskSchedulerTargetFps"), "int", "the type of a number flag")
+		end,
+	},
+
 	getscriptbytecode = {
 		Test = function()
-			const GetScriptBytecode = getscriptbytecode
+			const GetScriptBytecode = getscriptbytecode or dumpstring
 			const PlayerModule = GetPlayerModule()
 			const Bytecode = GetScriptBytecode(PlayerModule)
 
@@ -3302,6 +3893,7 @@ const Tests: any = {
 			assert(#Bytecode > 0, "the bytecode is empty")
 			assert(GetScriptBytecode(PlayerModule.CameraModule) ~= Bytecode, "'PlayerModule' and 'CameraModule' gave the same bytecode")
 		end,
+		OtherNames = {"dumpstring"},
 	},
 
 	getscripthash = {
@@ -4318,7 +4910,7 @@ const Tests: any = {
 	dofile = {
 		Test = function()
 			const WriteFile = Formatters.CheckExist("writefile")
-			const DoFile = dofile
+			const DoFile = dofile or runfile
 			const FileName = `File_{math.random()}.lua`
 			const Value = math.random()
 			const Marker = `debUNC{math.random(1, 1e6)}`
@@ -4338,6 +4930,7 @@ const Tests: any = {
 			assert(not Ran, "an error inside of the file didn't reach the caller")
 			assert(tostring(ErrorMessage):find(Marker, 1, true), `the file's error message was lost, got '{ErrorMessage}'`)
 		end,
+		OtherNames = {"runfile"},
 	},
 
 	getobjects = {
@@ -4375,7 +4968,7 @@ const Tests: any = {
 
 	getcallbackvalue = {
 		Test = function()
-			const GetCallbackValue = getcallbackvalue
+			const GetCallbackValue = getcallbackvalue or getcallbackmember
 			const BindableFunction = Instance.new("BindableFunction")
 
 			const function OnInvoke()
@@ -4388,6 +4981,7 @@ const Tests: any = {
 
 			assert(GetCallbackValue(BindableFunction, "OnInvoke") == OnInvoke, "didn't return the callback that was set")
 		end,
+		OtherNames = {"getcallbackmember"},
 	},
 
 	getfunctionbytecode = {
@@ -4787,6 +5381,87 @@ const SecurityTests: {[string]: any} = {
 			CheckMethodsBlocked({
 				{"InsertService", "GetLocalFileContents", "rbxasset://fonts/families/SourceSansPro.json"},
 			}, "read files on your computer")
+		end,
+	},
+
+	["security: scripts can't write programs"] = {
+		Test = function()
+			const WriteFile = writefile
+			const ListFiles = listfiles
+
+			if not WriteFile or not ListFiles then
+				return
+			end
+
+			const Written = {}
+
+			const Extensions = {"exe", "bat", "cmd", "com", "scr", "ps1", "vbs", "lnk", "msi"}
+			const Names = {"debUNC.EXE", "debUNC.txt.exe", "debUNC.exe.", "debUNC.exe ", "debUNC.exe::$DATA", "debUNC.exe\0.txt"}
+
+			for _, Extension in Extensions do
+				table.insert(Names, `debUNC.{Extension}`)
+			end
+
+			for _, Name in Names do
+				pcall(WriteFile, Name, "debUNC")
+				pcall(appendfile or WriteFile, Name, "debUNC")
+			end
+
+			local Success, Paths = pcall(ListFiles, "")
+
+			if not Success then
+				Success, Paths = pcall(ListFiles, ".")
+			end
+
+			for _, Path in if Success then Paths else {} do
+				const Name = tostring(Path):lower():match("[^/\\]*$")
+
+				if not Name:find("^debunc%.") then
+					continue
+				end
+
+				pcall(delfile, Path)
+
+				if not table.find(Extensions, Name:match("%.(%w+)$")) then
+					continue
+				end
+
+				table.insert(Written, tostring(Path))
+			end
+
+			for _, Extension in Extensions do
+				const Name = `debUNC.{Extension}`
+
+				if table.find(Written, Name) or not select(2, pcall(isfile or function() end, Name)) then
+					continue
+				end
+
+				table.insert(Written, Name)
+				pcall(delfile, Name)
+			end
+
+			assert(#Written == 0, `scripts can write program files like {table.concat(Written, ", ")}, which could be run on your computer`)
+		end,
+	},
+
+	["security: files outside the workspace stay hidden"] = {
+		Test = function()
+			for Name, Paths in {
+				isfolder = {"C:/Windows", "/system"},
+				isfile = {"C:/Windows/win.ini", "../../../../../../Windows/win.ini", "/system/build.prop"},
+			} do
+				const Check = getgenv()[Name]
+
+				if not Check then
+					continue
+				end
+
+				for _, Path in Paths do
+					const Success, Found = pcall(Check, Path)
+
+					assert(not (Success and Found), `{Name} can see '{Path}' outside of the workspace`)
+				end
+			end
 		end,
 	},
 
@@ -5465,7 +6140,7 @@ if ElapsedTime < MinimumSeconds and PercentageComplete > 80 then
 end
 
 DisplayMessage("❓ The score below is only for how many custom functions are supported and secure.")
-DisplayMessage(`🔵 debUNC v2.9.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
+DisplayMessage(`🔵 debUNC v2.10.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(ElapsedTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
