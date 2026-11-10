@@ -36,3 +36,4 @@ To pass the getconnections test, the function must:
 - Stop the connection from firing after `Disconnect` is called.
 - Leave a connection out after it's disconnected.
 - Include connections made with `Once`.
+- Give each connection `Enabled`, `ForeignState` and `LuaConnection` as booleans, and `Function`, `Fire`, `Defer`, `Disconnect`, `Disable` and `Enable` as functions.

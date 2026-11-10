@@ -23,3 +23,5 @@ To pass the setthreadidentity test, the function must:
 - Change only the current thread's identity, leaving other threads as they were.
 - Pass the identity on to threads started from the current thread.
 - Keep the identity after the thread yields.
+- Block RobloxScript and RobloxSecurity members at identity 2, and allow them at identity 8.
+- Error when given something that isn't a number, leaving the identity unchanged.

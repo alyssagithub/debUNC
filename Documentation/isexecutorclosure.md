@@ -19,3 +19,4 @@ To pass the isexecutorclosure test, the function must:
 - Return `true` for a function made in the executor.
 - Return `false` for `print`.
 - Return `false` for a function from the game's PlayerModule.
+- Return `true` for itself and for a NewCClosure made in the executor.

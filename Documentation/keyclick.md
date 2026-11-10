@@ -1,5 +1,5 @@
 # keyclick: (KeyCode: number) -> ()
-Presses and releases a key. The Roblox window has to be focused.
+Presses and releases a key. It works even when the Roblox window isn't focused, and never sends input to other windows.
 ```lua
 keyclick(0x41)
 ```
@@ -17,3 +17,4 @@ keyclick(0x41)
 To pass the keyclick test, the function must:
 - Press the key for the given key code (`0x4A` is J) so Roblox detects it.
 - Release the key again, so it isn't left held down.
+- Reach Roblox even when the Roblox window isn't focused, without sending input to other windows.

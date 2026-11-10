@@ -21,3 +21,6 @@ To pass the getrenv test, the function must:
 - Leave out executor functions such as `getgenv` and `hookfunction`, so game scripts can't find them.
 - Keep a value written to it, so a later call returns it.
 - Return a table.
+- Give the same `_G` and `shared` that game scripts use.
+- Keep executor functions like `getgenv` and `hookfunction` out of game scripts' environments, the game's `_G` and `shared`, not just out of `getrenv()` itself.
+- Keep `printidentity` the same real C function everywhere, so `setfenv` can't be used on it.

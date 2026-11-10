@@ -3,10 +3,6 @@ Returns whether a thread was made by the executor, and not by one of the game's 
 ```lua
 print(isexecutorthread(coroutine.running())) --> true
 ```
-# Aliases
-| Name |
-| :- |
-| isourthread |
 # Parameters
 | Thread: [thread](https://create.roblox.com/docs/reference/engine/libraries/coroutine)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The thread to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |

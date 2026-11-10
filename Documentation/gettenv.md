@@ -27,3 +27,4 @@ To pass the gettenv test, the function must:
 - Return a table for a given thread.
 - Return this script's environment for a thread started by this script.
 - Only include globals that `getfenv()` also has.
+- Keep the environment of a thread that already finished.

@@ -1,5 +1,5 @@
 # mousemoveabs: (X: number, Y: number) -> ()
-Moves the mouse to a position in the Roblox window. The Roblox window has to be focused.
+Moves the mouse to a position in the Roblox window. It works even when the Roblox window isn't focused, and never sends input to other windows.
 ```lua
 mousemoveabs(100, 100)
 ```
@@ -16,3 +16,4 @@ mousemoveabs(100, 100)
 To pass the mousemoveabs test, the function must:
 - Move the mouse to the given screen position, with movement that scales the same on both axes.
 - Place the mouse within 2 pixels of where the target position should be.
+- Reach Roblox even when the Roblox window isn't focused, without sending input to other windows.

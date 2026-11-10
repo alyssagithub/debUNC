@@ -19,3 +19,4 @@ runonthread(Thread, "print('Hello world!')") --> Hello world!
 # Test requirements
 To pass the runonthread test, the function must:
 - Run the code it's given on the thread within 1 second.
+- Run code on a thread made with `coroutine.create`.

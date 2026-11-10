@@ -26,4 +26,10 @@ print(getcallbackvalue(BindableFunction, "OnInvoke")()) --> Hello world!
 # Test requirements
 To pass the getcallbackvalue test, the function must:
 - Return `nil` when no callback is set.
-- Return the callback that was set.
+- Return the callback that was set, and only the newest one after it's replaced.
+- Not call the callback while reading it.
+- Return `nil` after the callback is cleared.
+- Return a callback that's a NewCClosure.
+- Return a RemoteFunction's `OnClientInvoke`.
+- Return `game.OnClose`, a callback on the DataModel.
+- Error for a property that isn't a callback, like `Name`.

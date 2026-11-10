@@ -1,5 +1,5 @@
 # mousescroll: (Delta: number) -> ()
-Scrolls the mouse wheel. The Roblox window has to be focused.
+Scrolls the mouse wheel. It works even when the Roblox window isn't focused, and never sends input to other windows.
 ```lua
 mousescroll(120)
 ```
@@ -15,3 +15,4 @@ mousescroll(120)
 To pass the mousescroll test, the function must:
 - Fire a mouse wheel input that scrolls up for a positive amount.
 - Fire a mouse wheel input that scrolls down for a negative amount.
+- Reach Roblox even when the Roblox window isn't focused, without sending input to other windows.

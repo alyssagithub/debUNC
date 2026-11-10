@@ -1,5 +1,5 @@
 # keypress: (KeyCode: number) -> ()
-Presses a key and holds it down until [keyrelease](keyrelease.md) is called. The Roblox window has to be focused.
+Presses a key and holds it down until [keyrelease](keyrelease.md) is called. It works even when the Roblox window isn't focused, and never sends input to other windows.
 ```lua
 keypress(0x41)
 task.wait(1)
@@ -17,3 +17,4 @@ keyrelease(0x41)
 To pass the keypress test, the function must:
 - Press the key for the given key code (`0x4A` is J) so Roblox detects it.
 - Hold the key down until [keyrelease](keyrelease.md) releases it.
+- Reach Roblox even when the Roblox window isn't focused, without sending input to other windows.

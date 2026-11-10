@@ -30,3 +30,4 @@ To pass the clonefunction test, the function must:
 - Keep the same source, line, name, parameter count, and variadic flag in `debug.info`.
 - Return a new reference when it's given a C function.
 - Return a working clone of a C function, so a cloned `WaitForChild` finds and returns Terrain.
+- Keep a clone working the same after the function it was cloned from gets hooked.

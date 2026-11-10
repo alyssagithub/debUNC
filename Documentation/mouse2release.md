@@ -1,5 +1,5 @@
 # mouse2release: () -> ()
-Releases the right mouse button. The Roblox window has to be focused.
+Releases the right mouse button. It works even when the Roblox window isn't focused, and never sends input to other windows.
 ```lua
 mouse2press()
 task.wait(1)
@@ -14,3 +14,4 @@ mouse2release()
 To pass the mouse2release test, the function must:
 - Release the right mouse button after [mouse2press](mouse2press.md) holds it down, firing an `InputEnded` event that Roblox detects.
 - Leave the right mouse button no longer held down.
+- Reach Roblox even when the Roblox window isn't focused, without sending input to other windows.

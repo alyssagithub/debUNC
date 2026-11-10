@@ -8,7 +8,6 @@ print(#Bytecode)
 | Name |
 | :- |
 | get_script_bytecode |
-| dumpstring |
 # Parameters
 | Script: [LuaSourceContainer](https://create.roblox.com/docs/reference/engine/classes/LuaSourceContainer)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The script to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
