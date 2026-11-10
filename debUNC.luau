@@ -161,6 +161,25 @@ const function IsRobloxFocused(): boolean
 	return HasFocus
 end
 
+const function MoveFocusToConsole()
+	if not IsRobloxFocused() then
+		return
+	end
+
+	const CreateConsole = rconsolecreate
+
+	if not CreateConsole then
+		return
+	end
+
+	pcall(CreateConsole)
+	pcall(rconsoleshow or function() end)
+
+	WaitFor(function()
+		return not IsRobloxFocused()
+	end, 2)
+end
+
 const function CheckInputFree()
 	const TestName = TestThreads[coroutine.running()]
 
@@ -170,8 +189,10 @@ const function CheckInputFree()
 
 	const IdentifyExecutor = identifyexecutor
 
-	if IdentifyExecutor and tostring((IdentifyExecutor())):lower() == "athena" and not IsRobloxFocused() then
-		error({Skipped = "the Roblox window isn't focused, and Athena sends input to whatever window is focused", Environment = FocusLost})
+	const ExecutorName = IdentifyExecutor and tostring((IdentifyExecutor()))
+
+	if ExecutorName and table.find({"athena", "bunni"}, ExecutorName:lower()) and not IsRobloxFocused() then
+		error(`input only works while Roblox is focused, {ExecutorName} sends it to whatever window is focused instead`)
 	end
 
 	if not WaitFor(function()
@@ -735,6 +756,22 @@ const Tests: any = {
 			assert(Environment ~= getgenv(), "it's the same table as getgenv(), not Roblox's environment")
 			assert(Environment.getgenv == nil and Environment.hookfunction == nil, "it has executor functions in it, so game scripts can find them")
 			Formatters.CheckEqual(Stored, Value, "a value written to it")
+
+			const Animate = Player.Character and Player.Character:FindFirstChild("Animate")
+			const ScriptEnvironment = Animate and Formatters.CheckExist("getsenv")(Animate)
+
+			assert(ScriptEnvironment, "couldn't get the Animate script's environment to compare with")
+			assert(ScriptEnvironment._G == Environment._G, "its _G isn't the same _G game scripts use")
+			assert(ScriptEnvironment.shared == Environment.shared, "its shared isn't the same shared game scripts use")
+			assert(Environment.printidentity == printidentity and ScriptEnvironment.printidentity == printidentity, "printidentity isn't the same function everywhere, so it's been replaced in one environment")
+			assert(Formatters.CheckExist("debug.info")(printidentity, "s") == "[C]" and debug.info(printidentity, "n") == "printidentity", "printidentity isn't Roblox's real C function anymore")
+			assert(not pcall(setfenv, printidentity, getfenv()), "setfenv worked on printidentity, so it's a LuaClosure pretending to be Roblox's")
+
+			for _, Name in {"getgenv", "hookfunction", "identifyexecutor", "getrenv", "newcclosure"} do
+				for Place, Table in {["a game script's environment"] = ScriptEnvironment, ["the game's _G"] = Environment._G, ["the game's shared"] = Environment.shared} do
+					assert(rawget(Table, Name) == nil and Table[Name] == nil, `{Name} can be reached from {Place}, so game scripts can detect the executor`)
+				end
+			end
 		end,
 		ReturnType = "table",
 	},
@@ -783,6 +820,11 @@ const Tests: any = {
 			for FunctionName in ThreadEnvironment do
 				assert(getfenv()[FunctionName], `the thread environment has '{FunctionName}' but getfenv() doesn't`)
 			end
+
+			const Finished = task.spawn(function() end)
+			const Success, FinishedEnvironment = pcall(GetThreadEnvironment, Finished)
+
+			assert(Success and FinishedEnvironment == getfenv(), "didn't keep the environment of a thread that already finished")
 		end,
 	},
 
@@ -916,7 +958,7 @@ const Tests: any = {
 			const Found = {}
 
 			for _, Path in Result do
-				Found[(Path:gsub("\\", "/"):gsub("/$", ""))] = true
+				Found[(Path:gsub("\\", "/"):gsub("/$", ""):gsub("^%./", ""))] = true
 			end
 
 			assert(ReturnedTable, "didn't return a table")
@@ -1065,6 +1107,8 @@ const Tests: any = {
 					return false
 				end)
 
+				assert(typeof(Original) == "function", `should return the original function, got {typeof(Original)}`)
+
 				const HookedResult = FirstFunction()
 
 				HookFunction(FirstFunction, Original)
@@ -1072,6 +1116,68 @@ const Tests: any = {
 				assert(Original() == true, "the returned function isn't giving the expected result when called")
 				assert(HookedResult == false, "the hooked function didn't return the hook's result")
 				assert(FirstFunction() == true, "hooking the function back to the returned original didn't restore it")
+			end
+
+			do
+				local OriginalRuns, HookRuns = 0, 0
+
+				const function Target()
+					OriginalRuns += 1
+
+					return "debUNC Original"
+				end
+
+				const Environment = getfenv(Target)
+				const function Hook()
+					HookRuns += 1
+
+					return "debUNC Hooked"
+				end
+
+				setfenv(Hook, setmetatable({}, {__index = Environment}))
+
+				const Original = HookFunction(Target, Hook)
+				const Result = Target()
+				const OriginalRunsFromHookedCall = OriginalRuns
+
+				assert(Original ~= Target, "returned the hooked function itself instead of a separate original")
+				Formatters.CheckEqual(Result, "debUNC Hooked", "the hooked function's result")
+				Formatters.CheckEqual(HookRuns, 1, "the number of times the hook ran for one call")
+				Formatters.CheckEqual(OriginalRunsFromHookedCall, 0, "the number of times the original ran when only the hooked function was called")
+				Formatters.CheckEqual(Original(), "debUNC Original", "the returned original's result")
+				assert(getfenv(Target) == Environment, "the hooked function took on the hook's environment, so getfenv can tell it was hooked")
+			end
+
+			do
+				const IsLoaded = game.IsLoaded
+				local Restored = false
+				const Original = HookFunction(IsLoaded, function()
+					return "debUNC"
+				end)
+
+				AddCleanup(function()
+					if not Restored then
+						HookFunction(IsLoaded, Original)
+					end
+				end)
+
+				const HookedResult = IsLoaded(game)
+				const OriginalResult = Original(game)
+
+				HookFunction(IsLoaded, Original)
+				Restored = true
+
+				Formatters.CheckEqual(HookedResult, "debUNC", "game.IsLoaded's result while hooked")
+				Formatters.CheckEqual(OriginalResult, true, "the result of game.IsLoaded's returned original")
+				Formatters.CheckEqual(IsLoaded(game), true, "game.IsLoaded's result after hooking it back")
+
+				const function Target()
+					return "debUNC Original"
+				end
+
+				HookFunction(Target, game.GetFullName)
+
+				Formatters.CheckEqual(Target(workspace), workspace:GetFullName(), "a function hooked with game.GetFullName, given workspace,")
 			end
 
 			do
@@ -1176,6 +1282,22 @@ const Tests: any = {
 				assert(Formatters.CheckExist("debug.info")(HookedNewCClosure, "s") == "[C]", "a C function hooked with a LuaClosure stopped showing as [C]")
 			end
 
+			do
+				const function NamedTarget()
+					return "debUNC Original"
+				end
+
+				const Address = tostring(NamedTarget)
+				const Name = debug.info(NamedTarget, "n")
+
+				HookFunction(NamedTarget, NewCClosure(function()
+					return "debUNC Hooked"
+				end))
+
+				Formatters.CheckEqual(tostring(NamedTarget), Address, "the hooked function's address")
+				Formatters.CheckEqual(debug.info(NamedTarget, "n"), Name, "the name of a function hooked with a NewCClosure")
+			end
+
 			const HookedNewCClosure = NewCClosure(function() end)
 
 			HookFunction(HookedNewCClosure, task.wait)
@@ -1244,6 +1366,24 @@ const Tests: any = {
 
 			assert(Succes, `the new WaitForChild failed with "{Result}"`)
 			assert(Result == Terrain, `the new WaitForChild returned "{Result}" instead of "{Terrain.Name}"`)
+
+			const HookFunction = hookfunction
+
+			if not HookFunction then
+				return
+			end
+
+			const function Original()
+				return "debUNC Original"
+			end
+
+			const Clone = clonefunction(Original)
+
+			HookFunction(Original, function()
+				return "debUNC Hooked"
+			end)
+
+			Formatters.CheckEqual(Clone(), "debUNC Original", "a clone's result after the function it was cloned from got hooked")
 		end,
 	},
 
@@ -1567,6 +1707,14 @@ const Tests: any = {
 			end, 1), if WrongValue ~= nil then `the connection was fired with the wrong value, expected number '{GeneratedValue}' and got {typeof(WrongValue)} '{WrongValue}'` else "the connection wasn't fired")
 
 			assert(typeof(Connections[1].Thread) == "thread", `.Thread should be a thread, got {typeof(Connections[1].Thread)}`)
+
+			for Field, Type in {Enabled = "boolean", ForeignState = "boolean", LuaConnection = "boolean", Function = "function", Fire = "function", Defer = "function", Disconnect = "function", Disable = "function", Enable = "function"} do
+				const Success, Value = pcall(function()
+					return Connections[1][Field]
+				end)
+
+				assert(Success and type(Value) == Type, `.{Field} should be a {Type}, got {if Success then type(Value) else "an error"}`)
+			end
 			assert(Connections[1].Enabled == true, ".Enabled should be true for an active connection")
 
 			Connections[1]:Disable()
@@ -1902,6 +2050,133 @@ const Tests: any = {
 
 			assert(Seen > 0, "hooking game's __namecall didn't catch a game:GetService call")
 			assert(Service == workspace, "game:GetService gave the wrong result while __namecall was hooked")
+
+			const function Capture(Metamethod: string): Function
+				local Captured
+
+				xpcall(function()
+					if Metamethod == "__index" then
+						return (game :: any)[{}]
+					end
+
+					return (game :: any):debUNCMissingMethod()
+				end, function()
+					Captured = debug.info(2, "f")
+				end)
+
+				return Captured
+			end
+
+			const function Outcome(Function: Function, ...): string
+				const Success, Result = pcall(Function, ...)
+
+				return if Success then "succeeded" else tostring(Result)
+			end
+
+			const CapturedIndex = Capture("__index")
+			const CapturedNamecall = Capture("__namecall")
+
+			assert(typeof(CapturedIndex) == "function" and typeof(CapturedNamecall) == "function", "couldn't capture the game's __index and __namecall the way game scripts do")
+			const BadCalls = {
+				{Name = "__index with a string as self", Call = function() return Outcome(CapturedIndex, "debUNC", "Name") end},
+				{Name = "__index with a table as the key", Call = function() return Outcome(CapturedIndex, game, {}) end},
+				{Name = "__index with no arguments", Call = function() return Outcome(CapturedIndex) end},
+				{Name = "__namecall with no arguments", Call = function() return Outcome(CapturedNamecall) end},
+				{Name = "__namecall with a string as self", Call = function() return Outcome(CapturedNamecall, "debUNC") end},
+			}
+			const Before = {}
+
+			for Index, BadCall in BadCalls do
+				Before[Index] = BadCall.Call()
+			end
+
+			local HookCalls = 0
+			local IndexOriginal, NamecallOriginal
+
+			const function Unhook()
+				if IndexOriginal then
+					pcall(HookMetamethod, game, "__index", IndexOriginal)
+					IndexOriginal = nil
+				end
+
+				if NamecallOriginal then
+					pcall(HookMetamethod, game, "__namecall", NamecallOriginal)
+					NamecallOriginal = nil
+				end
+			end
+
+			AddCleanup(Unhook)
+
+			IndexOriginal = HookMetamethod(game, "__index", function(...)
+				HookCalls += 1
+
+				return IndexOriginal(...)
+			end)
+
+			NamecallOriginal = HookMetamethod(game, "__namecall", function(...)
+				HookCalls += 1
+
+				return NamecallOriginal(...)
+			end)
+
+			const After = {}
+
+			for Index, BadCall in BadCalls do
+				After[Index] = BadCall.Call()
+			end
+
+			const HookCallsFromBadCalls = HookCalls
+
+			Unhook()
+
+			for Index, BadCall in BadCalls do
+				assert(After[Index] == Before[Index], `calling the game's {BadCall.Name} gave "{After[Index]}" once it was hooked instead of "{Before[Index]}", so game scripts can detect the hook`)
+			end
+
+			assert(HookCallsFromBadCalls == 0, `the hook ran for bad calls that should have errored before reaching it ({HookCallsFromBadCalls} times)`)
+
+			local StackOriginal
+			local StackRestored = false
+			const HookEnvironment = setmetatable({}, {__index = getfenv()})
+			const function StackHook(...)
+				return StackOriginal(...)
+			end
+
+			setfenv(StackHook, HookEnvironment)
+			StackOriginal = HookMetamethod(game, "__namecall", StackHook)
+			AddCleanup(function()
+				if not StackRestored then
+					HookMetamethod(game, "__namecall", StackOriginal)
+				end
+			end)
+
+			local FoundOnStack = false
+
+			xpcall(function()
+				return (game :: any):debUNCMissingMethod()
+			end, function()
+				for Level = 1, 50 do
+					const Function = debug.info(Level, "f")
+
+					if not Function then
+						break
+					end
+
+					if Function == StackHook or getfenv(Function) == HookEnvironment then
+						FoundOnStack = true
+					end
+				end
+			end)
+
+			const YieldSuccess, YieldResult = pcall(function()
+				return workspace:WaitForChild(`debUNC{math.random(1, 1e6)}`, 0.1)
+			end)
+
+			HookMetamethod(game, "__namecall", StackOriginal)
+			StackRestored = true
+
+			assert(not FoundOnStack, "the __namecall hook could be found on the stack from an error handler, so game scripts can detect it")
+			assert(YieldSuccess and YieldResult == nil, `WaitForChild couldn't yield through the hooked __namecall, got "{YieldResult}"`)
 		end,
 	},
 
@@ -1913,9 +2188,8 @@ const Tests: any = {
 	},
 
 	setstackhidden = {
-		OtherNames = {"sethiddenstack"},
 		Test = function()
-			const SetStackHidden = setstackhidden or sethiddenstack
+			const SetStackHidden = setstackhidden
 			const GetInfo = Formatters.CheckExist("debug.info")
 
 			const function Inner(Mode: string): any
@@ -1965,9 +2239,8 @@ const Tests: any = {
 	},
 
 	isstackhidden = {
-		OtherNames = {"ishiddenstack"},
 		Test = function()
-			const IsStackHidden = isstackhidden or ishiddenstack
+			const IsStackHidden = isstackhidden
 			const SetStackHidden = Formatters.CheckExist("setstackhidden")
 
 			const function Target() end
@@ -3114,8 +3387,54 @@ const Tests: any = {
 
 			SetThreadIdentity(Original)
 
+			const function CanUseRobloxScript()
+				return pcall(function()
+					return game:GetService("CorePackages").Name
+				end)
+			end
+
+			const function CanUseRobloxSecurity()
+				return pcall(function()
+					return Instance.new("SurfaceAppearance").TexturePack
+				end)
+			end
+
+			local Capabilities
+
+			task.spawn(function()
+				SetThreadIdentity(2)
+
+				const RobloxScriptAtTwo, RobloxSecurityAtTwo = CanUseRobloxScript(), CanUseRobloxSecurity()
+
+				SetThreadIdentity(8)
+				Capabilities = {RobloxScriptAtTwo, RobloxSecurityAtTwo, CanUseRobloxScript(), CanUseRobloxSecurity()}
+			end)
+
+			WaitFor(function()
+				return Capabilities ~= nil
+			end, 2)
+
+			local StringIdentity
+			const GetThreadIdentity = Formatters.CheckExist("getthreadidentity")
+
+			task.spawn(function()
+				const Success = pcall(SetThreadIdentity, "debUNC")
+
+				StringIdentity = {Success, GetThreadIdentity()}
+			end)
+
+			WaitFor(function()
+				return StringIdentity ~= nil
+			end, 2)
+
 			assert(not ReadAtTwo, "CoreGui could still be read at identity 2")
 			assert(ReadAtEight, "CoreGui couldn't be read at identity 8")
+			assert(Capabilities, "a thread that changed its identity never finished")
+			assert(not Capabilities[1] and not Capabilities[2], "a thread at identity 2 could still use RobloxScript or RobloxSecurity members, so the identity only changed in name")
+			assert(Capabilities[3] and Capabilities[4], "a thread at identity 8 couldn't use RobloxScript or RobloxSecurity members")
+			assert(StringIdentity, "a thread that tried setting a string identity never finished")
+			assert(not StringIdentity[1], "should error when given something that isn't a number")
+			Formatters.CheckEqual(StringIdentity[2], Original, "the identity after trying to set it to a string")
 			Formatters.CheckEqual(MainIdentity, 8, "this thread's identity after another thread changed its own")
 			Formatters.CheckEqual(Inherited, 2, "the identity of a thread started from an identity 2 thread")
 			Formatters.CheckEqual(AfterYield, 2, "the identity after a yield")
@@ -3671,6 +3990,24 @@ const Tests: any = {
 			task.cancel(Thread)
 
 			assert(Ran, "the code didn't run on the thread")
+
+			const Coroutine = coroutine.create(function()
+				coroutine.yield()
+			end)
+
+			coroutine.resume(Coroutine)
+
+			const CoroutineValue = math.random()
+
+			runonthread(Coroutine, `shared.debUNCThreadValue = {CoroutineValue}`)
+
+			const CoroutineRan = WaitFor(function()
+				return shared.debUNCThreadValue == CoroutineValue
+			end, 1)
+
+			shared.debUNCThreadValue = nil
+
+			assert(CoroutineRan, "the code didn't run on a thread made with coroutine.create")
 		end,
 	},
 
@@ -3768,6 +4105,51 @@ const Tests: any = {
 
 			assert(table.find(GarbageCollected, Holder.Function), "didn't find a new function")
 			assert(table.find(GarbageCollected, Holder.Table), "didn't find a new table when including tables")
+
+			const WithoutTables = getgc(false)
+			const Seen = {}
+
+			for _, Value in WithoutTables do
+				assert(type(Value) ~= "table", "returned a table even though tables weren't asked for")
+				assert(not Seen[Value], "returned the same value twice")
+				Seen[Value] = true
+			end
+
+			const Fired = {}
+			const Proxy = newproxy(true)
+			const Metatable = getmetatable(Proxy)
+
+			for _, Metamethod in {"__index", "__newindex", "__tostring", "__len", "__unm", "__add", "__eq", "__lt", "__le", "__concat", "__call"} do
+				Metatable[Metamethod] = function()
+					table.insert(Fired, Metamethod)
+				end
+			end
+
+			getgc(true)
+			getgc(false)
+
+			assert(#Fired == 0, `ran {table.concat(Fired, ", ")} on a userdata it collected, so game scripts can detect it with a trapped newproxy`)
+
+			const Weak = setmetatable({}, {__mode = "v"})
+
+			Weak[1] = {}
+
+			const Held = getgc(true)
+
+			WaitFor(function()
+				for _ = 1, 2000 do
+					table.create(64, 0)
+				end
+
+				return Weak[1] == nil
+			end, 6)
+
+			const HeldMetatable = getrawmetatable and getrawmetatable(Held)
+
+			assert(Weak[1] == nil, `kept garbage alive while its result was held, so game scripts can detect it with a weak table (__mode is {if HeldMetatable then tostring(HeldMetatable.__mode) else "not set"})`)
+			const Counted, Info = collectgarbage("count"), gcinfo()
+
+			assert(math.abs(Counted - Info) <= 64, `collectgarbage("count") said {Counted} but gcinfo() said {Info}, so one of them is being faked`)
 		end,
 	},
 
@@ -3838,7 +4220,7 @@ const Tests: any = {
 
 	isexecutorthread = {
 		Test = function()
-			const IsExecutorThread = isexecutorthread or isourthread
+			const IsExecutorThread = isexecutorthread
 			const Animate = Player.Character and Player.Character:FindFirstChild("Animate")
 			const GameThread = Animate and Formatters.CheckExist("getscriptthread")(Animate)
 
@@ -3848,7 +4230,6 @@ const Tests: any = {
 			assert(IsExecutorThread(GameThread) == false, "returned true for a game script's thread")
 			assert(not pcall(IsExecutorThread, 1), "should error when given something that isn't a thread")
 		end,
-		OtherNames = {"isourthread"},
 	},
 
 	["Regex.new"] = {
@@ -3884,7 +4265,7 @@ const Tests: any = {
 
 	getscriptbytecode = {
 		Test = function()
-			const GetScriptBytecode = getscriptbytecode or dumpstring
+			const GetScriptBytecode = getscriptbytecode
 			const PlayerModule = GetPlayerModule()
 			const Bytecode = GetScriptBytecode(PlayerModule)
 
@@ -3893,7 +4274,6 @@ const Tests: any = {
 			assert(#Bytecode > 0, "the bytecode is empty")
 			assert(GetScriptBytecode(PlayerModule.CameraModule) ~= Bytecode, "'PlayerModule' and 'CameraModule' gave the same bytecode")
 		end,
-		OtherNames = {"dumpstring"},
 	},
 
 	getscripthash = {
@@ -4001,6 +4381,11 @@ const Tests: any = {
 
 			assert(IsExecutorClosure(function() end) == true, "should return true for a function made in the executor")
 			assert(IsExecutorClosure(print) == false, "should return false for print")
+			assert(IsExecutorClosure(IsExecutorClosure) == true, "should return true for itself")
+
+			if newcclosure then
+				assert(IsExecutorClosure(newcclosure(function() end)) == true, "should return true for a NewCClosure made in the executor")
+			end
 			assert(
 				IsExecutorClosure(require(GetPlayerModule().CommonUtils.CameraWrapper).getCamera) == false,
 				"should return false for a function from the game's PlayerModule"
@@ -4576,6 +4961,21 @@ const Tests: any = {
 				error({Skipped = `the saved place would be about {math.floor(PredictedMegabytes)} MB, which is too large to test quickly`, Environment = true})
 			end
 
+			const ListFiles = listfiles
+			const Before = {}
+
+			for _, Path in if ListFiles then ListFiles("") else {} do
+				Before[Path] = true
+			end
+
+			AddCleanup(function()
+				for _, Path in if ListFiles then ListFiles("") else {} do
+					if not Before[Path] and tostring(Path):lower():find("%.rbxlx?$") then
+						RemovePath("delfile", Path)
+					end
+				end
+			end)
+
 			const FileName = saveinstance({noscripts = true})
 
 			Formatters.CheckReturnType(FileName, "string")
@@ -4910,7 +5310,7 @@ const Tests: any = {
 	dofile = {
 		Test = function()
 			const WriteFile = Formatters.CheckExist("writefile")
-			const DoFile = dofile or runfile
+			const DoFile = dofile
 			const FileName = `File_{math.random()}.lua`
 			const Value = math.random()
 			const Marker = `debUNC{math.random(1, 1e6)}`
@@ -4930,7 +5330,6 @@ const Tests: any = {
 			assert(not Ran, "an error inside of the file didn't reach the caller")
 			assert(tostring(ErrorMessage):find(Marker, 1, true), `the file's error message was lost, got '{ErrorMessage}'`)
 		end,
-		OtherNames = {"runfile"},
 	},
 
 	getobjects = {
@@ -4968,7 +5367,7 @@ const Tests: any = {
 
 	getcallbackvalue = {
 		Test = function()
-			const GetCallbackValue = getcallbackvalue or getcallbackmember
+			const GetCallbackValue = getcallbackvalue
 			const BindableFunction = Instance.new("BindableFunction")
 
 			const function OnInvoke()
@@ -4977,11 +5376,45 @@ const Tests: any = {
 
 			assert(GetCallbackValue(BindableFunction, "OnInvoke") == nil, "should return nil when no callback is set")
 
+			local Calls = 0
+
+			BindableFunction.OnInvoke = function()
+				Calls += 1
+			end
 			BindableFunction.OnInvoke = OnInvoke
 
 			assert(GetCallbackValue(BindableFunction, "OnInvoke") == OnInvoke, "didn't return the callback that was set")
+			Formatters.CheckEqual(Calls, 0, "the number of times reading a replaced callback called it")
+
+			BindableFunction.OnInvoke = nil
+
+			assert(GetCallbackValue(BindableFunction, "OnInvoke") == nil, "should return nil after the callback is cleared")
+
+			const Wrapped = (newcclosure or function(Function)
+				return Function
+			end)(OnInvoke)
+
+			BindableFunction.OnInvoke = Wrapped
+
+			assert(GetCallbackValue(BindableFunction, "OnInvoke") == Wrapped, "didn't return a NewCClosure callback that was set")
+
+			const RemoteFunction = Instance.new("RemoteFunction")
+
+			RemoteFunction.OnClientInvoke = OnInvoke
+
+			assert(GetCallbackValue(RemoteFunction, "OnClientInvoke") == OnInvoke, "didn't return a RemoteFunction's OnClientInvoke")
+
+			const OnClose = function() end
+
+			game.OnClose = OnClose
+
+			const DataModelCallback = GetCallbackValue(game, "OnClose")
+
+			game.OnClose = nil
+
+			assert(DataModelCallback == OnClose, "didn't return game.OnClose, a callback on the DataModel")
+			assert(not pcall(GetCallbackValue, BindableFunction, "Name"), "should error for a property that isn't a callback")
 		end,
-		OtherNames = {"getcallbackmember"},
 	},
 
 	getfunctionbytecode = {
@@ -5444,6 +5877,71 @@ const SecurityTests: {[string]: any} = {
 		end,
 	},
 
+	["security: game scripts don't get executor powers"] = {
+		Test = function()
+			const SetThreadIdentity = Formatters.CheckExist("setthreadidentity")
+			const GameLoadstring = Formatters.CheckExist("getrenv")().loadstring
+			local Results
+
+			task.spawn(function()
+				SetThreadIdentity(2)
+
+				if pcall(function()
+					return game:GetService("CorePackages").Name
+				end) then
+					Results = {Lowered = false}
+					return
+				end
+
+				Results = {
+					Lowered = true,
+					Browser = pcall(function()
+						game:GetService("BrowserService"):OpenBrowserWindow("")
+					end),
+					Locked = pcall(function()
+						Instance.new("StringValue").RobloxLocked = true
+					end),
+					Loadstring = pcall(GameLoadstring, "return 1"),
+				}
+			end)
+
+			WaitFor(function()
+				return Results ~= nil
+			end, 2)
+
+			const Leftover = {}
+
+			for _, Service in {"VirtualInputManager", "VirtualUser"} do
+				if game:FindService(Service) then
+					table.insert(Leftover, Service)
+				end
+			end
+
+			assert(#Leftover == 0, `{table.concat(Leftover, " and ")} exists in the game, so game scripts can detect the executor through FindService`)
+			assert(Results, "a thread at identity 2 never finished")
+
+			if not Results.Lowered then
+				error({Skipped = "setthreadidentity didn't really lower the identity, so what game scripts can do couldn't be checked"})
+			end
+
+			const Leaks = {}
+
+			if Results.Browser then
+				table.insert(Leaks, "BrowserService:OpenBrowserWindow")
+			end
+
+			if Results.Locked then
+				table.insert(Leaks, "setting RobloxLocked")
+			end
+
+			if Results.Loadstring then
+				table.insert(Leaks, "loadstring")
+			end
+
+			assert(#Leaks == 0, `{table.concat(Leaks, ", ")} works at the game's own identity, which lets game scripts use executor powers`)
+		end,
+	},
+
 	["security: files outside the workspace stay hidden"] = {
 		Test = function()
 			for Name, Paths in {
@@ -5552,6 +6050,22 @@ const NoTests: {[string | number]: any} = {
 		RunLast = true,
 	},
 
+	rconsolesettitle = {
+		Test = function()
+			CheckConsole()
+			rconsolesettitle("debUNC")
+		end,
+		RunLast = true,
+	},
+
+	rconsoleclear = {
+		Test = function()
+			CheckConsole()
+			rconsoleclear()
+		end,
+		RunLast = true,
+	},
+
 	rconsoledestroy = {
 		Test = CheckConsole,
 		RunLast = true,
@@ -5589,23 +6103,30 @@ const NoTests: {[string | number]: any} = {
 				end
 			end
 
+		end,
+		RunLast = true,
+	},
+
+	messagebox = {
+		Test = function()
 			const MessageBox = messagebox
+			const BoxStartTime = os.clock()
 
-			if not MessageBox then
-				return
-			end
+			local Frames = 0
 
-			const BoxStartTime = tick()
+			const Connection = game:GetService("RunService").Heartbeat:Connect(function()
+				Frames += 1
+			end)
 
 			task.spawn(pcall, MessageBox, "debUNC test, you can close this", "debUNC", 0)
+			task.wait(1)
+			Connection:Disconnect()
 
-			MessageBoxTime = tick() - BoxStartTime
+			const Elapsed = os.clock() - BoxStartTime
 
-			if not WaitFor(CheckLostFocus, 2) then
-				return
-			end
+			MessageBoxTime = math.max(Elapsed - 1, 0)
 
-			assert(WaitFor(CheckInactive, 1), "still returned true after the Roblox window lost focus")
+			assert(Elapsed < 2 and Frames > 10, `Roblox froze while the message box was open, only {Frames} frames ran in {math.floor(Elapsed * 10) / 10} seconds`)
 		end,
 		RunLast = true,
 	},
@@ -5985,16 +6506,12 @@ const function RunTest(Name: string, Info: any)
 		return
 	end
 
-	if not Missing and InputTests[Name] and not IsRobloxFocused() then
-		warn(`🟠 {Name}: skipped because the Roblox window isn't focused`)
-		Results[Name] = "skipped"
-		UntestableTests += 1
-		EnvironmentSkips += if FocusLost then 1 else 0
-		return
-	end
-
 	if not Settings.DebugMode then
 		ErrorMessage = tostring(ErrorMessage):gsub("^.-:%d+: ", "")
+	end
+
+	if not Missing and InputTests[Name] and not IsRobloxFocused() and not tostring(ErrorMessage):find("focused") then
+		ErrorMessage = `{ErrorMessage} while Roblox wasn't focused, input should still reach Roblox`
 	end
 
 	if Missing then
@@ -6077,11 +6594,17 @@ end
 
 DisplayMessage("Don't touch your mouse or keyboard until the tests finish.")
 
-for _, Name in {"rconsolecreate", "rconsoleprint", "rconsoleinfo", "rconsolewarn", "rconsoleerr", "rconsoledestroy", "isrbxactive"} do
+for _, Name in {"rconsolecreate", "rconsoleprint", "rconsoleinfo", "rconsolewarn", "rconsoleerr", "rconsolesettitle", "rconsoleclear", "rconsoledestroy", "isrbxactive", "messagebox"} do
 	table.insert(LastTests, table.remove(LastTests, table.find(LastTests, Name)))
 end
 
+MoveFocusToConsole()
+
 for _, Name in LastTests do
+	if Name == "rconsolecreate" then
+		pcall(rconsoledestroy or function() end)
+	end
+
 	RunTestAlone(Name, Tests[Name])
 end
 
@@ -6140,12 +6663,13 @@ if ElapsedTime < MinimumSeconds and PercentageComplete > 80 then
 end
 
 DisplayMessage("❓ The score below is only for how many custom functions are supported and secure.")
-DisplayMessage(`🔵 debUNC v2.10.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
+DisplayMessage(`🔵 debUNC v2.11.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(ElapsedTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
 DisplayMessage(`🟠 Skipped tests: {UntestableTests}`)
 DisplayMessage(`🟡 Missing functions: {MissingFunctions}`)
+DisplayMessage("Join our NEW discord server @ discord.gg/rEVTBKFDSP")
 
 const function Divider()
 	print("---------------------------------------------------------------------------------------------------------")
