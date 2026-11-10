@@ -16,7 +16,7 @@ reasons why i made this:
 loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.luau"))()
 ```
 # Confirmed results (debUNC v2.11.0)
-Every result below is also in [results.json](results.json), with the list of tests each executor passed, failed, skipped or is missing. You can load it from `https://github.com/alyssagithub/debUNC/raw/main/results.json`.
+also you can use these results in https://github.com/alyssagithub/debUNC/raw/main/results.json for stuff like an api to see an executor's score
 
 ![Kawaii](https://img.shields.io/badge/Kawaii_1.8.0-98%25-brightgreen?style=for-the-badge)
 
