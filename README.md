@@ -24,6 +24,8 @@ also you can use these results in https://github.com/alyssagithub/debUNC/raw/mai
 
 ![Delta](https://img.shields.io/badge/Delta_1.0.745.1142-67%25-yellow?style=for-the-badge)
 
+![Opiumware](https://img.shields.io/badge/Opiumware_v2.6.0-66%25-yellow?style=for-the-badge)
+
 ![Xeno](https://img.shields.io/badge/Xeno_v1.3.65-27%25-yellow?style=for-the-badge)
 
 | Executor | Version | Score | Took | 🟢 Passed | 🔴 Failed | 🟠 Skipped | 🟡 Missing |
@@ -31,6 +33,7 @@ also you can use these results in https://github.com/alyssagithub/debUNC/raw/mai
 | [Synapse Z](https://z.synapse.do) | v1.0.4.0 | **75%** | 76.97s | 166 | 26 | 2 | 25 |
 | [Athena](https://getathena.gg/) | 1.0 | **68%** | 26.66s | 149 | 31 | 13 | 26 |
 | [Delta](https://deltaexploits.gg/) (Android, MuMu) | 1.0.745.1142 | **67%** | 82.39s | 148 | 24 | 6 | 41 |
+| [Opiumware](https://use.opiumware.today/) (Mac) | v2.6.0 | **66%** | 39.94s | 145 | 35 | 13 | 26 |
 | [Xeno](https://www.xeno.now/) | v1.3.65 | **27%** | 34.84s | 61 | 55 | 10 | 93 |
 
 <details>
@@ -255,6 +258,91 @@ also you can use these results in https://github.com/alyssagithub/debUNC/raw/mai
 - `runonthread`
 - `saveinstance`
 - `trampolinecall`
+- `writecustomasset`
+- `writefileasync`
+
+</details>
+
+<details>
+<summary><b>Opiumware (Mac) details</b></summary>
+
+**🔴 Failed**
+- `createcommchannel`: invalid argument #1 (invalid communication channel ID)
+- `game.HttpGet`: requesting the same url twice never gave a cached response, so NoCache has nothing to skip
+- `getcallbackvalue`: didn't return game.OnClose, a callback on the DataModel
+- `getcommchannel`: invalid argument #1 (invalid communication channel ID)
+- `getrawmetatable`: __index gave function: 0x15bd67fab219405c instead of function: 0x8374cfcea785a89f (__index may not be a CClosure)
+- `getscriptclosure`: the closure's script doesn't match
+- `getscripthash`: the hash isn't the sha384 of the script's bytecode
+- `hookfunction`: the hooked function took on the hook's environment, so getfenv can tell it was hooked
+- `hookmetamethod`: the hook ran for bad calls that should have errored before reaching it (5 times)
+- `keyclick`: the key press wasn't detected while Roblox wasn't focused, input should still reach Roblox
+- `keypress`: the input wasn't detected while Roblox wasn't focused, input should still reach Roblox
+- `keyrelease`: the input was never held down, so it can't be released while Roblox wasn't focused, input should still reach Roblox
+- `messagebox`: Roblox froze while the message box was open, only 71 frames ran in 2.7 seconds
+- `mouse1click`: the input wasn't detected while Roblox wasn't focused, input should still reach Roblox
+- `mouse1press`: the input wasn't detected while Roblox wasn't focused, input should still reach Roblox
+- `mouse1release`: the input was never held down, so it can't be released while Roblox wasn't focused, input should still reach Roblox
+- `mouse2click`: the input wasn't detected while Roblox wasn't focused, input should still reach Roblox
+- `mouse2press`: the input wasn't detected while Roblox wasn't focused, input should still reach Roblox
+- `mouse2release`: the input was never held down, so it can't be released while Roblox wasn't focused, input should still reach Roblox
+- `mousemoveabs`: the mouse went to 1510.08179, 107.213547 then 1510.08179, 107.213547, which doesn't match moving to 1148.5, 614 then 1254.5, 703 while Roblox wasn't focused, input should still reach Roblox
+- `mousemoverel`: the mouse moved by 0, 0 then 0, 0, but moving by 25 then 50 should go the same way twice as far while Roblox wasn't focused, input should still reach Roblox
+- `mousescroll`: the scroll up wasn't detected while Roblox wasn't focused, input should still reach Roblox
+- `raknet.addreceivehook`: raknet is not enabled
+- `raknet.addsendhook`: raknet is not enabled
+- `raknet.removereceivehook`: raknet is not enabled
+- `raknet.removesendhook`: raknet is not enabled
+- `raknet.send`: raknet is not enabled
+- `rconsolecreate`: rconsolehidden returned true after rconsoleshow, so the console didn't open
+- `runonactor`: run_on_actor failed to run on provided actor, linked thread does not exist
+- `runonthread`: the code didn't run on the thread
+- `saveinstance`: didn't return a string
+- `security`: file:// is blocked: InsertService:GetLocalFileContents can be called, which lets scripts read files on your computer
+- `security: purchases need your approval`: MarketplaceService:PromptNativePurchaseWithContext, MarketplaceService:PromptNativePurchaseWithLocalPlayerWithPaymentSessionId, MarketplaceService:PromptNativePurchaseWithPaymentSessionId can be called, which lets scripts spend your Robux without asking
+- `security: requests can't use your login`: ContentProvider:SetBaseUrl, OpenCloudService:InvokeAsync can be called, which lets scripts send web requests logged in as you
+- `security: your account can't be changed without asking`: AvatarEditorService:NoPromptApplyProfileConfiguration can be called, which lets scripts change your account without asking
+
+**🟠 Skipped**
+- `getactorfromthread`: couldn't be tested because runonactor failed
+- `getactors`: couldn't be tested because runonactor failed
+- `getactorthreads`: couldn't be tested because runonactor failed
+- `hookproto`: couldn't be tested because isprotohooked is missing
+- `isparallel`: couldn't be tested because runonactor failed
+- `rconsoleclear`: couldn't be tested because rconsolecreate failed
+- `rconsoledestroy`: couldn't be tested because rconsolecreate failed
+- `rconsoleerr`: couldn't be tested because rconsolecreate failed
+- `rconsoleinfo`: couldn't be tested because rconsolecreate failed
+- `rconsoleprint`: couldn't be tested because rconsolecreate failed
+- `rconsolesettitle`: couldn't be tested because rconsolecreate failed
+- `rconsolewarn`: couldn't be tested because rconsolecreate failed
+- `restoreproto`: couldn't be tested because isprotohooked is missing
+
+**🟡 Missing**
+- `DirectoryWatcher.new`
+- `Regex.Escape`
+- `Regex.new`
+- `appendfileasync`
+- `getclipboard`
+- `getfflagtype`
+- `getfilesize`
+- `getfunctionreferences`
+- `getmetafield`
+- `getobjectreferences`
+- `getobjects`
+- `getoriginalenv`
+- `hasmetafield`
+- `hasmetatable`
+- `iscorescript`
+- `isprotohooked`
+- `isstackhidden`
+- `iswriteable`
+- `loadfileasync`
+- `makewriteable`
+- `movefile`
+- `raknet.receive`
+- `readfileasync`
+- `renamefile`
 - `writecustomasset`
 - `writefileasync`
 
