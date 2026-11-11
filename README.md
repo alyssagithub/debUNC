@@ -20,6 +20,8 @@ also you can use these results in https://github.com/alyssagithub/debUNC/raw/mai
 
 ![Synapse Z](https://img.shields.io/badge/Synapse_Z_v1.0.4.0-75%25-yellow?style=for-the-badge)
 
+![OpiumWare](https://img.shields.io/badge/OpiumWare_v2.6.0-71%25-yellow?style=for-the-badge)
+
 ![Athena](https://img.shields.io/badge/Athena_1.0-68%25-yellow?style=for-the-badge)
 
 ![Delta](https://img.shields.io/badge/Delta_1.0.745.1142-67%25-yellow?style=for-the-badge)
@@ -29,6 +31,7 @@ also you can use these results in https://github.com/alyssagithub/debUNC/raw/mai
 | Executor | Version | Score | Took | 🟢 Passed | 🔴 Failed | 🟠 Skipped | 🟡 Missing |
 |---|---|:---:|:---:|:---:|:---:|:---:|:---:|
 | [Synapse Z](https://z.synapse.do) | v1.0.4.0 | **75%** | 76.97s | 166 | 26 | 2 | 25 |
+| [OpiumWare](https://use.opiumware.today/) | v2.6.0 | **71%** | 25.06s | 156 | 24 | 13 | 26 |
 | [Athena](https://getathena.gg/) | 1.0 | **68%** | 26.66s | 149 | 31 | 13 | 26 |
 | [Delta](https://deltaexploits.gg/) (Android, MuMu) | 1.0.745.1142 | **67%** | 82.39s | 148 | 24 | 6 | 41 |
 | [Xeno](https://www.xeno.now/) | v1.3.65 | **27%** | 34.84s | 61 | 55 | 10 | 93 |
@@ -94,6 +97,11 @@ also you can use these results in https://github.com/alyssagithub/debUNC/raw/mai
 - `saveinstance`
 - `writecustomasset`
 - `writefileasync`
+
+</details>
+
+<details>
+<summary><b>OpiumWare details</b></summary>
 
 </details>
 
