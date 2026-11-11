@@ -1016,6 +1016,386 @@
 			"notTested": []
 		},
 		{
+			"name": "Opiumware",
+			"version": "v2.6.0",
+			"debunc": "v2.12.0",
+			"platform": "Mac",
+			"score": 66,
+			"took": 39.94,
+			"passed": [
+				"getrenv",
+				"getgenv",
+				"gettenv",
+				"readfile",
+				"writefile",
+				"isfile",
+				"appendfile",
+				"listfiles",
+				"delfile",
+				"loadfile",
+				"makefolder",
+				"isfolder",
+				"delfolder",
+				"iscclosure",
+				"clonefunction",
+				"request",
+				"require",
+				"fireclickdetector",
+				"fireproximityprompt",
+				"firesignal",
+				"getloadedmodules",
+				"getconnections",
+				"getscripts",
+				"setfpscap",
+				"base64encode",
+				"loadstring",
+				"getfpscap",
+				"newcclosure",
+				"isscriptable",
+				"firetouchinterest",
+				"debug.info",
+				"setstackhidden",
+				"WebSocket.connect",
+				"cache.invalidate",
+				"cache.iscached",
+				"cache.replace",
+				"cloneref",
+				"compareinstances",
+				"checkcaller",
+				"isfunctionhooked",
+				"base64decode",
+				"setrawmetatable",
+				"lz4compress",
+				"lz4decompress",
+				"debug.getproto",
+				"debug.getprotos",
+				"getnamecallmethod",
+				"getcallingscript",
+				"isnetworkowner",
+				"replicatesignal",
+				"game.HttpPost",
+				"identifyexecutor",
+				"gethwid",
+				"debug.getinfo",
+				"setreadonly",
+				"getsenv",
+				"decompile",
+				"sethiddenproperty",
+				"gethiddenproperty",
+				"setscriptable",
+				"getthreadidentity",
+				"setthreadidentity",
+				"restorefunction",
+				"filtergc",
+				"getmenv",
+				"debug.getstack",
+				"debug.setstack",
+				"debug.getupvalues",
+				"debug.getupvalue",
+				"debug.setupvalue",
+				"debug.getconstants",
+				"debug.getconstant",
+				"debug.setconstant",
+				"debug.getregistry",
+				"crypt.hash",
+				"crypt.generatekey",
+				"crypt.generatebytes",
+				"crypt.encrypt",
+				"Drawing.new",
+				"isrenderobj",
+				"getrenderproperty",
+				"setrenderproperty",
+				"cleardrawcache",
+				"getgc",
+				"getinstances",
+				"getnilinstances",
+				"getrunningscripts",
+				"isexecutorthread",
+				"getscriptbytecode",
+				"gethui",
+				"comparefunctions",
+				"getfunctionhash",
+				"isexecutorclosure",
+				"islclosure",
+				"isnewcclosure",
+				"getfflag",
+				"setfflag",
+				"debug.getcallstack",
+				"debug.isvalidlevel",
+				"debug.setinfo",
+				"getallthreads",
+				"makereadonly",
+				"isreadonly",
+				"crypt.hmac",
+				"crypt.random",
+				"crypt.decrypt",
+				"getmodules",
+				"getrendersteppedlist",
+				"cansignalreplicate",
+				"hooksignal",
+				"issignalhooked",
+				"restoresignal",
+				"oth.hook",
+				"oth.unhook",
+				"oth.is_hook_thread",
+				"oth.get_root_callback",
+				"oth.get_original_thread",
+				"getcustomasset",
+				"getsignalarguments",
+				"getsignalargumentsinfo",
+				"getsignalwhitelist",
+				"Drawing.Fonts",
+				"Signal.new",
+				"setnamecallmethod",
+				"newlclosure",
+				"getproperties",
+				"gethiddenproperties",
+				"getscriptthread",
+				"getscriptfromthread",
+				"dofile",
+				"getfunctionbytecode",
+				"trampolinecall",
+				"setclipboard",
+				"security: account data and tokens stay private",
+				"security: scripts can't run things outside Roblox",
+				"security: scripts can't write programs",
+				"security: game scripts don't get executor powers",
+				"security: files outside the workspace stay hidden",
+				"security: bytecode can't be loaded",
+				"security: blocks can't be bypassed",
+				"queueonteleport",
+				"setrbxclipboard",
+				"setsimulationradius",
+				"clearqueueonteleport",
+				"isrbxactive"
+			],
+			"failed": [
+				{
+					"test": "hookfunction",
+					"reason": "the hooked function took on the hook's environment, so getfenv can tell it was hooked"
+				},
+				{
+					"test": "raknet.send",
+					"reason": "raknet is not enabled"
+				},
+				{
+					"test": "runonactor",
+					"reason": "run_on_actor failed to run on provided actor, linked thread does not exist"
+				},
+				{
+					"test": "mouse2release",
+					"reason": "the input was never held down, so it can't be released while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "game.HttpGet",
+					"reason": "requesting the same url twice never gave a cached response, so NoCache has nothing to skip"
+				},
+				{
+					"test": "getscripthash",
+					"reason": "the hash isn't the sha384 of the script's bytecode"
+				},
+				{
+					"test": "security: requests can't use your login",
+					"reason": "ContentProvider:SetBaseUrl, OpenCloudService:InvokeAsync can be called, which lets scripts send web requests logged in as you"
+				},
+				{
+					"test": "raknet.removereceivehook",
+					"reason": "raknet is not enabled"
+				},
+				{
+					"test": "raknet.addsendhook",
+					"reason": "raknet is not enabled"
+				},
+				{
+					"test": "createcommchannel",
+					"reason": "invalid argument #1 (invalid communication channel ID)"
+				},
+				{
+					"test": "mousemoveabs",
+					"reason": "the mouse went to 1510.08179, 107.213547 then 1510.08179, 107.213547, which doesn't match moving to 1148.5, 614 then 1254.5, 703 while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "getrawmetatable",
+					"reason": "__index gave function: 0x15bd67fab219405c instead of function: 0x8374cfcea785a89f (__index may not be a CClosure)"
+				},
+				{
+					"test": "mouse1click",
+					"reason": "the input wasn't detected while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "security: purchases need your approval",
+					"reason": "MarketplaceService:PromptNativePurchaseWithContext, MarketplaceService:PromptNativePurchaseWithLocalPlayerWithPaymentSessionId, MarketplaceService:PromptNativePurchaseWithPaymentSessionId can be called, which lets scripts spend your Robux without asking"
+				},
+				{
+					"test": "saveinstance",
+					"reason": "didn't return a string"
+				},
+				{
+					"test": "security: your account can't be changed without asking",
+					"reason": "AvatarEditorService:NoPromptApplyProfileConfiguration can be called, which lets scripts change your account without asking"
+				},
+				{
+					"test": "mouse1press",
+					"reason": "the input wasn't detected while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "raknet.addreceivehook",
+					"reason": "raknet is not enabled"
+				},
+				{
+					"test": "hookmetamethod",
+					"reason": "the hook ran for bad calls that should have errored before reaching it (5 times)"
+				},
+				{
+					"test": "security: file:// is blocked",
+					"reason": "InsertService:GetLocalFileContents can be called, which lets scripts read files on your computer"
+				},
+				{
+					"test": "keypress",
+					"reason": "the input wasn't detected while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "mouse1release",
+					"reason": "the input was never held down, so it can't be released while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "getcommchannel",
+					"reason": "invalid argument #1 (invalid communication channel ID)"
+				},
+				{
+					"test": "mouse2press",
+					"reason": "the input wasn't detected while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "keyrelease",
+					"reason": "the input was never held down, so it can't be released while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "keyclick",
+					"reason": "the key press wasn't detected while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "rconsolecreate",
+					"reason": "rconsolehidden returned true after rconsoleshow, so the console didn't open"
+				},
+				{
+					"test": "mousemoverel",
+					"reason": "the mouse moved by 0, 0 then 0, 0, but moving by 25 then 50 should go the same way twice as far while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "messagebox",
+					"reason": "Roblox froze while the message box was open, only 71 frames ran in 2.7 seconds"
+				},
+				{
+					"test": "raknet.removesendhook",
+					"reason": "raknet is not enabled"
+				},
+				{
+					"test": "mouse2click",
+					"reason": "the input wasn't detected while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "runonthread",
+					"reason": "the code didn't run on the thread"
+				},
+				{
+					"test": "mousescroll",
+					"reason": "the scroll up wasn't detected while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "getscriptclosure",
+					"reason": "the closure's script doesn't match"
+				},
+				{
+					"test": "getcallbackvalue",
+					"reason": "didn't return game.OnClose, a callback on the DataModel"
+				}
+			],
+			"skipped": [
+				{
+					"test": "rconsoledestroy",
+					"reason": "couldn't be tested because rconsolecreate failed"
+				},
+				{
+					"test": "rconsolesettitle",
+					"reason": "couldn't be tested because rconsolecreate failed"
+				},
+				{
+					"test": "getactorthreads",
+					"reason": "couldn't be tested because runonactor failed"
+				},
+				{
+					"test": "rconsoleprint",
+					"reason": "couldn't be tested because rconsolecreate failed"
+				},
+				{
+					"test": "rconsolewarn",
+					"reason": "couldn't be tested because rconsolecreate failed"
+				},
+				{
+					"test": "hookproto",
+					"reason": "couldn't be tested because isprotohooked is missing"
+				},
+				{
+					"test": "getactors",
+					"reason": "couldn't be tested because runonactor failed"
+				},
+				{
+					"test": "isparallel",
+					"reason": "couldn't be tested because runonactor failed"
+				},
+				{
+					"test": "rconsoleerr",
+					"reason": "couldn't be tested because rconsolecreate failed"
+				},
+				{
+					"test": "rconsoleinfo",
+					"reason": "couldn't be tested because rconsolecreate failed"
+				},
+				{
+					"test": "rconsoleclear",
+					"reason": "couldn't be tested because rconsolecreate failed"
+				},
+				{
+					"test": "getactorfromthread",
+					"reason": "couldn't be tested because runonactor failed"
+				},
+				{
+					"test": "restoreproto",
+					"reason": "couldn't be tested because isprotohooked is missing"
+				}
+			],
+			"missing": [
+				"hasmetafield",
+				"appendfileasync",
+				"makewriteable",
+				"DirectoryWatcher.new",
+				"readfileasync",
+				"renamefile",
+				"getfilesize",
+				"isstackhidden",
+				"getobjectreferences",
+				"Regex.new",
+				"getobjects",
+				"writecustomasset",
+				"iscorescript",
+				"getmetafield",
+				"hasmetatable",
+				"loadfileasync",
+				"getoriginalenv",
+				"writefileasync",
+				"iswriteable",
+				"raknet.receive",
+				"Regex.Escape",
+				"isprotohooked",
+				"getfflagtype",
+				"movefile",
+				"getfunctionreferences",
+				"getclipboard"
+			],
+			"notTested": []
+		},
+		{
 			"name": "Xeno",
 			"version": "v1.3.65",
 			"debunc": "v2.12.0",
