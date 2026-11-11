@@ -1998,6 +1998,226 @@ const Tests: any = {
 		end,
 	},
 
+	getoriginalenv = {
+		Test = function()
+			const GetOriginalEnv = getoriginalenv
+			const HookFunction = Formatters.CheckExist("hookfunction")
+			const HookMetamethod = Formatters.CheckExist("hookmetamethod")
+			const Genv = getgenv()
+			const Environment = GetOriginalEnv()
+
+			Formatters.CheckReturnType(Environment, "table")
+
+			const Missing = {}
+
+			for _, Name in {"loadstring", "getgenv", "hookfunction", "hookmetamethod", "isfunctionhooked", "identifyexecutor", "game", "workspace", "print", "task", "string", "table", "debug"} do
+				if rawget(Environment, Name) == nil and Environment[Name] == nil then
+					table.insert(Missing, Name)
+				end
+			end
+
+			assert(#Missing == 0, `the original env is missing {table.concat(Missing, ", ")}`)
+			assert(
+				not pcall(function()
+					Environment.debUNC = true
+				end)
+					and not pcall(function()
+						Environment.identifyexecutor = function() end
+					end)
+					and not pcall(function()
+						Environment.string.rep = function() end
+					end),
+				"the returned table allows values in it to be changed, it needs to be frozen"
+			)
+
+			const function TryHook(Target: Function): boolean
+				local Original
+				const Success = pcall(function()
+					Original = HookFunction(Target, function(...)
+						return Original(...)
+					end)
+				end)
+
+				if Success and Original then
+					pcall(HookFunction, Target, Original)
+				end
+
+				return Success
+			end
+
+			assert(not TryHook(GetOriginalEnv) and not TryHook(Environment.identifyexecutor), "getoriginalenv or a function in it could be hooked")
+
+			const Replaced = pcall(function()
+				Genv.getoriginalenv = function() end
+			end) and Genv.getoriginalenv ~= GetOriginalEnv
+
+			if Replaced then
+				rawset(Genv, "getoriginalenv", GetOriginalEnv)
+			end
+
+			assert(not Replaced, "getoriginalenv could be replaced in getgenv()")
+
+			const IdentifyExecutor = Genv.identifyexecutor
+			const RealName = IdentifyExecutor()
+			local IdentifyOriginal
+			local IdentifyRestored = false
+
+			AddCleanup(function()
+				if not IdentifyRestored and IdentifyOriginal then
+					HookFunction(IdentifyExecutor, IdentifyOriginal)
+				end
+
+				Genv.identifyexecutor = IdentifyExecutor
+			end)
+
+			IdentifyOriginal = HookFunction(IdentifyExecutor, function()
+				return "debUNC"
+			end)
+
+			const HookedName = Environment.identifyexecutor()
+			const FreshHookedName = GetOriginalEnv().identifyexecutor()
+			const Detected = Environment.isfunctionhooked(IdentifyExecutor)
+
+			HookFunction(IdentifyExecutor, IdentifyOriginal)
+			IdentifyRestored = true
+
+			Genv.identifyexecutor = function()
+				return "debUNC"
+			end
+
+			const ReplacedName = GetOriginalEnv().identifyexecutor()
+
+			Genv.identifyexecutor = IdentifyExecutor
+
+			const Rep = string.rep
+			local RepOriginal
+			local RepRestored = false
+
+			AddCleanup(function()
+				if not RepRestored and RepOriginal then
+					HookFunction(Rep, RepOriginal)
+				end
+			end)
+
+			RepOriginal = HookFunction(Rep, function()
+				return "debUNC"
+			end)
+
+			const RepResult = Environment.string.rep("a", 2)
+
+			HookFunction(Rep, RepOriginal)
+			RepRestored = true
+
+			assert(HookedName == RealName and FreshHookedName == RealName, "getoriginalenv().identifyexecutor ran the hooked version instead of the original")
+			assert(ReplacedName == RealName, "getoriginalenv().identifyexecutor ran the replaced version instead of the original")
+			assert(Detected == true, "getoriginalenv().isfunctionhooked didn't see that identifyexecutor was hooked")
+			assert(RepResult == "aa", "getoriginalenv().string.rep ran the hooked version instead of the original")
+
+			const OriginalGame = GetOriginalEnv(game)
+			local NamecallRuns, IndexRuns, GetServiceRuns = 0, 0, 0
+			local NamecallOriginal, IndexOriginal, GetServiceOriginal
+			const GetService = game.GetService
+
+			const function Unhook()
+				if NamecallOriginal then
+					pcall(HookMetamethod, game, "__namecall", NamecallOriginal)
+					NamecallOriginal = nil
+				end
+
+				if IndexOriginal then
+					pcall(HookMetamethod, game, "__index", IndexOriginal)
+					IndexOriginal = nil
+				end
+
+				if GetServiceOriginal then
+					pcall(HookFunction, GetService, GetServiceOriginal)
+					GetServiceOriginal = nil
+				end
+			end
+
+			AddCleanup(Unhook)
+
+			NamecallOriginal = HookMetamethod(game, "__namecall", function(...)
+				NamecallRuns += 1
+
+				return NamecallOriginal(...)
+			end)
+
+			IndexOriginal = HookMetamethod(game, "__index", function(...)
+				IndexRuns += 1
+
+				return IndexOriginal(...)
+			end)
+
+			const ServiceSuccess, Service = pcall(function()
+				return OriginalGame:GetService("Workspace")
+			end)
+			const ServiceNamecallRuns = NamecallRuns
+			const NameSuccess, Name = pcall(function()
+				return OriginalGame.Name
+			end)
+			const NameIndexRuns = IndexRuns
+			const OriginalWorkspace = select(2, pcall(function()
+				return OriginalGame.Workspace
+			end))
+			const NamecallRunsBeforeChild = NamecallRuns
+
+			pcall(function()
+				OriginalWorkspace:GetChildren()
+			end)
+
+			const ChildNamecallRuns = NamecallRuns - NamecallRunsBeforeChild
+
+			if NamecallOriginal then
+				pcall(HookMetamethod, game, "__namecall", NamecallOriginal)
+				NamecallOriginal = nil
+			end
+
+			if IndexOriginal then
+				pcall(HookMetamethod, game, "__index", IndexOriginal)
+				IndexOriginal = nil
+			end
+
+			GetServiceOriginal = HookFunction(GetService, function(...)
+				GetServiceRuns += 1
+
+				return GetServiceOriginal(...)
+			end)
+
+			game:GetService("Workspace")
+
+			const ControlGetServiceRuns = GetServiceRuns
+
+			pcall(function()
+				return OriginalGame:GetService("Workspace")
+			end)
+
+			const OriginalGetServiceRuns = GetServiceRuns - ControlGetServiceRuns
+
+			Unhook()
+
+			const MetatableTarget = setmetatable({}, {__index = function()
+				return "debUNC Original"
+			end})
+			const MetatableOriginal = HookMetamethod(MetatableTarget, "__index", function()
+				return "debUNC Hooked"
+			end)
+			const MetatableSuccess, MetatableResult = pcall(function()
+				return GetOriginalEnv(MetatableTarget).debUNC
+			end)
+
+			HookMetamethod(MetatableTarget, "__index", MetatableOriginal)
+
+			assert(ServiceSuccess and Service == workspace, `getoriginalenv(game):GetService("Workspace") should return workspace, got '{Service}'`)
+			assert(ServiceNamecallRuns == 0, "calling a method on getoriginalenv(game) ran the __namecall hook")
+			assert(NameSuccess and Name == game.Name and NameIndexRuns == 0, "reading a property on getoriginalenv(game) ran the hooked __index")
+			assert(ChildNamecallRuns == 0, "when calling a method on an indexed object in getoriginalenv(game) it ran the hooked __namecall")
+			assert(ControlGetServiceRuns == 0 or OriginalGetServiceRuns == 0, "getoriginalenv(game):GetService ran the hooked GetService instead of the original")
+			assert(MetatableSuccess and MetatableResult == "debUNC Original", "calling getoriginalenv with a metatable arg returned the hooked metamethods")
+			assert(not pcall(GetOriginalEnv, 1), "should error when passing an arg value that isn't an object or table")
+		end,
+	},
+
 	hookmetamethod = {
 		Test = function()
 			const OriginalIndex = function() end
@@ -2420,6 +2640,40 @@ const Tests: any = {
 				ClonedReference:GetPivot().Position == NewPosition,
 				"setting the Position property of the original reference doesn't update the cloned reference"
 			)
+
+			ClonedReference.Name = "debUNC"
+
+			assert(Part.Name == "debUNC", "changing the .Name property on the cloned ref didn't change it on the original")
+			assert(ClonedReference.ClassName == "Part" and ClonedReference:IsA("BasePart"), "the cloned ref's inherited class doesn't match the original Part")
+
+			const Child = Instance.new("Folder")
+
+			Child.Parent = Part
+
+			assert(ClonedReference:FindFirstChild("Folder") == Child, "FindFirstChild on the cloned reference didn't find the original's child")
+
+			local Changed = false
+
+			ClonedReference.Changed:Connect(function()
+				Changed = true
+			end)
+
+			Part.Transparency = 0.5
+
+			assert(WaitFor(function()
+				return Changed
+			end, 1), "the cloned ref's .Changed event didn't fire when changing a property on the original ref")
+
+			const Players = game:GetService("Players")
+
+			assert(cloneref(Players).LocalPlayer == Players.LocalPlayer, "when trying to get the LocalPlayer from a cloned Players service, it didn't give the same as the original")
+			assert(not pcall(cloneref, {}) and not pcall(cloneref, "debUNC"), "should error when passing an arg value that isn't an Instance")
+
+			ClonedReference:Destroy()
+
+			assert(not pcall(function()
+				Part.Parent = workspace
+			end), "destroying the cloned ref didn't destroy the original")
 		end,
 	},
 
@@ -2440,21 +2694,25 @@ const Tests: any = {
 
 			assert(CheckCaller() == true, "should return true when called by the executor")
 
-			const FoundModule, CameraModule = pcall(function()
-				return GetPlayerModule().CameraModule
+			const FoundModule, ControlModule = pcall(function()
+				return GetPlayerModule().ControlModule
 			end)
 
-			assert(FoundModule, "BaseCamera doesn't exist, go to a normal game")
+			assert(FoundModule, "ControlModule doesn't exist, go to a normal game")
 
-			const Success, Camera = pcall(require, CameraModule.BaseCamera)
+			const Success, Controller = pcall(require, ControlModule.BaseCharacterController)
 
-			assert(Success, `failed to require BaseCamera with the error {Camera}`)
+			assert(Success, `failed to require BaseCharacterController with the error {Controller}`)
 
-			const Old = Camera.GetSubjectPosition
+			const Old = Controller.GetMoveVector
 			local Called: boolean?
 
-			Camera.GetSubjectPosition = function(...)
-				Camera.GetSubjectPosition = Old
+			AddCleanup(function()
+				Controller.GetMoveVector = Old
+			end)
+
+			Controller.GetMoveVector = function(...)
+				Controller.GetMoveVector = Old
 				Called = CheckCaller()
 				return Old(...)
 			end
@@ -2463,13 +2721,13 @@ const Tests: any = {
 				return Called ~= nil
 			end, 2)
 
-			Camera.GetSubjectPosition = Old
+			Controller.GetMoveVector = Old
 
 			if Called == nil then
-				error({Skipped = "the camera never called the hooked function", Environment = true})
+				error({Skipped = "the ControlModule never called the hooked function", Environment = true})
 			end
 
-			assert(Called == false, "should return false when called by the CameraModule.BaseCamera")
+			assert(Called == false, "should return false when called by the ControlModule")
 		end,
 	},
 
@@ -2638,32 +2896,36 @@ const Tests: any = {
 
 	getcallingscript = {
 		Test = function()
-			const Success, CameraWrapper = pcall(require, GetPlayerModule().CommonUtils.CameraWrapper)
+			const Success, Controller = pcall(require, GetPlayerModule().ControlModule.BaseCharacterController)
 
 			assert(Success, "your executor needs to support 'require' to run this test")
 
-			const GetCameraOriginal = CameraWrapper.getCamera
+			const GetMoveVectorOriginal = Controller.GetMoveVector
 			local CallingScript
 			local Called = false
 
-			CameraWrapper.getCamera = function(...)
-				CameraWrapper.getCamera = GetCameraOriginal
+			AddCleanup(function()
+				Controller.GetMoveVector = GetMoveVectorOriginal
+			end)
+
+			Controller.GetMoveVector = function(...)
+				Controller.GetMoveVector = GetMoveVectorOriginal
 				Called = true
 				CallingScript = getcallingscript()
-				return GetCameraOriginal(...)
+				return GetMoveVectorOriginal(...)
 			end
 
 			if not WaitFor(function()
 				return Called
 			end, 2) then
-				CameraWrapper.getCamera = GetCameraOriginal
-				error({Skipped = "the camera never called the hooked function", Environment = true})
+				Controller.GetMoveVector = GetMoveVectorOriginal
+				error({Skipped = "the ControlModule never called the hooked function", Environment = true})
 			end
 
 			assert(CallingScript, "returned nil when it should've returned a script")
 			assert(
 				CallingScript:IsDescendantOf(GetPlayerModule()),
-				`the calling script of CameraWrapper.getCamera should be inside of PlayerModule, got '{CallingScript}'`
+				`the calling script of BaseCharacterController.GetMoveVector should be inside of PlayerModule, got '{CallingScript}'`
 			)
 		end,
 	},
@@ -6147,26 +6409,6 @@ const GetGlobalEnvironment: () -> {[string]: any} = getgenv or function()
 	return {}
 end
 
-const function RestoreFunctions()
-	const GlobalEnvironment = GetGlobalEnvironment()
-
-	if not GlobalEnvironment.OriginalFunctions then
-		return
-	end
-
-	for Name, OriginalFunction in GlobalEnvironment.OriginalFunctions do
-		getfenv()[Name] = OriginalFunction
-	end
-
-	for Name in GlobalEnvironment.NonExistentFunctions do
-		getfenv()[Name] = nil
-	end
-
-	GlobalEnvironment.OriginalFunctions = nil
-end
-
-RestoreFunctions()
-
 local ExecutorName, ExecutorVersion = (identifyexecutor or function()
 	return "Unknown Executor", "0.0.0"
 end)()
@@ -6174,7 +6416,11 @@ end)()
 ExecutorName = ExecutorName or "Unknown Executor"
 ExecutorVersion = ExecutorVersion or "0.0.0"
 
+local WriteLog = function(_Message: string) end
+
 const function DisplayMessage(Message: string)
+	WriteLog(Message)
+
 	if ExecutorName == "AWP" then
 		print(Message)
 		return
@@ -6186,11 +6432,9 @@ const function DisplayMessage(Message: string)
 end
 
 const Settings: {[string]: any} = {
-	FakeFunctions = false,
-	GetTests = false,
-	GetUnaddedFunctions = false,
 	DebugMode = false,
 	CrashTests = false,
+	LogResults = false,
 }
 
 for Name, Value in shared.Settings or {} do
@@ -6205,6 +6449,48 @@ for Name in Settings do
 	end
 
 	Settings[Name] = Saved
+end
+
+local LogPath: string?
+
+if Settings.LogResults and writefile and appendfile then
+	const Path = `debUNC logs/debUNC {(ExecutorName:gsub("[^%w%s%.%-_]", ""))} {os.date("%Y-%m-%d %H-%M-%S")}.txt`
+
+	pcall(makefolder, "debUNC logs")
+
+	if pcall(writefile, Path, "") then
+		LogPath = Path
+	end
+end
+
+WriteLog = function(Message: string)
+	if not LogPath then
+		return
+	end
+
+	pcall(appendfile, LogPath, `[{os.date("%H:%M:%S")}] {Message}\n`)
+end
+
+const RobloxPrint, RobloxWarn = print, warn
+
+const function JoinMessage(...): string
+	const Parts = table.pack(...)
+
+	for Index = 1, Parts.n do
+		Parts[Index] = tostring(Parts[Index])
+	end
+
+	return table.concat(Parts, " ", 1, Parts.n)
+end
+
+local function print(...)
+	RobloxPrint(...)
+	WriteLog(JoinMessage(...))
+end
+
+local function warn(...)
+	RobloxWarn(...)
+	WriteLog(JoinMessage(...))
 end
 
 if Settings.CrashTests then
@@ -6252,48 +6538,6 @@ pcall(game:GetService("StarterGui").SetCore, game:GetService("StarterGui"), "Dev
 DisplayMessage("If your Roblox crashes or freezes during these tests, run `shared.DebugMode = true` before debUNC to prevent it or find the crashing function.")
 
 const IsFunctionHooked = isfunctionhooked
-
-if Settings.FakeFunctions then
-	const NewCClosure: ((...any) -> ...any) -> (...any) -> ...any = newcclosure
-	const OriginalFunctions = {}
-	const NonExistentFunctions = {}
-
-	DisplayMessage("Faking functions is enabled")
-
-	for FunctionName in Tests do
-		if FunctionName == "getgenv" or FunctionName == "newcclosure" or Tests[FunctionName].Security then
-			continue
-		end
-
-		const LibraryName, MemberName = FunctionName:match("^([^.]+)%.([^.]+)$")
-
-		if LibraryName then
-			const OriginalLibrary = getfenv()[LibraryName]
-
-			if typeof(OriginalLibrary) ~= "table" then
-				continue
-			end
-
-			if OriginalFunctions[LibraryName] == nil then
-				OriginalFunctions[LibraryName] = OriginalLibrary
-				getfenv()[LibraryName] = table.clone(OriginalLibrary)
-			end
-
-			getfenv()[LibraryName][MemberName] = NewCClosure(function() end)
-			continue
-		end
-
-		if not getfenv()[FunctionName] then
-			NonExistentFunctions[FunctionName] = true
-		end
-
-		OriginalFunctions[FunctionName] = getfenv()[FunctionName]
-		getfenv()[FunctionName] = NewCClosure(function() end)
-	end
-
-	GetGlobalEnvironment().OriginalFunctions = OriginalFunctions
-	GetGlobalEnvironment().NonExistentFunctions = NonExistentFunctions
-end
 
 const function StartCallLogging()
 	const HookFunction = hookfunction
@@ -6663,7 +6907,7 @@ if ElapsedTime < MinimumSeconds and PercentageComplete > 80 then
 end
 
 DisplayMessage("❓ The score below is only for how many custom functions are supported and secure.")
-DisplayMessage(`🔵 debUNC v2.11.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
+DisplayMessage(`🔵 debUNC v2.12.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(ElapsedTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
@@ -6687,99 +6931,7 @@ end
 
 Divider()
 
-RestoreFunctions()
-
-if not Settings.GetUnaddedFunctions and not Settings.GetTests then
-	return
+if LogPath then
+	DisplayMessage(`Logged results are available at {LogPath}`)
 end
 
-print("A list of functions and libraries in getfenv() and getgenv() that aren't added to the test.")
-
-Divider()
-
-const Blacklist = {
-	"aunisgay",
-	"aunisafemboy",
-	"iusets is a skid",
-	"queue_on_teleport",
-	"hookfunc",
-	"http.request",
-}
-
-const GetRobloxEnvironment = getrenv
-const RobloxEnvironment = GetRobloxEnvironment and GetRobloxEnvironment() or {}
-const AlreadyChecked = {}
-const VisitedTables = {}
-
-local Copy = ""
-
-const function GetFromEnvironment(Environment, GetTests: boolean?, Library: string?)
-	if VisitedTables[Environment] then
-		return
-	end
-
-	VisitedTables[Environment] = true
-
-	for Name: any, Value: any in Environment do
-		if typeof(Name) ~= "string" then
-			continue
-		end
-
-		if Library then
-			Name = `{Library}.{Name}`
-		end
-
-		if not GetTests and (
-			Tests[Name]
-			or (Name:find("_") and Tests[(Name:gsub("_", ""))])
-			or (typeof(Value) ~= "function" and typeof(Value) ~= "table")
-			or FindFirstFunction(Name, RobloxEnvironment) ~= nil
-			or AlreadyChecked[Name]
-			or table.find(Blacklist, Name)
-		) then
-			continue
-		end
-
-		if typeof(Value) == "table" and getmetatable(Value) ~= nil then
-			continue
-		end
-
-		if typeof(Value) == "table" and not Settings.GetTests then
-			GetFromEnvironment(Value, false, Name)
-			continue
-		end
-
-		AlreadyChecked[Name] = true
-
-		const Message = `"{Name}",`
-
-		Copy ..= `{Message}\n`
-		print(Message)
-	end
-end
-
-if Settings.GetTests then
-	GetFromEnvironment(Tests, true)
-else
-	GetFromEnvironment(getfenv())
-	GetFromEnvironment(GetGlobalEnvironment())
-end
-
-if Copy == "" then
-	print("No unadded functions found.")
-	Divider()
-	return
-end
-
-Divider()
-
-const SetClipboard = setclipboard
-
-if not SetClipboard then
-	return
-end
-
-SetClipboard(Copy)
-print("^ Copied to your clipboard! ^")
-
-Divider()
