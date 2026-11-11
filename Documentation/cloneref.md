@@ -23,3 +23,10 @@ To pass the cloneref test, the function must:
 - Return an Instance.
 - Return a reference that isn't the same as the original reference.
 - Point to the same instance, so changing the original's `Position` also changes the clone's.
+- Pass property changes made through the clone, like `Name`, on to the original.
+- Keep the original's class, so `ClassName` and `IsA` match.
+- Find the original's children through the clone.
+- Fire the clone's `Changed` event when the original changes.
+- Give the same `LocalPlayer` through a cloned `Players` service.
+- Error when given something that isn't an Instance.
+- Destroy the original when the clone is destroyed.

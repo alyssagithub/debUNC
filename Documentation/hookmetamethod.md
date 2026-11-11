@@ -1,4 +1,4 @@
-# hookmetamethod: (Object: any, Metamethod: string, Hook: (...any) -> ...any) -> (...any) -> ...any
+# hookmetamethod: (Object: userdata | table, Metamethod: string, Hook: (...any) -> ...any) -> (...any) -> ...any
 Replaces a metamethod, and returns a function that still runs the original.
 ```lua
 local Original
@@ -11,7 +11,7 @@ end)
 | :- |
 | hook_meta_method |
 # Parameters
-| Object: any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The object with the metamethod.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Object: userdata \| table&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The object with the metamethod.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
 | Metamethod: [string](https://create.roblox.com/docs/luau/strings) | The name of the metamethod. |
 | Hook: (...any) -> ...any | The function to run instead. It's given the same values the original would get, and what it returns is used. |

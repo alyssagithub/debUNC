@@ -1,4 +1,4 @@
-# filtergc: (Type: string, Options: {Keys: {any}?, Values: {any}?, KeyValuePairs: {[any]: any}?, Metatable: table?, Name: string?, IgnoreExecutor: boolean?}, ReturnOne: boolean?) -> any
+# filtergc: (Type: string, Options: {Keys: {any}?, Values: {any}?, KeyValuePairs: {[any]: any}?, Metatable: table?, Name: string?, IgnoreExecutor: boolean?}, ReturnOne: boolean?) -> {function | table} | function | table | nil
 Searches the garbage collector for functions or tables that match the given options.
 ```lua
 local Marker = {Secret = true}
@@ -14,7 +14,7 @@ print(filtergc("table", {Keys = {"Secret"}}, true) == Marker) --> true
 | Options: <pre>{<br>&nbsp;&nbsp;&nbsp;&nbsp;Keys: {any}?,<br>&nbsp;&nbsp;&nbsp;&nbsp;Values: {any}?,<br>&nbsp;&nbsp;&nbsp;&nbsp;KeyValuePairs: {[any]: any}?,<br>&nbsp;&nbsp;&nbsp;&nbsp;Metatable: table?,<br>&nbsp;&nbsp;&nbsp;&nbsp;Name: string?,<br>&nbsp;&nbsp;&nbsp;&nbsp;IgnoreExecutor: boolean?,<br>}</pre> | What to search for, such as Keys or Name. |
 | ReturnOne: [boolean?](https://create.roblox.com/docs/luau/booleans) | Whether to return the first match only. |
 # Returns
-| any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of matches, or the first match.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| {function \| table} \| function \| table \| nil&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of matches, or the first match.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
 # Options
 | Keys: [table?](https://create.roblox.com/docs/luau/tables)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | For tables, keys that the table has to have.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |

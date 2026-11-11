@@ -13,4 +13,4 @@ print(checkcaller()) --> true
 # Test requirements
 To pass the checkcaller test, the function must:
 - Return true when it's called from the executor.
-- Return false when it's called from a game script, such as a hooked function that `BaseCamera` calls.
+- Return false when it's called from a game script, such as a hooked function that `ControlModule` calls.

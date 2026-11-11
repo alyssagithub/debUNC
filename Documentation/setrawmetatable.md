@@ -1,4 +1,4 @@
-# setrawmetatable: (Object: any, Metatable: table) -> ()
+# setrawmetatable: (Object: userdata | table, Metatable: table) -> ()
 Sets the metatable of an object, even if it's locked.
 ```lua
 local Proxy = newproxy()
@@ -11,7 +11,7 @@ print(getmetatable(Proxy) == Metatable) --> true
 | :- |
 | set_raw_metatable |
 # Parameters
-| Object: any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The object to change.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Object: userdata \| table&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The object to change.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
 | Metatable: [table](https://create.roblox.com/docs/luau/tables) | The new metatable. |
 
