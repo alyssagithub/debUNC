@@ -16,3 +16,4 @@ print(isfile("Log.txt")) --> false
 # Test requirements
 To pass the delfile test, the function must:
 - Delete the file, so [isfile](isfile.md) returns `false` for it afterward.
+- Leave other files and their contents alone.

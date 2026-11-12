@@ -17,3 +17,4 @@ print(crypt.decrypt(Encrypted, Key, InitializationVector)) --> Hello world!
 To pass the crypt.decrypt test, the function must:
 - Give back the original text for random strings of 1 to 64 bytes encrypted with [crypt.encrypt](encrypt.md).
 - Fail to give back the original text when it's given the wrong key.
+- Decrypt the published AES-256 CTR test vector correctly.

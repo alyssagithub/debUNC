@@ -17,4 +17,5 @@ print(iscclosure(function() end)) --> false
 # Test requirements
 To pass the iscclosure test, the function must:
 - Return `true` for C closures such as `assert`, `print`, and `task.wait`.
+- Return `true` for a function wrapped with [newcclosure](newcclosure.md).
 - Return `false` for a function made in the executor.

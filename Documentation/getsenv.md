@@ -21,4 +21,4 @@ To pass the getsenv test, the function must:
 - Return the environment of a running LocalScript.
 - Set `script` in the returned environment to that LocalScript.
 - Include globals the running script sets.
-- Return an environment when the script's parent is `nil`.
+- Return an environment when the script's parent is `nil`, with `script` still set to that LocalScript.

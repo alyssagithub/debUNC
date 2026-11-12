@@ -16,3 +16,4 @@ print(Pattern:Match("axb*c") ~= nil) --> false
 To pass the Regex.Escape test, the function must:
 - Return a pattern that matches the original text, like "a.b*c".
 - Escape every special character, so `.` only matches a real dot and not any character.
+- Escape each of `.*+?^$()[]{}|\` so it matches only itself, on its own and all together.

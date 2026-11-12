@@ -17,4 +17,7 @@ print(table.find(getobjectreferences(Target), Holder) ~= nil) --> true
 | :-------- | :------- |
 # Test requirements
 To pass the getobjectreferences test, the function must:
+- Return a table.
 - Find the table that holds a given table.
+- Leave out a table that doesn't hold it.
+- Only return things that really reference it.

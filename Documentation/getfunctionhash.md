@@ -21,3 +21,5 @@ To pass the getfunctionhash test, the function must:
 - Return the same hash every time it's called on the same function.
 - Return different hashes for two different functions.
 - Return the same hash for two functions with the same code.
+- Return a SHA384 hash, 96 hex characters, like the standard.
+- Leave upvalues out of the hash, so two functions with the same code but different upvalues get the same hash.

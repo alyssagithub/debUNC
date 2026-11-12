@@ -21,3 +21,5 @@ To pass the getsignalargumentsinfo test, the function must:
 - Name the argument of a part's `Touched` as `otherPart`, typed as `Instance` or `BasePart`.
 - Return two arguments for `UserInputService.InputBegan`.
 - Name the second argument of `InputBegan` as `gameProcessedEvent`.
+- Return one argument for `workspace.ChildAdded`, typed as `Instance`.
+- Return no arguments for `Destroying`.

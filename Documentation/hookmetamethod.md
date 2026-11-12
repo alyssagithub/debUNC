@@ -26,6 +26,6 @@ To pass the hookmetamethod test, the function must:
 - Undo the hook when the metamethod is hooked back to the returned original.
 - Catch a `game:GetService` call made by the executor when `game`'s `__namecall` is hooked, with [getnamecallmethod](getnamecallmethod.md) giving `GetService`.
 - Return the right result from `game:GetService` while the hook calls the original.
-- Give the same errors as before for bad calls to `game`'s captured `__index` and `__namecall`, without running the hook for them.
+- Give the same errors as before for bad calls to `game`'s captured `__index` and `__namecall`, without running the hook for them, when called from a game script's thread.
 - Keep the `__namecall` hook from being found on the stack from an error handler.
 - Let `WaitForChild` yield through a hooked `__namecall`.

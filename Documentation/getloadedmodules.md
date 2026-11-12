@@ -18,6 +18,6 @@ To pass the getloadedmodules test, the function must:
 - Return a table.
 - Return only ModuleScripts.
 - List each module only once.
-- Leave out `StarterPlayerScripts.PlayerModule`.
 - Include `PlayerScripts.PlayerModule`.
 - Leave out modules that were never required.
+- Include a module after it's required.

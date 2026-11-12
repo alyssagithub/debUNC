@@ -21,4 +21,5 @@ print(isstackhidden(Hook)) --> true
 To pass the isstackhidden test, the function must:
 - Return `false` for a function that isn't hidden.
 - Return `true` after the function is hidden with [setstackhidden](setstackhidden.md).
+- Keep returning `false` for a different function that was never hidden.
 - Return `false` again after the function is shown again.

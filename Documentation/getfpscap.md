@@ -15,4 +15,5 @@ print(getfpscap()) --> 60
 # Test requirements
 To pass the getfpscap test, the function must:
 - Return 10 after [setfpscap](setfpscap.md) sets the cap to 10.
+- Return the new cap after it's set to another value.
 - Return a different value after the cap is set back to 0.

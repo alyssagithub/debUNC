@@ -19,3 +19,4 @@ print(getmetatable(Proxy) == Metatable) --> true
 To pass the setrawmetatable test, the function must:
 - Set the metatable of an object that has none, such as a new proxy.
 - Make the new metatable's metamethods work, so calling the proxy runs `__call` and returns its result.
+- Replace a locked metatable that `setmetatable` can't change, and make its metamethods work.

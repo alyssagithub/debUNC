@@ -15,6 +15,8 @@ end
 # Test requirements
 To pass the getscripts test, the function must:
 - Include the PlayerModule.
+- Include every running LocalScript in PlayerScripts.
 - Return only instances.
 - Return only scripts and ModuleScripts.
+- List each script only once.
 - Return a table.

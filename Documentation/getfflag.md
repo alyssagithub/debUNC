@@ -17,5 +17,6 @@ print(getfflag("TaskSchedulerTargetFps"))
 # Test requirements
 To pass the getfflag test, the function must:
 - Return a string for `MaxFrameBufferSize`.
-- Return a value that isn't empty.
+- Return a value that isn't empty, and is a number for `MaxFrameBufferSize`.
 - Error or return `nil` for a flag that doesn't exist.
+- Return `true` or `false` for a true or false flag.

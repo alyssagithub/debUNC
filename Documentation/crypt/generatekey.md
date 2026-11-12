@@ -10,4 +10,5 @@ print(#base64decode(Key)) --> 32
 # Test requirements
 To pass the crypt.generatekey test, the function must:
 - Return a base64 string that decodes to 32 bytes.
-- Return a different key each time.
+- Return a different key each time, over 32 keys.
+- Return random bytes, not the same byte over and over or a counter.

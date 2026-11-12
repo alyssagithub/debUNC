@@ -12,3 +12,4 @@ print(rawequal(Part, Folder:FindFirstChild("Part"))) --> false
 # Test requirements
 To pass the cache.invalidate test, the function must:
 - Remove the instance from the cache, so looking it up again gives a new reference.
+- Keep the new reference pointing at the same instance.

@@ -22,5 +22,6 @@ print(debug.getproto(Outer, 1))
 | :-------- | :------- |
 # Test requirements
 To pass the debug.getproto test, the function must:
-- Return the inner function at the given index.
+- Return the inner function at the given index as a function.
+- Return the right inner function for each index, so index 2 gives the second one.
 - Return a function with the inner function's name.

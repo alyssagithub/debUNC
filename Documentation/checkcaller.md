@@ -13,4 +13,5 @@ print(checkcaller()) --> true
 # Test requirements
 To pass the checkcaller test, the function must:
 - Return true when it's called from the executor.
+- Return true inside `task.spawn`, after `task.wait()` and inside `pcall` from the executor.
 - Return false when it's called from a game script, such as a hooked function that `ControlModule` calls.

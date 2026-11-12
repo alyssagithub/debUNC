@@ -29,6 +29,7 @@ To pass the getoriginalenv test, the function must:
 - Give the original `identifyexecutor` after it's hooked or replaced, and the original `string.rep` after it's hooked.
 - Let `isfunctionhooked` from it see that `identifyexecutor` was hooked.
 - Return an object whose methods and properties skip a hooked `__namecall` and `__index`, including on objects indexed from it.
+- Return Instances when indexing children of the object, like `Workspace`.
 - Return an object whose methods skip a method hooked with `hookfunction`, like `GetService`.
 - Return a table's original metamethods when given a table whose metatable was hooked.
 - Error when given something that isn't an object or table.

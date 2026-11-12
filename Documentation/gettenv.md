@@ -28,3 +28,4 @@ To pass the gettenv test, the function must:
 - Return this script's environment for a thread started by this script.
 - Only include globals that `getfenv()` also has.
 - Keep the environment of a thread that already finished.
+- Return a game LocalScript's own environment for its thread, with `script` set to that LocalScript and no executor functions in it.

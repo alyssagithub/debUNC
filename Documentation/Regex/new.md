@@ -26,3 +26,5 @@ To pass the Regex.new test, the function must:
 - Put each capture group after it, as "eee" for that same match.
 - Return nil from Match when nothing matches.
 - Replace every match with Replace, so "deb deeb" becomes "Z Z".
+- Support regex syntax that Lua patterns don't have, like `cat|dog`, `\d{3}`, the non-greedy `a.*?b` and the non-capturing group `(?:ab)`.
+- Error on a broken pattern, like `(abc`.

@@ -19,3 +19,4 @@ print(loadfile("Number.lua")()) --> 42
 # Test requirements
 To pass the loadfile test, the function must:
 - Return a function that runs the file's code, passing its arguments through `...` and returning its result.
+- Not return a function for a file that doesn't exist.

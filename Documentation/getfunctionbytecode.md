@@ -19,4 +19,6 @@ print(#getfunctionbytecode(Greet))
 To pass the getfunctionbytecode test, the function must:
 - Return a string.
 - Return bytecode that isn't empty.
+- Return the same bytecode each time it's called on the same function.
 - Return different bytecode for two different functions.
+- Include the function's own string constants, and not another function's.

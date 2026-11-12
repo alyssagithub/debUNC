@@ -15,4 +15,6 @@ print(isfolder("Logs")) --> true
 # Test requirements
 To pass the makefolder test, the function must:
 - Make a folder that [isfolder](isfolder.md) finds afterward.
+- Make a folder inside another folder.
+- Keep the files and folders inside a folder when it's called on that folder again.
 - Keep an existing file and its contents when called on that file's path.

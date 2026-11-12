@@ -18,3 +18,5 @@ To pass the getsignalarguments test, the function must:
 - Return a table.
 - Return one argument for a part's `Touched`, typed as `Instance` or `BasePart`.
 - Return two arguments for `UserInputService.InputBegan`.
+- Return one argument for `workspace.ChildAdded`, typed as `Instance`.
+- Return no arguments for `Destroying`.

@@ -26,5 +26,7 @@ NumberValue.Value = 5
 # Test requirements
 To pass the hooksignal test, the function must:
 - Call the hook when the signal fires.
+- Give the hook the connected function in its Info, and the signal's values.
 - Stop the signal's connections from firing when the hook returns `false`.
+- Leave the same signal on other instances alone.
 - Let the signal's connections fire when the hook returns `true`.

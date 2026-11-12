@@ -13,5 +13,7 @@ print(table.find(getallthreads(), coroutine.running()) ~= nil) --> true
 
 # Test requirements
 To pass the getallthreads test, the function must:
+- Return a table of only threads.
 - Include the thread that calls it.
+- Include a thread that was spawned and is waiting.
 - Return more than one thread.

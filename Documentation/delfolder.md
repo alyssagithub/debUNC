@@ -15,4 +15,6 @@ print(isfolder("Logs")) --> false
 
 # Test requirements
 To pass the delfolder test, the function must:
-- Delete the folder even when it has a file in it, so [isfolder](isfolder.md) returns `false` for it afterward.
+- Delete the folder even when it has files and folders in it, so [isfolder](isfolder.md) returns `false` for it afterward.
+- Delete everything inside the folder, including files inside its sub-folders.
+- Leave other folders and their files alone.

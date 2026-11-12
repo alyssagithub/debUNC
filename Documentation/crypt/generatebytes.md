@@ -13,3 +13,5 @@ print(#base64decode(Bytes)) --> 16
 # Test requirements
 To pass the crypt.generatebytes test, the function must:
 - Return a base64 string that decodes to the requested number of bytes.
+- Return different bytes each time, over 32 calls.
+- Return random bytes, not the same byte over and over or a counter.

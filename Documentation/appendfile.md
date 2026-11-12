@@ -15,4 +15,4 @@ print(readfile("Log.txt")) --> Hello world!
 | Data: [string](https://create.roblox.com/docs/luau/strings) | The text to add. |
 # Test requirements
 To pass the appendfile test, the function must:
-- Add the text to the end of the file without changing what was already in it.
+- Add the text to the end of the file without changing what was already in it, including null characters and `\r\n` line endings.

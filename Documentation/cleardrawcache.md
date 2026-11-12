@@ -11,4 +11,5 @@ print(Line.__OBJECT_EXISTS) --> false
 | clear_draw_cache |
 # Test requirements
 To pass the cleardrawcache test, the function must:
-- Remove every drawing object, so `__OBJECT_EXISTS` is false afterward.
+- Remove every drawing object of every type, so `__OBJECT_EXISTS` is false afterward.
+- Leave [Drawing.new](Drawing/new.md) working afterward.

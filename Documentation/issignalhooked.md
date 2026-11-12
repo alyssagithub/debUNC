@@ -19,3 +19,4 @@ print(issignalhooked(NumberValue.Changed)) --> false
 To pass the issignalhooked test, the function must:
 - Return `false` for a signal that isn't hooked.
 - Return `true` after the signal is hooked with [hooksignal](hooksignal.md).
+- Return `false` after the signal is restored with [restoresignal](restoresignal.md).

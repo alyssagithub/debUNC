@@ -20,4 +20,5 @@ print(isfunctionhooked(Greet)) --> true
 To pass the isfunctionhooked test, the function must:
 - Return `false` for a function that isn't hooked.
 - Return `true` for a function hooked with [hookfunction](hookfunction.md).
+- Keep returning `false` for a different function that was never hooked.
 - Return `false` after the function is restored with [restorefunction](restorefunction.md).

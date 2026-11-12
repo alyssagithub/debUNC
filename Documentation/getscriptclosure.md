@@ -18,3 +18,4 @@ print(getfenv(getscriptclosure(Script)).script == Script) --> true
 To pass the getscriptclosure test, the function must:
 - Return a function for a LocalScript.
 - Return a function whose environment's `script` is that LocalScript.
+- Return a function for a ModuleScript that gives back a table with the same keys as `require` does when it's called.

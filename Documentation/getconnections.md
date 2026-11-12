@@ -23,17 +23,18 @@ Connection:Disconnect()
 # Test requirements
 To pass the getconnections test, the function must:
 - Return a table.
-- Return one entry for a signal with one connection.
+- Return one entry for each connection on a signal with two connections.
 - Give each connection a `Fire` method.
 - Set `Function` to the function that was connected.
-- Fire the connection with the values passed to `Fire`.
+- Fire only that connection with the values passed to `Fire`.
+- Fire the connection when `Defer` is called.
 - Set `Thread` to a thread.
 - Set `Enabled` to `true` for an active connection.
 - Set `Enabled` to `false` after `Disable` is called.
-- Stop the connection from firing after `Disable` is called.
+- Stop the connection from firing after `Disable` is called, while the other connection on the signal keeps firing.
 - Set `Enabled` to `true` after `Enable` is called.
 - Let the connection fire again after `Enable` is called.
-- Stop the connection from firing after `Disconnect` is called.
-- Leave a connection out after it's disconnected.
+- Stop the connection from firing after `Disconnect` is called, while the other connection on the signal keeps firing.
+- Leave a connection out after it's disconnected, and keep the other one listed.
 - Include connections made with `Once`.
 - Give each connection `Enabled`, `ForeignState` and `LuaConnection` as booleans, and `Function`, `Fire`, `Defer`, `Disconnect`, `Disable` and `Enable` as functions.

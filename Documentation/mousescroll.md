@@ -13,6 +13,6 @@ mousescroll(120)
 
 # Test requirements
 To pass the mousescroll test, the function must:
-- Fire a mouse wheel input that scrolls up for a positive amount.
-- Fire a mouse wheel input that scrolls down for a negative amount.
+- Fire a mouse wheel input that scrolls up for a positive amount, and none that scroll down.
+- Fire a mouse wheel input that scrolls down for a negative amount, and none that scroll up.
 - Reach Roblox even when the Roblox window isn't focused, without sending input to other windows.

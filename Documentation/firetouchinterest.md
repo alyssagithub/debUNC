@@ -17,5 +17,5 @@ firetouchinterest(workspace.Pad, Root, 1)
 
 # Test requirements
 To pass the firetouchinterest test, the function must:
-- Fire `Touched` with the touching part within 5 seconds when the last argument is 0.
+- Fire `Touched` with the touching part within 5 seconds when the last argument is 0, without also firing `TouchEnded`.
 - Fire `TouchEnded` with the touching part within 5 seconds when the last argument is 1.

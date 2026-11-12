@@ -48,6 +48,7 @@ To pass the hookfunction test, the function must:
 - Hook a NewCClosure with a LuaClosure, and keep it showing as `[C]` in `debug.info`.
 - Hook a NewCClosure with a C function, such as `task.wait`.
 - Run the hook once per call without also running the original, and return an original that isn't the hooked function itself.
-- Keep the hooked function's environment, so `getfenv` doesn't give the hook's environment.
+- Pass the hook every argument the hooked function was called with, including `game` for `game.IsLoaded`.
+- Keep the hooked function's environment, so `getfenv` from a game script's thread doesn't give the hook's environment.
 - Hook and restore `game.IsLoaded`, and work when `game.GetFullName` is used as the hook.
 - Keep the hooked function's `tostring` address and `debug.info` name after hooking it with a NewCClosure.

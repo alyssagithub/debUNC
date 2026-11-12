@@ -17,3 +17,4 @@ restoresignal(NumberValue.Changed)
 To pass the restoresignal test, the function must:
 - Stop calling a hook added with [hooksignal](hooksignal.md).
 - Keep the signal's own connections firing after it's restored.
+- Make [issignalhooked](issignalhooked.md) return `false` after it's restored.

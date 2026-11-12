@@ -18,4 +18,6 @@ To pass the crypt.encrypt test, the function must:
 - Return encrypted text and an IV that [crypt.decrypt](decrypt.md) can turn back into the original text.
 - Use a new IV each time, so encrypting the same text twice gives different results.
 - Produce encrypted text that a different key can't decrypt.
+- Round trip empty text and 16 byte text through [crypt.decrypt](decrypt.md).
 - Support CTR mode and match the published AES-256 CTR test vector.
+- Support CBC mode and match the first block of the NIST SP 800-38A AES-256 CBC test vector.

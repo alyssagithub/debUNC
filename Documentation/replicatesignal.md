@@ -15,4 +15,4 @@ replicatesignal(game.Players.LocalPlayer.Kill)
 # Test requirements
 To pass the replicatesignal test, the function must:
 - Error when it's given a signal that can't be replicated, such as `workspace.ChildAdded`.
-- Replicate `Player.Kill` to the server, so the player's character dies within 5 seconds.
+- Replicate `Player.Kill` to the server, so the player's character dies within 5 seconds and respawns.

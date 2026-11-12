@@ -17,5 +17,6 @@ print(#Bytecode)
 # Test requirements
 To pass the getscriptbytecode test, the function must:
 - Return a string for the PlayerModule.
-- Return bytecode that isn't empty.
+- Return bytecode that isn't empty, at least 64 bytes long and not starting with a 0 byte.
+- Return the same bytecode each time for the same script.
 - Return different bytecode for different scripts, such as PlayerModule and CameraModule.

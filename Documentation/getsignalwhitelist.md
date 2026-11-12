@@ -12,4 +12,5 @@ end
 To pass the getsignalwhitelist test, the function must:
 - Return a table.
 - Include more than one signal.
-- Give each entry as a table with `Event` and `Parent` strings.
+- Give each entry as a table with `Event` and `Parent` strings that aren't empty.
+- Include `Player.Kill`.

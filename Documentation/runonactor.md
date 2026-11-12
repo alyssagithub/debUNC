@@ -19,5 +19,6 @@ runonactor(Actor, "print(...)", "Hello world!") --> Hello world!
 # Test requirements
 To pass the runonactor test, the function must:
 - Run the code it's given on the actor, passing along the arguments it's given.
+- Run the code on the actor's own thread, so [getactorfromthread](getactorfromthread.md) returns the actor or `task.desynchronize` works there.
 - Give the code access to executor functions like [getgenv](getgenv.md) and [hookfunction](hookfunction.md).
 - Run the code as executor code, so [checkcaller](checkcaller.md) returns `true`.

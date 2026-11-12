@@ -21,4 +21,3 @@ To pass the getcustomasset test, the function must:
 - Return a string.
 - Return an id that starts with `rbxasset://`.
 - Return an id that loads successfully for an image file.
-- Use the file's contents, so a file that isn't an image doesn't load as one.

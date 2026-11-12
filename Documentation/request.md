@@ -38,10 +38,10 @@ print(Response.Body)
 # Test requirements
 To pass the request test, the function must:
 - Send a GET request with headers and a query without erroring.
-- Return a table with a `StatusCode` of 200, a `StatusMessage` of `"OK"`, and a string `Body`.
+- Return a table with a `StatusCode` of 200, a `StatusMessage` of `"OK"`, `Success` set to `true`, and a string `Body`.
 - Send the headers and query it's given, so the server echoes them back.
 - Send a fingerprint (HWID) header.
-- Send POST, PUT, PATCH, and DELETE requests with the method they're given.
+- Send POST, PUT, PATCH, and DELETE requests with the method and body they're given.
 - Return a response with `Success` set to `false` and a `StatusCode` of 404 for a missing page, along with its `Headers` table.
 - Return the full body for 1,024 random bytes.
 - Follow redirects, returning a `StatusCode` of 200 after 2 redirects.

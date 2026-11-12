@@ -18,4 +18,7 @@ print(table.find(getfunctionreferences(Greet), Holder) ~= nil) --> true
 
 # Test requirements
 To pass the getfunctionreferences test, the function must:
+- Return a table.
 - Include the table that holds the function.
+- Leave out a table that doesn't hold it.
+- Only return things that really reference it.

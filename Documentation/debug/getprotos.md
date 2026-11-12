@@ -23,4 +23,5 @@ print(#debug.getprotos(Outer)) --> 1
 To pass the debug.getprotos test, the function must:
 - Return a table.
 - Include every inner function, so a function with 2 inner functions gives 2.
+- Return only functions in the table.
 - List the inner functions in the order they're written.

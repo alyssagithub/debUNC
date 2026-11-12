@@ -14,3 +14,4 @@ print(Folder:FindFirstChildWhichIsA("Instance") == Fire) --> true
 # Test requirements
 To pass the cache.replace test, the function must:
 - Replace the instance in the cache, so looking up the original instance gives back the new one.
+- Leave the real instances where they were, so the new one isn't moved into the original's parent.

@@ -15,3 +15,4 @@ print(table.find(getinstances(), Part) ~= nil) --> true
 # Test requirements
 To pass the getinstances test, the function must:
 - Include a newly made Part.
+- Include a Part parented to workspace.

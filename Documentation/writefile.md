@@ -16,5 +16,6 @@ print(readfile("Log.txt")) --> Hello world!
 # Test requirements
 To pass the writefile test, the function must:
 - Write the exact text it's given, including null characters, so [readfile](readfile.md) returns it.
-- Write a 1 MB file that reads back unchanged.
+- Write a 1 MB file of random bytes that reads back unchanged.
+- Write every byte from 0 to 255 and `\r\n` line endings without changing them.
 - Replace the whole file when it writes shorter text over longer text.
