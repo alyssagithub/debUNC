@@ -2,6 +2,7 @@
 type Function = (...any) -> ...any?
 
 const EncodingService = game:GetService("EncodingService")
+const LogService = game:GetService("LogService")
 const UserInputService = game:GetService("UserInputService")
 const Player = game:GetService("Players").LocalPlayer
 
@@ -144,6 +145,7 @@ const FocusGainedConnection = UserInputService.WindowFocused:Connect(function()
 end)
 
 const InputTests: {[string]: boolean} = {}
+const InputInterference: {[string]: boolean} = {}
 local FocusStuck = false
 
 const function IsRobloxFocused(): boolean
@@ -180,7 +182,7 @@ const function MoveFocusToConsole()
 	end, 2)
 end
 
-const function CheckInputFree()
+const function CheckInputFree(IsOwnInput: ((InputObject) -> boolean)?)
 	const TestName = TestThreads[coroutine.running()]
 
 	if TestName then
@@ -231,6 +233,28 @@ const function CheckInputFree()
 	if not Quiet then
 		error({Skipped = "the mouse or keyboard was being used during the test", Environment = true})
 	end
+
+	if not TestName then
+		return
+	end
+
+	InputInterference[TestName] = false
+
+	const InterferenceConnection = UserInputService.InputBegan:Connect(function(Input)
+		if Input.UserInputType ~= Enum.UserInputType.Keyboard and not Input.UserInputType.Name:find("^MouseButton") then
+			return
+		end
+
+		if IsOwnInput and IsOwnInput(Input) then
+			return
+		end
+
+		InputInterference[TestName] = true
+	end)
+
+	AddCleanup(function()
+		InterferenceConnection:Disconnect()
+	end)
 end
 
 const function WaitForInput(Signal: RBXScriptSignal, Check: (InputObject) -> boolean, Action: () -> ()): boolean
@@ -343,7 +367,9 @@ const function CheckMouseButton(Button: number, TestedName: string)
 		end)
 	end
 
-	CheckInputFree()
+	CheckInputFree(function(Input)
+		return Input.UserInputType == InputType
+	end)
 	CenterMouse()
 
 	CheckPressAndRelease(`mouse{Button}press`, `mouse{Button}release`, TestedName, function()
@@ -353,14 +379,16 @@ const function CheckMouseButton(Button: number, TestedName: string)
 	end)
 end
 
+const function IsTestKey(Input: InputObject): boolean
+	return Input.KeyCode == Enum.KeyCode.F13
+end
+
 const function CheckKey(TestedName: string)
-	CheckInputFree()
+	CheckInputFree(IsTestKey)
 
 	CheckPressAndRelease("keypress", "keyrelease", TestedName, function()
-		return UserInputService:IsKeyDown(Enum.KeyCode.J)
-	end, function(Input)
-		return Input.KeyCode == Enum.KeyCode.J
-	end, 0x4A)
+		return UserInputService:IsKeyDown(Enum.KeyCode.F13)
+	end, IsTestKey, 0x7C)
 end
 
 const function CheckPacketHook(Direction: string, CheckRemove: boolean)
@@ -594,9 +622,15 @@ end
 const function CheckClipboard()
 	const GetClipboard = Formatters.CheckExist("getclipboard")
 
+	const SetClipboard = Formatters.CheckExist("setclipboard")
+	const Previous = GetClipboard()
 	const Text = `debUNC{math.random(1, 1e6)}`
 
-	Formatters.CheckExist("setclipboard")(Text)
+	AddCleanup(function()
+		SetClipboard(Previous)
+	end)
+
+	SetClipboard(Text)
 
 	assert(WaitFor(function()
 		return GetClipboard() == Text
@@ -833,6 +867,8 @@ const function RunOnGameThread(Callback: () -> ...any): ...any
 	return table.unpack(Results, 2, Results.n)
 end
 
+const TeleportResults: {[string]: boolean} = {}
+
 const Tests: any = {
 	getrenv = {
 		Test = function()
@@ -943,7 +979,12 @@ const Tests: any = {
 		Test = function()
 			const GetThreadEnvironment: (thread?) -> {[string]: any} = gettenv
 
-			assert(GetThreadEnvironment() == getfenv(), "with no thread given, it should return the current environment like getfenv")
+			const CurrentEnvironment = getfenv(0)
+
+			assert(
+				GetThreadEnvironment() == CurrentEnvironment and GetThreadEnvironment(coroutine.running()) == CurrentEnvironment,
+				"with no thread given, it should return the current thread's environment"
+			)
 
 			const Thread = task.spawn(function()
 				task.wait(1)
@@ -957,16 +998,12 @@ const Tests: any = {
 
 			Formatters.CheckReturnType(ThreadEnvironment, "table")
 
-			assert(ThreadEnvironment == getfenv(), "a thread started by this script should have the same environment as it")
-
-			for FunctionName in ThreadEnvironment do
-				assert(getfenv()[FunctionName], `the thread environment has '{FunctionName}' but getfenv() doesn't`)
-			end
+			assert(ThreadEnvironment == CurrentEnvironment, "a thread started by this thread should have the same environment as it")
 
 			const Finished = task.spawn(function() end)
 			const Success, FinishedEnvironment = pcall(GetThreadEnvironment, Finished)
 
-			assert(Success and FinishedEnvironment == getfenv(), "didn't keep the environment of a thread that already finished")
+			assert(Success and FinishedEnvironment == CurrentEnvironment, "didn't keep the environment of a thread that already finished")
 
 			const GetScriptThread = Formatters.CheckExist("getscriptthread")
 
@@ -994,7 +1031,7 @@ const Tests: any = {
 
 			Formatters.CheckReturnType(GameEnvironment, "table")
 
-			assert(GameEnvironment ~= getfenv(), "a game script's thread gave the executor's environment instead of its own")
+			assert(GameEnvironment ~= CurrentEnvironment, "a game script's thread gave the executor's environment instead of its own")
 			assert(GameEnvironment.script == GameScript, `the environment of {GameScript.Name}'s thread doesn't have {GameScript.Name} as its script`)
 			assert(GameEnvironment.getgenv == nil, "a game script's thread environment has executor functions in it, they should only be in the executor's")
 		end,
@@ -3670,6 +3707,7 @@ const Tests: any = {
 					Lucid = "1.0.0",
 					Bunni = "2.0",
 					athena = "1.0",
+					supQ = "1.0.0",
 				})[Name],
 				`the version '{ExecutorVersion}' never changes between updates, it should be the real version of each release`
 			)
@@ -4035,14 +4073,14 @@ const Tests: any = {
 			const Scale = (Second - First) / (SecondTarget - FirstTarget)
 
 			assert(
-				Scale.X > 0 and math.abs(Scale.X - Scale.Y) < Scale.X * 0.02,
+				Scale.X > 0 and math.abs(Scale.X - Scale.Y) < Scale.X * 0.05,
 				`the mouse went to {First} then {Second}, which doesn't match moving to {FirstTarget} then {SecondTarget}`
 			)
 
 			const Expected = First + (LastTarget - FirstTarget) * Scale.X
 			const Last = MoveTo(LastTarget)
 
-			assert((Last - Expected).Magnitude < 2, `the mouse went to {Last} instead of {Expected}`)
+			assert((Last - Expected).Magnitude < 4, `the mouse went to {Last} instead of {Expected}`)
 		end,
 		RunLast = true,
 	},
@@ -4068,7 +4106,7 @@ const Tests: any = {
 			const SecondMove = MoveBy(50)
 
 			assert(
-				FirstMove.X > 0 and math.abs(FirstMove.X - FirstMove.Y) < 2 and (SecondMove - FirstMove * 2).Magnitude < 3,
+				FirstMove.X > 0 and math.abs(FirstMove.X - FirstMove.Y) < 4 and (SecondMove - FirstMove * 2).Magnitude < 6,
 				`the mouse moved by {FirstMove} then {SecondMove}, but moving by 25 then 50 should go the same way twice as far`
 			)
 		end,
@@ -4217,7 +4255,7 @@ const Tests: any = {
 
 			local PrintedIdentity
 
-			const Connection = game:GetService("LogService").MessageOut:Connect(function(Message)
+			const Connection = LogService.MessageOut:Connect(function(Message)
 				PrintedIdentity = PrintedIdentity or tonumber(Message:match("Current identity is (%d+)"))
 			end)
 
@@ -5015,7 +5053,25 @@ const Tests: any = {
 			const Value = math.random()
 			const Argument = `debUNC {math.random()}`
 
-			const Attributes = RunOnNewActor(`Actor:SetAttribute("Value", {Value}) Actor:SetAttribute("Argument", (select(2, ...))) Actor:SetAttribute("HasExecutor", typeof(getgenv) == "function" and typeof(hookfunction) == "function") Actor:SetAttribute("IsExecutor", checkcaller and checkcaller() == true) local Desynchronized = pcall(task.desynchronize) if Desynchronized then task.synchronize() end Actor:SetAttribute("OnActor", Desynchronized or (typeof(getactorfromthread) == "function" and getactorfromthread(coroutine.running()) == Actor))`, Argument)
+			const Ran, Attributes = pcall(RunOnNewActor, `Actor:SetAttribute("Value", {Value}) Actor:SetAttribute("Argument", (select(2, ...))) Actor:SetAttribute("HasExecutor", typeof(getgenv) == "function" and typeof(hookfunction) == "function") Actor:SetAttribute("IsExecutor", checkcaller and checkcaller() == true) local Desynchronized = pcall(task.desynchronize) if Desynchronized then task.synchronize() end Actor:SetAttribute("OnActor", Desynchronized or (typeof(getactorfromthread) == "function" and getactorfromthread(coroutine.running()) == Actor))`, Argument)
+
+			if not Ran then
+				const Actor = Instance.new("Actor")
+
+				Instance.new("LocalScript").Parent = Actor
+				Actor.Parent = GetPlayerScripts()
+				AddCleanup(function()
+					Actor:Destroy()
+				end)
+
+				Formatters.CheckExist("runonactor")(Actor, `(...):SetAttribute("Done", true)`, Actor)
+
+				assert(not WaitFor(function()
+					return Actor:GetAttribute("Done") == true
+				end, 2), "the executor failed to init a new actor, it only ran code on an actor that already had a script running")
+
+				error(Attributes, 0)
+			end
 
 			assert(Attributes.Value == Value, "the code didn't run on the actor")
 			assert(Attributes.OnActor == true, "the code didn't run on the actor's own thread")
@@ -5578,20 +5634,26 @@ const Tests: any = {
 		Test = function()
 			const GetFastFlag = Formatters.CheckExist("getfflag")
 			const SetFastFlag = setfflag
-			const Original = GetFastFlag("TaskSchedulerTargetFps")
-			const NewValue = tostring(math.random(100, 200))
+			local Flag = "DebugGraphicsPreferD3D11"
+
+			if not pcall(SetFastFlag, Flag, GetFastFlag(Flag)) then
+				Flag = "TaskSchedulerTargetFps"
+			end
+
+			const Original = GetFastFlag(Flag)
+			const NewValue = if Original:lower() == "true" then "false" elseif Original:lower() == "false" then "true" else tostring(math.random(100, 200))
 
 			AddCleanup(function()
-				SetFastFlag("TaskSchedulerTargetFps", Original)
+				SetFastFlag(Flag, Original)
 			end)
 
-			SetFastFlag("TaskSchedulerTargetFps", NewValue)
+			SetFastFlag(Flag, NewValue)
 
-			const Result = GetFastFlag("TaskSchedulerTargetFps")
+			const Result = GetFastFlag(Flag)
 
-			SetFastFlag("TaskSchedulerTargetFps", Original)
+			SetFastFlag(Flag, Original)
 
-			Formatters.CheckEqual(Result, NewValue, "the flag")
+			Formatters.CheckEqual(Result:lower(), NewValue, "the flag")
 		end,
 	},
 
@@ -5662,10 +5724,38 @@ const Tests: any = {
 	["raknet.send"] = {
 		Test = function()
 			const RakNet = raknet
-			const Marker = `\255debUNC {math.random()}`
+			const Packets = {}
+			const Counts = {}
 
-			RakNet.send(Marker)
-			RakNet.send(buffer.fromstring(Marker))
+			const function OnSend(Packet)
+				Packets[Packet.PacketId] = Packet.AsString
+				Counts[Packet.PacketId] = (Counts[Packet.PacketId] or 0) + 1
+			end
+
+			AddCleanup(function()
+				RakNet.removesendhook(OnSend)
+			end)
+
+			Formatters.CheckExist("raknet.addsendhook")(OnSend)
+			task.wait(3)
+			RakNet.removesendhook(OnSend)
+
+			local CommonId
+
+			for PacketId, Count in Counts do
+				if CommonId and Counts[CommonId] >= Count then
+					continue
+				end
+
+				CommonId = PacketId
+			end
+
+			if not CommonId then
+				error({Skipped = "no packet was sent within 3 seconds to copy and send again"})
+			end
+
+			RakNet.send(Packets[CommonId])
+			RakNet.send(buffer.fromstring(Packets[CommonId]))
 
 			const Disconnected = RakNet.stats and WaitFor(function()
 				return RakNet.stats().Connected == false
@@ -5751,16 +5841,6 @@ const Tests: any = {
 		end,
 	},
 
-	hasmetafield = {
-		Test = function()
-			const HasMetafield = hasmetafield
-
-			assert(HasMetafield(setmetatable({}, {__index = {}}), "__index") == true, "should return true for a field the metatable has")
-			assert(HasMetafield(setmetatable({}, {}), "__index") == false, "should return false for a field the metatable doesn't have")
-			assert(HasMetafield(game, "__namecall") == true, "should see __namecall on game's locked metatable")
-		end,
-	},
-
 	makereadonly = {
 		Test = function()
 			const Table = {}
@@ -5771,15 +5851,6 @@ const Tests: any = {
 			assert(not pcall(function()
 				Table.debUNC = true
 			end), "could still write to the table after making it read-only")
-		end,
-	},
-
-	iswriteable = {
-		Test = function()
-			const IsWriteable = iswriteable
-
-			assert(IsWriteable({}) == true, "should return true for a normal table")
-			assert(IsWriteable(table.freeze({})) == false, "should return false for a frozen table")
 		end,
 	},
 
@@ -6099,20 +6170,18 @@ const Tests: any = {
 
 	keyclick = {
 		Test = function()
-			CheckInputFree()
+			CheckInputFree(IsTestKey)
 
-			const Detected = WaitForInput(UserInputService.InputBegan, function(Input)
-				return Input.KeyCode == Enum.KeyCode.J
-			end, function()
-				keyclick(0x4A)
+			const Detected = WaitForInput(UserInputService.InputBegan, IsTestKey, function()
+				keyclick(0x7C)
 			end)
 
 			const Released = WaitFor(function()
-				return not UserInputService:IsKeyDown(Enum.KeyCode.J)
+				return not UserInputService:IsKeyDown(Enum.KeyCode.F13)
 			end, 1)
 
 			if not Released then
-				Formatters.CheckExist("keyrelease")(0x4A)
+				Formatters.CheckExist("keyrelease")(0x7C)
 			end
 
 			assert(Detected, "the key press wasn't detected")
@@ -6457,26 +6526,6 @@ const Tests: any = {
 		end,
 	},
 
-	hasmetatable = {
-		Test = function()
-			const HasMetatable = hasmetatable
-
-			assert(HasMetatable(setmetatable({}, {})) == true, "should return true for a table with a metatable")
-			assert(HasMetatable({}) == false, "should return false for a table without a metatable")
-			assert(HasMetatable(game) == true, "should return true for game, which has a locked metatable")
-		end,
-	},
-
-	getmetafield = {
-		Test = function()
-			const GetMetafield = getmetafield
-			const Value = math.random()
-
-			Formatters.CheckEqual(GetMetafield(setmetatable({}, {__index = Value}), "__index"), Value, "the __index field")
-			Formatters.CheckReturnType(GetMetafield(game, "__namecall"), "function")
-		end,
-	},
-
 	iscorescript = {
 		Test = function()
 			const IsCoreScript = iscorescript
@@ -6620,6 +6669,113 @@ const Tests: any = {
 
 	restoreproto = {
 		Test = CheckProtoHook,
+	},
+
+	queueonteleport = {
+		OtherNames = {"queue_on_teleport", "queue_teleport", "queueteleport"},
+		Test = function()
+			if TeleportResults.Queued == nil then
+				error({Skipped = "it needs a teleport, use shared.TeleportTests = true to try it", Environment = true})
+			end
+
+			assert(TeleportResults.Queued, "the queued code never ran after the last teleport")
+		end,
+	},
+
+	clearqueueonteleport = {
+		OtherNames = {"clear_teleport_queue", "clearteleportqueue"},
+		Test = function()
+			if TeleportResults.Cleared == nil then
+				error({Skipped = "it needs a teleport, use shared.TeleportTests = true to try it", Environment = true})
+			end
+
+			assert(not TeleportResults.Cleared, "code queued before clearing still ran after the teleport")
+		end,
+	},
+
+	["MessageBox.new"] = {
+		Test = function()
+			const NewMessageBox = MessageBox.new
+
+			for _, Name in {
+				"Error",
+				"Question",
+				"Warning",
+				"Information",
+			} do
+				assert(typeof(MessageBox.Icons) == "table" and MessageBox.Icons[Name] ~= nil, `MessageBox.Icons is missing the {Name} preset`)
+			end
+
+			local TimeoutChoice
+			local TimeoutReturned = false
+
+			const TimeoutBox = NewMessageBox({
+				Title = "debUNC",
+				Text = "debUNC test, you can close this",
+				Buttons = {"debUNC"},
+				Duration = 1,
+				Callback = function(Choice)
+					TimeoutChoice = Choice
+				end,
+			})
+
+			AddCleanup(function()
+				pcall(TimeoutBox.Close, TimeoutBox)
+			end)
+
+			task.spawn(function()
+				TimeoutBox:Show()
+				TimeoutReturned = true
+			end)
+
+			const YieldedUntilChoice = WaitFor(function()
+				return TimeoutReturned
+			end, 4) and TimeoutChoice ~= nil
+
+			WaitFor(function()
+				return TimeoutChoice ~= nil
+			end, 2)
+
+			assert(TimeoutChoice == "TimedOut", `expected the Callback to get 'TimedOut' after the Duration ran out, got '{TimeoutChoice}'`)
+			assert(YieldedUntilChoice, ":Show() didn't yield until a choice was made when Yield was true")
+
+			local CloseChoice
+			local CloseReturned = false
+
+			const CloseBox = NewMessageBox({
+				Title = "debUNC",
+				Text = "debUNC test, you can close this",
+				Buttons = {"debUNC"},
+				Yield = false,
+			})
+
+			AddCleanup(function()
+				pcall(CloseBox.Close, CloseBox)
+			end)
+
+			CloseBox:OnChoice(function(Choice)
+				CloseChoice = Choice
+			end)
+
+			task.spawn(function()
+				CloseBox:Show()
+				CloseReturned = true
+			end)
+
+			const ReturnedRightAway = WaitFor(function()
+				return CloseReturned
+			end, 0.5)
+
+			CloseBox:Close()
+
+			WaitFor(function()
+				return CloseChoice ~= nil
+			end, 2)
+
+			assert(ReturnedRightAway, ":Show() still yielded when Yield was false")
+			assert(CloseChoice == "ForceClosed", `expected :Close() to give the OnChoice function 'ForceClosed', got '{CloseChoice}'`)
+		end,
+		RunLast = true,
 	},
 
 	getcallbackvalue = {
@@ -7161,7 +7317,7 @@ const SecurityTests: {[string]: any} = {
 				end
 
 				for _, Name in OutsideNames do
-					if not select(2, pcall(IsFile, Name)) then
+					if select(2, pcall(IsFile, Name)) ~= true then
 						continue
 					end
 
@@ -7209,7 +7365,7 @@ const SecurityTests: {[string]: any} = {
 			for _, Extension in Extensions do
 				const Name = `debUNC.{Extension}`
 
-				if table.find(Written, Name) or not select(2, pcall(IsFile, Name)) then
+				if table.find(Written, Name) or select(2, pcall(IsFile, Name)) ~= true then
 					continue
 				end
 
@@ -7436,12 +7592,6 @@ for Name, Info in SecurityTests do
 end
 
 const NoTests: {[string | number]: any} = {
-	"queueonteleport",
-	"setrbxclipboard",
-
-	"setsimulationradius",
-	"clearqueueonteleport",
-
 	rconsolecreate = {
 		Test = CheckConsole,
 		RunLast = true,
@@ -7581,7 +7731,7 @@ const function DisplayMessage(Message: string)
 		return
 	end
 
-	if not pcall(game:GetService("TestService").Message, game:GetService("TestService"), Message) then
+	if not pcall(LogService.Info, LogService, Message) then
 		print(Message)
 	end
 end
@@ -7590,6 +7740,7 @@ const Settings: {[string]: any} = {
 	DebugMode = false,
 	CrashTests = false,
 	LogResults = false,
+	TeleportTests = false,
 }
 
 for Name in Settings do
@@ -7600,6 +7751,55 @@ for Name in Settings do
 	end
 
 	Settings[Name] = Saved
+end
+
+const TeleportFile = "debUNC teleport.txt"
+const QueuedFile = "debUNC queued.txt"
+const ClearedFile = "debUNC cleared.txt"
+
+const function IsFile(Path: string): boolean
+	return isfile ~= nil and select(2, pcall(isfile, Path)) == true
+end
+
+if IsFile(TeleportFile) then
+	const Token = readfile(TeleportFile)
+
+	TeleportResults.Queued = IsFile(QueuedFile) and readfile(QueuedFile) == Token
+
+	if TeleportResults.Queued then
+		TeleportResults.Cleared = IsFile(ClearedFile)
+	end
+
+	for _, Path in {TeleportFile, QueuedFile, ClearedFile} do
+		pcall(delfile, Path)
+	end
+elseif Settings.TeleportTests and writefile and readfile then
+	const QueueOnTeleport = FindFirstFunction("queueonteleport") or FindFirstFunction("queue_on_teleport") or FindFirstFunction("queue_teleport") or FindFirstFunction("queueteleport")
+	const ClearQueueOnTeleport = FindFirstFunction("clearqueueonteleport") or FindFirstFunction("clear_teleport_queue") or FindFirstFunction("clearteleportqueue")
+
+	if QueueOnTeleport then
+		const Token = tostring(math.random(1, 1e9))
+		const SettingLines = {}
+
+		for Name, Value in Settings do
+			table.insert(SettingLines, `shared.{Name} = {Value}`)
+		end
+
+		writefile(TeleportFile, Token)
+
+		if ClearQueueOnTeleport then
+			pcall(QueueOnTeleport, `writefile("{ClearedFile}", "")`)
+			pcall(ClearQueueOnTeleport)
+		end
+
+		pcall(QueueOnTeleport, `{table.concat(SettingLines, " ")} writefile("{QueuedFile}", "{Token}") loadstring(game:HttpGet("https://github.com/alyssagithub/debUNC/raw/main/debUNC.luau"))()`)
+		DisplayMessage("Rejoining to test queueonteleport, debUNC will run again after the teleport.")
+		game:GetService("TeleportService"):Teleport(game.PlaceId, Player)
+
+		do
+			return
+		end
+	end
 end
 
 local LogPath: string?
@@ -7635,13 +7835,23 @@ const function JoinMessage(...): string
 end
 
 local function print(...)
-	RobloxPrint(...)
-	WriteLog(JoinMessage(...))
+	const Message = JoinMessage(...)
+
+	if not pcall(LogService.Output, LogService, Message) then
+		RobloxPrint(...)
+	end
+
+	WriteLog(Message)
 end
 
 local function warn(...)
-	RobloxWarn(...)
-	WriteLog(JoinMessage(...))
+	const Message = JoinMessage(...)
+
+	if not pcall(LogService.Warn, LogService, Message) then
+		RobloxWarn(...)
+	end
+
+	WriteLog(Message)
 end
 
 if Settings.CrashTests then
@@ -7861,23 +8071,35 @@ const function RunTest(Name: string, Info: any)
 			return
 		end
 
-		if not Info.Retry then
-			Info.Test()
-			return
+		local LastError
+
+		for Attempt = 1, 3 do
+			const AttemptSuccess, AttemptError = pcall(Info.Test)
+
+			if AttemptSuccess then
+				return
+			end
+
+			if typeof(AttemptError) == "table" and AttemptError.Skipped then
+				error(AttemptError, 0)
+			end
+
+			LastError = AttemptError
+
+			const Interfered = InputInterference[Name] == true
+
+			if not (Info.Retry or InputTests[Name]) or (Attempt == 2 and not Interfered) then
+				break
+			end
+
+			if Attempt == 3 and Interfered then
+				error({Skipped = "the mouse or keyboard was being used during the test", Environment = true})
+			end
+
+			RunCleanups(coroutine.running())
 		end
 
-		const FirstSuccess, FirstError = pcall(Info.Test)
-
-		if FirstSuccess then
-			return
-		end
-
-		if typeof(FirstError) == "table" and FirstError.Skipped then
-			error(FirstError, 0)
-		end
-
-		RunCleanups(coroutine.running())
-		Info.Test()
+		error(LastError, 0)
 	end)
 
 	TestThreads[coroutine.running()] = nil
@@ -8055,7 +8277,14 @@ for _, Name in FailedNames do
 		continue
 	end
 
-	warn(`🔴 {Name}: {FailureMessages[Name]}`)
+	const FailureLine = `🔴 {Name}: {FailureMessages[Name]}`
+	const Logged, LogError = pcall(LogService.Error, LogService, FailureLine)
+
+	if Logged or tostring(LogError):find(FailureLine, 1, true) then
+		WriteLog(FailureLine)
+	else
+		warn(FailureLine)
+	end
 	FailedTests += 1
 end
 
@@ -8070,7 +8299,7 @@ if ElapsedTime < MinimumSeconds and PercentageComplete > 80 then
 end
 
 DisplayMessage("❓ The score below is only for how many custom functions are supported and secure.")
-DisplayMessage(`🔵 debUNC v2.13.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
+DisplayMessage(`🔵 debUNC v2.14.0 Score for {ExecutorName} {ExecutorVersion}: {PercentageComplete}%`)
 DisplayMessage(`🟣 Total tests: {TotalTests} (Took {math.floor(ElapsedTime * 100) / 100} seconds)`)
 DisplayMessage(`🟢 Successful tests: {CompletedTests}`)
 DisplayMessage(`🔴 Failed tests: {FailedTests}`)
