@@ -11,13 +11,15 @@ end)
 | :- |
 | hook_meta_method |
 # Parameters
-| Object: userdata \| table&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The object with the metamethod.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Object: userdata \| table | The object with the metamethod. |
 | Metamethod: [string](https://create.roblox.com/docs/luau/strings) | The name of the metamethod. |
 | Hook: (...any) -> ...any | The function to run instead. It's given the same values the original would get, and what it returns is used. |
 # Returns
-| (...any) -> ...any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | A function that runs the original. Give it the same values you'd give the original.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| (...any) -> ...any | A function that runs the original. Give it the same values you'd give the original. |
 # Test requirements
 To pass the hookmetamethod test, the function must:
 - Return the original metamethod function.

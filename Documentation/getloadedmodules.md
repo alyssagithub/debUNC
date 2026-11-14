@@ -10,8 +10,9 @@ end
 | :- |
 | get_loaded_modules |
 # Returns
-| {[ModuleScript](https://create.roblox.com/docs/reference/engine/classes/ModuleScript)}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of ModuleScripts.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {[ModuleScript](https://create.roblox.com/docs/reference/engine/classes/ModuleScript)} | An array of ModuleScripts. |
 
 # Test requirements
 To pass the getloadedmodules test, the function must:

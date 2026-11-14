@@ -6,13 +6,15 @@ local Encrypted, InitializationVector = crypt.encrypt("Hello world!", Key)
 print(crypt.decrypt(Encrypted, Key, InitializationVector)) --> Hello world!
 ```
 # Parameters
-| Encrypted: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The encrypted text.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Encrypted: [string](https://create.roblox.com/docs/luau/strings) | The encrypted text. |
 | Key: [string](https://create.roblox.com/docs/luau/strings) | The key it was encrypted with. |
 | InitializationVector: [string](https://create.roblox.com/docs/luau/strings) | The initialization vector from crypt.encrypt. |
 # Returns
-| [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The decrypted text.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [string](https://create.roblox.com/docs/luau/strings) | The decrypted text. |
 # Test requirements
 To pass the crypt.decrypt test, the function must:
 - Give back the original text for random strings of 1 to 64 bytes encrypted with [crypt.encrypt](encrypt.md).

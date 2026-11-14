@@ -10,8 +10,9 @@ end)
 Signal:Fire("Hello world!")
 ```
 # Returns
-| Signal&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The new signal, with the methods below.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Signal | The new signal, with the methods below. |
 # Methods
 ## Connect: (Callback: (...any) -> ()) -> Connection
 Runs a function every time the signal fires.
@@ -23,11 +24,13 @@ end)
 Connection:Disconnect()
 ```
 ### Parameters
-| Callback: (...any) -> ()&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to run. It's given the values the signal fired with.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Callback: (...any) -> () | The function to run. It's given the values the signal fired with. |
 ### Returns
-| Connection&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | A connection with a Disconnect method.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Connection | A connection with a Disconnect method. |
 ## Once: (Callback: (...any) -> ()) -> Connection
 Runs a function the next time the signal fires.
 ```lua
@@ -36,11 +39,13 @@ Signal:Once(function(Message)
 end)
 ```
 ### Parameters
-| Callback: (...any) -> ()&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to run. It's given the values the signal fired with.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Callback: (...any) -> () | The function to run. It's given the values the signal fired with. |
 ### Returns
-| Connection&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | A connection with a Disconnect method.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Connection | A connection with a Disconnect method. |
 ## Wait: () -> ...any
 Yields until the signal fires, and returns the values it fired with.
 ```lua
@@ -48,16 +53,18 @@ local Message = Signal:Wait()
 print(Message)
 ```
 ### Returns
-| ...any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The values the signal fired with.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| ...any | The values the signal fired with. |
 ## Fire: (...: any) -> ()
 Fires the signal with the given values.
 ```lua
 Signal:Fire("Hello world!")
 ```
 ### Parameters
-| ...: any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The values to fire it with.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| ...: any | The values to fire it with. |
 # Test requirements
 To pass the Signal.new test, the function must:
 - Pass every value given to `:Fire()` to connected functions.

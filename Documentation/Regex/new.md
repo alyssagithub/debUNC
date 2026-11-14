@@ -9,11 +9,13 @@ print(Match.Captures[2]) --> eee
 print(Pattern:Replace("deb deeb", "Z")) --> Z Z
 ```
 # Parameters
-| Pattern: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The regular expression.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Pattern: [string](https://create.roblox.com/docs/luau/strings) | The regular expression. |
 # Returns
-| Regex&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An object with Match and Replace methods.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Regex | An object with Match and Replace methods. |
 # Methods
 ## Match: (Text: string) -> {Captures: {string}}?
 Finds the first match in the text. Captures[1] is the whole match and each capture group's text follows it. Returns nil if nothing matches.

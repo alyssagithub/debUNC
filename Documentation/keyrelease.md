@@ -10,8 +10,9 @@ keyrelease(0x41)
 | :- |
 | key_release |
 # Parameters
-| KeyCode: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Windows key code, such as 0x41 for A.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| KeyCode: [number](https://create.roblox.com/docs/luau/numbers) | The Windows key code, such as 0x41 for A. |
 
 # Test requirements
 To pass the keyrelease test, the function must:

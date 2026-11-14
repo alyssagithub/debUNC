@@ -11,11 +11,13 @@ print(debug.isvalidlevel(500)) --> false
 | | is_valid_level |
 | | isvalidlevel |
 # Parameters
-| Level: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The stack level to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Level: [number](https://create.roblox.com/docs/luau/numbers) | The stack level to check. |
 # Returns
-| [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not the level exists.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [boolean](https://create.roblox.com/docs/luau/booleans) | Whether or not the level exists. |
 
 # Test requirements
 To pass the debug.isvalidlevel test, the function must:

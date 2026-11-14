@@ -8,12 +8,14 @@ print(gethiddenproperty(game.Players.LocalPlayer, "SimulationRadius"))
 | :- |
 | get_hidden_property |
 # Parameters
-| Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Instance to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance) | The Instance to read. |
 | Property: [string](https://create.roblox.com/docs/luau/strings) | The name of the property. |
 # Returns
-| any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The property's value.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| any | The property's value. |
 
 # Test requirements
 To pass the gethiddenproperty test, the function must:

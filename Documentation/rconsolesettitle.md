@@ -10,8 +10,9 @@ rconsolesettitle("My script")
 | rconsolename |
 | consolesettitle |
 # Parameters
-| Title: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The new title.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Title: [string](https://create.roblox.com/docs/luau/strings) | The new title. |
 
 # Test requirements
 To pass the rconsolesettitle test, the function must:

@@ -10,8 +10,9 @@ print(getrenv().game == game) --> true
 | get_roblox_environment |
 | getrobloxenvironment |
 # Returns
-| {[string]: any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Roblox's environment.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {[string]: any} | Roblox's environment. |
 # Test requirements
 To pass the getrenv test, the function must:
 - Include the Roblox globals `delay`, `elapsedTime`, `printidentity`, `settings`, `spawn`, `stats`, `tick`, `time`, `typeof`, `UserSettings`, `version`, `wait`, `warn`, `ypcall`, `Enum`, `game`, `shared`, `_G`, and `workspace`.

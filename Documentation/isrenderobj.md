@@ -9,11 +9,13 @@ print(isrenderobj({})) --> false
 | :- |
 | is_render_obj |
 # Parameters
-| Object: any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The value to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Object: any | The value to check. |
 # Returns
-| [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not it's a Drawing object.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [boolean](https://create.roblox.com/docs/luau/booleans) | Whether or not it's a Drawing object. |
 
 # Test requirements
 To pass the isrenderobj test, the function must:

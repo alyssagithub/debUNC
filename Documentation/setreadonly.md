@@ -10,8 +10,9 @@ print(table.isfrozen(Table)) --> true
 | :- |
 | set_read_only |
 # Parameters
-| Table: [table](https://create.roblox.com/docs/luau/tables)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The table to change.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Table: [table](https://create.roblox.com/docs/luau/tables) | The table to change. |
 | ReadOnly: [boolean](https://create.roblox.com/docs/luau/booleans) | Whether or not it should be read-only. |
 
 # Test requirements

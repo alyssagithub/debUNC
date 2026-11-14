@@ -14,11 +14,13 @@ print(#debug.getprotos(Outer)) --> 1
 | | get_protos |
 | | getprotos |
 # Parameters
-| Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The outer function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Function: [function](https://create.roblox.com/docs/luau/functions) | The outer function. |
 # Returns
-| {any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of the inner functions. Some executors give a ProtoProxy instead of a normal function, which can still be called.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {any} | An array of the inner functions. Some executors give a ProtoProxy instead of a normal function, which can still be called. |
 # Test requirements
 To pass the debug.getprotos test, the function must:
 - Return a table.

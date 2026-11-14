@@ -8,12 +8,14 @@ local Broken, Error = loadstring("local x x", "MyChunk")
 print(Broken, Error) --> nil, [string "MyChunk"]:1: ...
 ```
 # Parameters
-| Source: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The code to compile.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Source: [string](https://create.roblox.com/docs/luau/strings) | The code to compile. |
 | ChunkName: [string?](https://create.roblox.com/docs/luau/strings) | The name shown in error messages for this code. |
 # Returns
-| [function?](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The compiled code, or nil if it couldn't be compiled.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [function?](https://create.roblox.com/docs/luau/functions) | The compiled code, or nil if it couldn't be compiled. |
 | [string?](https://create.roblox.com/docs/luau/strings) | The compile error, if there was one. |
 # Test requirements
 To pass the loadstring test, the function must:

@@ -11,14 +11,17 @@ Socket:Send("Hello world!")
 Socket:Close()
 ```
 # Parameters
-| Url: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The url to connect to.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Url: [string](https://create.roblox.com/docs/luau/strings) | The url to connect to. |
 # Returns
-| WebSocket&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The socket, with the properties and methods below.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| WebSocket | The socket, with the properties and methods below. |
 # Properties
-| OnMessage: Signal&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | A signal that fires with each message from the server.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Property&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| OnMessage: Signal | A signal that fires with each message from the server. |
 | OnClose: Signal | A signal that fires when the connection closes. |
 # Methods
 ## Send: (Message: string) -> ()
@@ -27,8 +30,9 @@ Sends a message to the server.
 Socket:Send("Hello world!")
 ```
 ### Parameters
-| Message: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The message to send.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Message: [string](https://create.roblox.com/docs/luau/strings) | The message to send. |
 ## Close: () -> ()
 Closes the connection.
 ```lua

@@ -14,8 +14,9 @@ Target()
 | :- | :- |
 | oth | getrootcallback |
 # Returns
-| [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | A function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [function](https://create.roblox.com/docs/luau/functions) | A function. |
 
 # Test requirements
 To pass the oth.get_root_callback test, the function must:

@@ -13,11 +13,13 @@ print(compareinstances(Part, Clone)) --> true
 | clone_reference |
 | clonereference |
 # Parameters
-| Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Instance to make a reference to.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance) | The Instance to make a reference to. |
 # Returns
-| [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The new reference.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance) | The new reference. |
 # Test requirements
 To pass the cloneref test, the function must:
 - Return an Instance.

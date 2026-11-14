@@ -9,8 +9,9 @@ print(HWID)
 | :- |
 | get_hwid |
 # Returns
-| [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The hardware's identifier.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [string](https://create.roblox.com/docs/luau/strings) | The hardware's identifier. |
 
 # Test requirements
 To pass the gethwid test, the function must:

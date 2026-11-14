@@ -4,11 +4,13 @@ Returns the type of value a FastFlag holds, like `bool` or `int`.
 print(getfflagtype("TaskSchedulerTargetFps")) --> int
 ```
 # Parameters
-| Flag: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The name of the flag.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Flag: [string](https://create.roblox.com/docs/luau/strings) | The name of the flag. |
 # Returns
-| [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The flag's type, like `bool`, `int` or `string`.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [string](https://create.roblox.com/docs/luau/strings) | The flag's type, like `bool`, `int` or `string`. |
 # Test requirements
 To pass the getfflagtype test, the function must:
 - Return `bool` for a flag that's true or false, like `DebugGraphicsPreferVulkan`.

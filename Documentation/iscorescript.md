@@ -1,4 +1,9 @@
 # iscorescript: (Script: LuaSourceContainer) -> boolean
+> [!NOTE]
+> **Niche**
+>
+> This function is not widely implemented by executors, so scripts should implement proper handling in the case of an executor being unable to use this.
+
 Returns whether or not a script is one of Roblox's core scripts.
 ```lua
 print(iscorescript(game.Players.LocalPlayer.PlayerScripts.PlayerModule)) --> false
@@ -8,11 +13,13 @@ print(iscorescript(game.Players.LocalPlayer.PlayerScripts.PlayerModule)) --> fal
 | :- |
 | is_core_script |
 # Parameters
-| Script: [LuaSourceContainer](https://create.roblox.com/docs/reference/engine/classes/LuaSourceContainer)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The script to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Script: [LuaSourceContainer](https://create.roblox.com/docs/reference/engine/classes/LuaSourceContainer) | The script to check. |
 # Returns
-| [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not it's a core script.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [boolean](https://create.roblox.com/docs/luau/booleans) | Whether or not it's a core script. |
 # Test requirements
 To pass the iscorescript test, the function must:
 - Return `false` for the PlayerModule, which isn't a core script.

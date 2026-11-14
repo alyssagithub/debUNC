@@ -11,8 +11,9 @@ runonactor(Actor, "print(...)", "Hello world!") --> Hello world!
 | :- |
 | run_on_actor |
 # Parameters
-| Actor: [Actor](https://create.roblox.com/docs/reference/engine/classes/Actor)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Actor to run in.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Actor: [Actor](https://create.roblox.com/docs/reference/engine/classes/Actor) | The Actor to run in. |
 | Code: [string](https://create.roblox.com/docs/luau/strings) | The code to run. |
 | ...: any | The values to pass to the code. |
 

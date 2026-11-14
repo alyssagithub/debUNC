@@ -1,15 +1,22 @@
 # loadfileasync: (Path: string) -> function
+> [!NOTE]
+> **Niche**
+>
+> This function is not widely implemented by executors, so scripts should implement proper handling in the case of an executor being unable to use this.
+
 Compiles a file in the workspace folder into a function without blocking other scripts.
 ```lua
 writefile("Number.lua", "return 42")
 print(loadfileasync("Number.lua")()) --> 42
 ```
 # Parameters
-| Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The path of the file.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Path: [string](https://create.roblox.com/docs/luau/strings) | The path of the file. |
 # Returns
-| [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The compiled function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [function](https://create.roblox.com/docs/luau/functions) | The compiled function. |
 
 # Test requirements
 To pass the loadfileasync test, the function must:

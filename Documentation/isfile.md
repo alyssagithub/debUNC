@@ -9,11 +9,13 @@ print(isfile("Log.txt")) --> true
 | :- |
 | is_file |
 # Parameters
-| Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The path of the file.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Path: [string](https://create.roblox.com/docs/luau/strings) | The path of the file. |
 # Returns
-| [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not the file exists.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [boolean](https://create.roblox.com/docs/luau/booleans) | Whether or not the file exists. |
 # Test requirements
 To pass the isfile test, the function must:
 - Return `true` for a file that exists.

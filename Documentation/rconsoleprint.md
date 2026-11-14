@@ -10,5 +10,6 @@ rconsoleprint("Hello world!")
 | consoleprint |
 | rconsole_print |
 # Parameters
-| Text: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The text to print.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Text: [string](https://create.roblox.com/docs/luau/strings) | The text to print. |

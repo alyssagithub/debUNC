@@ -9,11 +9,13 @@ print(table.find(getgc(), Greet) ~= nil) --> true
 | :- |
 | get_gc |
 # Parameters
-| IncludeTables: [boolean?](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether to include tables.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| IncludeTables: [boolean?](https://create.roblox.com/docs/luau/booleans) | Whether to include tables. |
 # Returns
-| {any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of functions. With IncludeTables it also has tables and other values, like CFrames.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {any} | An array of functions. With IncludeTables it also has tables and other values, like CFrames. |
 
 # Test requirements
 To pass the getgc test, the function must:

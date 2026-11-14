@@ -9,8 +9,9 @@ end
 raknet.addsendhook(OnSend)
 ```
 # Properties
-| PacketId: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The id of the packet.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Property&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| PacketId: [number](https://create.roblox.com/docs/luau/numbers) | The id of the packet. |
 | Size: [number](https://create.roblox.com/docs/luau/numbers) | The size of the packet in bytes. |
 | AsString: [string](https://create.roblox.com/docs/luau/strings) | The packet's data as a string. |
 | AsBuffer: [buffer](https://create.roblox.com/docs/reference/engine/libraries/buffer) | The packet's data as a buffer. |

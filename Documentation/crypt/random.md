@@ -4,11 +4,13 @@ Generates random bytes.
 print(#crypt.random(16)) --> 16
 ```
 # Parameters
-| Length: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The number of bytes to generate.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Length: [number](https://create.roblox.com/docs/luau/numbers) | The number of bytes to generate. |
 # Returns
-| [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The random bytes.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [string](https://create.roblox.com/docs/luau/strings) | The random bytes. |
 # Test requirements
 To pass the crypt.random test, the function must:
 - Return the requested number of bytes.

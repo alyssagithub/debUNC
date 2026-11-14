@@ -23,12 +23,14 @@ print(Original()) --> Hello
 | replace_closure |
 | replaceclosure |
 # Parameters
-| Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to hook.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Function: [function](https://create.roblox.com/docs/luau/functions) | The function to hook. |
 | Hook: (...any) -> ...any | The function to run instead. It's given the same values the original would get, and what it returns is used. |
 # Returns
-| (...any) -> ...any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | A function that runs the original. Give it the same values you'd give the original.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| (...any) -> ...any | A function that runs the original. Give it the same values you'd give the original. |
 # Test requirements
 To pass the hookfunction test, the function must:
 - Return a function that gives the original result.

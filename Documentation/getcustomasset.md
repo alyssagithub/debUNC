@@ -9,11 +9,13 @@ ImageLabel.Image = getcustomasset("Image.png")
 | :- |
 | get_custom_asset |
 # Parameters
-| Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The path of the file.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Path: [string](https://create.roblox.com/docs/luau/strings) | The path of the file. |
 # Returns
-| [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The rbxasset:// id.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [string](https://create.roblox.com/docs/luau/strings) | The rbxasset:// id. |
 
 # Test requirements
 To pass the getcustomasset test, the function must:

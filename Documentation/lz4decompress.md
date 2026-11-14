@@ -10,12 +10,14 @@ print(lz4decompress(lz4compress(Text), #Text) == Text) --> true
 | crypt | lz4decompress |
 | | lz4_decompress |
 # Parameters
-| Compressed: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The compressed string.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Compressed: [string](https://create.roblox.com/docs/luau/strings) | The compressed string. |
 | Size: [number](https://create.roblox.com/docs/luau/numbers) | The size of the original string. |
 # Returns
-| [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The decompressed string.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [string](https://create.roblox.com/docs/luau/strings) | The decompressed string. |
 
 # Test requirements
 To pass the lz4decompress test, the function must:

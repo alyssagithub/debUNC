@@ -10,8 +10,9 @@ firetouchinterest(workspace.Pad, Root, 1)
 | :- |
 | fire_touch_interest |
 # Parameters
-| Part: [BasePart](https://create.roblox.com/docs/reference/engine/classes/BasePart)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The part being touched.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Part: [BasePart](https://create.roblox.com/docs/reference/engine/classes/BasePart) | The part being touched. |
 | OtherPart: [BasePart](https://create.roblox.com/docs/reference/engine/classes/BasePart) | The part touching it. |
 | Ended: [number](https://create.roblox.com/docs/luau/numbers) | 0 to start the touch and 1 to end it. |
 

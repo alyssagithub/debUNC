@@ -1,4 +1,9 @@
 # DirectoryWatcher.new: (Path: string) -> DirectoryWatcher
+> [!NOTE]
+> **Niche**
+>
+> This function is not widely implemented by executors, so scripts should implement proper handling in the case of an executor being unable to use this.
+
 Watches a folder in the workspace folder and fires a signal when a file in it changes, even when it was changed outside of Roblox. It's much cheaper than checking the files over and over with `listfiles` and `readfile`.
 ```lua
 makefolder("Scripts")
@@ -12,14 +17,17 @@ end)
 writefile("Scripts/Main.lua", "print('Hello world!')")
 ```
 # Parameters
-| Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The path of the folder to watch.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Path: [string](https://create.roblox.com/docs/luau/strings) | The path of the folder to watch. |
 # Returns
-| DirectoryWatcher&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The watcher, with the properties and methods below.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| DirectoryWatcher | The watcher, with the properties and methods below. |
 # Properties
-| OnChanged: Signal&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | A signal that fires with the path of each file that changes.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Property&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| OnChanged: Signal | A signal that fires with the path of each file that changes. |
 # Methods
 ## Destroy: () -> ()
 Stops watching the folder, so `OnChanged` won't fire anymore.

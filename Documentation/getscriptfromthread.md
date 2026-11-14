@@ -9,11 +9,13 @@ print(getscriptfromthread(getscriptthread(Script)) == Script) --> true
 | :- |
 | get_script_from_thread |
 # Parameters
-| Thread: [thread](https://create.roblox.com/docs/reference/engine/libraries/coroutine)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The thread to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Thread: [thread](https://create.roblox.com/docs/reference/engine/libraries/coroutine) | The thread to check. |
 # Returns
-| [Instance?](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The script.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [Instance?](https://create.roblox.com/docs/reference/engine/classes/Instance) | The script. |
 # Test requirements
 To pass the getscriptfromthread test, the function must:
 - Return `nil` for a thread that doesn't belong to a script.

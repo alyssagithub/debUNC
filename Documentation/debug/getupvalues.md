@@ -16,11 +16,13 @@ print(debug.getupvalues(Greet)[1] == Value) --> true
 | | get_upvalues |
 | | getupvalues |
 # Parameters
-| Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Function: [function](https://create.roblox.com/docs/luau/functions) | The function to read. |
 # Returns
-| {any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of the function's upvalues.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {any} | An array of the function's upvalues. |
 
 # Test requirements
 To pass the debug.getupvalues test, the function must:

@@ -9,3 +9,7 @@ clearqueueonteleport()
 | :- |
 | clear_teleport_queue |
 | clearteleportqueue |
+
+# Test requirements
+To pass the clearqueueonteleport test, the function must:
+- Stop code queued before it was called from running after the player teleports, when debUNC is run with `shared.TeleportTests = true`.

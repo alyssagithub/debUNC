@@ -10,8 +10,9 @@ print(Line.Thickness) --> 5
 | :- |
 | set_render_property |
 # Parameters
-| Object: DrawingObject&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Drawing object.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Object: DrawingObject | The Drawing object. |
 | Property: [string](https://create.roblox.com/docs/luau/strings) | The name of the property. |
 | Value: any | The new value. |
 

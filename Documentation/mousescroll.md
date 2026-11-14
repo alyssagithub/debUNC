@@ -8,8 +8,9 @@ mousescroll(120)
 | :- |
 | mouse_scroll |
 # Parameters
-| Delta: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | How far to scroll, positive for up and negative for down.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Delta: [number](https://create.roblox.com/docs/luau/numbers) | How far to scroll, positive for up and negative for down. |
 
 # Test requirements
 To pass the mousescroll test, the function must:

@@ -12,8 +12,9 @@ runonthread(Thread, "print('Hello world!')") --> Hello world!
 | :- |
 | run_on_thread |
 # Parameters
-| Thread: [thread](https://create.roblox.com/docs/reference/engine/libraries/coroutine)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The thread to run on.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Thread: [thread](https://create.roblox.com/docs/reference/engine/libraries/coroutine) | The thread to run on. |
 | Code: [string](https://create.roblox.com/docs/luau/strings) | The code to run. |
 
 # Test requirements

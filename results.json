@@ -1,13 +1,13 @@
 {
-	"debunc": "v2.13.0",
+	"debunc": "v2.14.0",
 	"executors": [
 		{
 			"name": "Kawaii",
 			"version": "1.8.0",
-			"debunc": "v2.13.0",
+			"debunc": "v2.14.0",
 			"platform": "Android",
-			"score": 96,
-			"took": 42.79,
+			"score": 94,
+			"took": 41.36,
 			"passed": [
 				"getrenv",
 				"getgenv",
@@ -43,6 +43,7 @@
 				"debug.info",
 				"setstackhidden",
 				"isstackhidden",
+				"DirectoryWatcher.new",
 				"WebSocket.connect",
 				"cache.invalidate",
 				"cache.iscached",
@@ -79,8 +80,6 @@
 				"mousemoveabs",
 				"mousemoverel",
 				"mousescroll",
-				"keypress",
-				"keyrelease",
 				"sethiddenproperty",
 				"gethiddenproperty",
 				"setscriptable",
@@ -141,9 +140,7 @@
 				"debug.isvalidlevel",
 				"debug.setinfo",
 				"getallthreads",
-				"hasmetafield",
 				"makereadonly",
-				"iswriteable",
 				"isreadonly",
 				"crypt.hmac",
 				"crypt.random",
@@ -160,7 +157,6 @@
 				"oth.is_hook_thread",
 				"oth.get_root_callback",
 				"oth.get_original_thread",
-				"keyclick",
 				"loadfileasync",
 				"appendfileasync",
 				"saveinstance",
@@ -174,8 +170,6 @@
 				"newlclosure",
 				"getproperties",
 				"gethiddenproperties",
-				"hasmetatable",
-				"getmetafield",
 				"iscorescript",
 				"getscriptthread",
 				"getscriptfromthread",
@@ -206,10 +200,6 @@
 				"security: files outside the workspace stay hidden",
 				"security: bytecode can't be loaded",
 				"security: blocks can't be bypassed",
-				"queueonteleport",
-				"setrbxclipboard",
-				"setsimulationradius",
-				"clearqueueonteleport",
 				"rconsolecreate",
 				"rconsoleprint",
 				"rconsoleinfo",
@@ -222,10 +212,6 @@
 				"messagebox"
 			],
 			"failed": [
-				{
-					"test": "DirectoryWatcher.new",
-					"reason": "OnChanged didn't fire after a file in the folder was written"
-				},
 				{
 					"test": "getcallbackvalue",
 					"reason": "should error for a property that isn't a callback"
@@ -243,17 +229,38 @@
 					"reason": "the hook ran for bad calls that should have errored before reaching it (1 times)"
 				},
 				{
+					"test": "keyclick",
+					"reason": "the key press wasn't detected"
+				},
+				{
+					"test": "keypress",
+					"reason": "the input wasn't detected"
+				},
+				{
+					"test": "keyrelease",
+					"reason": "the input was never held down, so it can't be released"
+				},
+				{
 					"test": "security: game scripts don't get executor powers",
 					"reason": "loadstring works at the game's own identity, which lets game scripts use executor powers"
 				}
 			],
 			"skipped": [
 				{
+					"test": "clearqueueonteleport",
+					"reason": "skipped because it needs a teleport, use shared.TeleportTests = true to try it"
+				},
+				{
 					"test": "getthreadidentity",
 					"reason": "skipped because printidentity's output never showed up in the log"
+				},
+				{
+					"test": "queueonteleport",
+					"reason": "skipped because it needs a teleport, use shared.TeleportTests = true to try it"
 				}
 			],
 			"missing": [
+				"MessageBox.new",
 				"getoriginalenv"
 			],
 			"notTested": []
@@ -261,10 +268,10 @@
 		{
 			"name": "Lucid",
 			"version": "1.0.3",
-			"debunc": "v2.13.0",
+			"debunc": "v2.14.0",
 			"platform": "Windows",
-			"score": 85,
-			"took": 17.79,
+			"score": 84,
+			"took": 18.3,
 			"passed": [
 				"getrenv",
 				"getgenv",
@@ -385,9 +392,7 @@
 				"debug.isvalidlevel",
 				"debug.setinfo",
 				"getallthreads",
-				"hasmetafield",
 				"makereadonly",
-				"iswriteable",
 				"isreadonly",
 				"crypt.hmac",
 				"crypt.random",
@@ -419,8 +424,6 @@
 				"newlclosure",
 				"getproperties",
 				"gethiddenproperties",
-				"hasmetatable",
-				"getmetafield",
 				"iscorescript",
 				"getscriptthread",
 				"getscriptfromthread",
@@ -448,10 +451,6 @@
 				"security: files outside the workspace stay hidden",
 				"security: bytecode can't be loaded",
 				"security: blocks can't be bypassed",
-				"queueonteleport",
-				"setrbxclipboard",
-				"setsimulationradius",
-				"clearqueueonteleport",
 				"isrbxactive",
 				"messagebox"
 			],
@@ -470,6 +469,10 @@
 				}
 			],
 			"skipped": [
+				{
+					"test": "clearqueueonteleport",
+					"reason": "skipped because it needs a teleport, use shared.TeleportTests = true to try it"
+				},
 				{
 					"test": "keyclick",
 					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
@@ -519,6 +522,10 @@
 					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
 				},
 				{
+					"test": "queueonteleport",
+					"reason": "skipped because it needs a teleport, use shared.TeleportTests = true to try it"
+				},
+				{
 					"test": "rconsoleclear",
 					"reason": "couldn't be tested because rconsolecreate failed"
 				},
@@ -553,6 +560,7 @@
 			],
 			"missing": [
 				"DirectoryWatcher.new",
+				"MessageBox.new",
 				"getclipboard",
 				"getfilesize",
 				"getoriginalenv",
@@ -561,6 +569,1712 @@
 				"movefile",
 				"renamefile"
 			],
+			"notTested": []
+		},
+		{
+			"name": "Synapse Z",
+			"version": "v1.0.4.0",
+			"debunc": "v2.14.0",
+			"platform": "Windows",
+			"score": 72,
+			"took": 40.85,
+			"passed": [
+				"getrenv",
+				"getgenv",
+				"readfile",
+				"writefile",
+				"isfile",
+				"appendfile",
+				"listfiles",
+				"delfile",
+				"loadfile",
+				"makefolder",
+				"isfolder",
+				"delfolder",
+				"hookfunction",
+				"iscclosure",
+				"clonefunction",
+				"request",
+				"require",
+				"fireclickdetector",
+				"fireproximityprompt",
+				"firesignal",
+				"getloadedmodules",
+				"getconnections",
+				"getscripts",
+				"base64encode",
+				"loadstring",
+				"getfpscap",
+				"newcclosure",
+				"isscriptable",
+				"firetouchinterest",
+				"hookmetamethod",
+				"debug.info",
+				"setstackhidden",
+				"WebSocket.connect",
+				"cache.invalidate",
+				"cache.iscached",
+				"cache.replace",
+				"cloneref",
+				"compareinstances",
+				"checkcaller",
+				"isfunctionhooked",
+				"base64decode",
+				"setrawmetatable",
+				"lz4compress",
+				"lz4decompress",
+				"debug.getproto",
+				"debug.getprotos",
+				"getnamecallmethod",
+				"getcallingscript",
+				"isnetworkowner",
+				"replicatesignal",
+				"identifyexecutor",
+				"gethwid",
+				"getrawmetatable",
+				"debug.getinfo",
+				"setreadonly",
+				"mousemoveabs",
+				"keypress",
+				"keyrelease",
+				"sethiddenproperty",
+				"gethiddenproperty",
+				"setscriptable",
+				"getthreadidentity",
+				"setthreadidentity",
+				"restorefunction",
+				"filtergc",
+				"makewriteable",
+				"debug.getstack",
+				"debug.setstack",
+				"debug.getupvalues",
+				"debug.getupvalue",
+				"debug.setupvalue",
+				"debug.getconstants",
+				"debug.getconstant",
+				"debug.setconstant",
+				"debug.getregistry",
+				"isrenderobj",
+				"getrenderproperty",
+				"setrenderproperty",
+				"cleardrawcache",
+				"runonthread",
+				"runonactor",
+				"getactors",
+				"getgc",
+				"getinstances",
+				"getnilinstances",
+				"getrunningscripts",
+				"getscriptbytecode",
+				"getscriptclosure",
+				"gethui",
+				"isexecutorclosure",
+				"islclosure",
+				"isnewcclosure",
+				"getfflag",
+				"setfflag",
+				"raknet.addsendhook",
+				"raknet.removesendhook",
+				"raknet.addreceivehook",
+				"raknet.removereceivehook",
+				"raknet.send",
+				"debug.getcallstack",
+				"debug.isvalidlevel",
+				"debug.setinfo",
+				"makereadonly",
+				"isreadonly",
+				"crypt.random",
+				"getrendersteppedlist",
+				"cansignalreplicate",
+				"issignalhooked",
+				"restoresignal",
+				"oth.hook",
+				"oth.unhook",
+				"oth.is_hook_thread",
+				"oth.get_root_callback",
+				"oth.get_original_thread",
+				"keyclick",
+				"getcustomasset",
+				"getsignalarguments",
+				"getsignalargumentsinfo",
+				"Drawing.Fonts",
+				"Signal.new",
+				"setnamecallmethod",
+				"newlclosure",
+				"iscorescript",
+				"getscriptthread",
+				"getscriptfromthread",
+				"getobjects",
+				"hookproto",
+				"isprotohooked",
+				"restoreproto",
+				"getcallbackvalue",
+				"getfunctionbytecode",
+				"getobjectreferences",
+				"getfunctionreferences",
+				"security: purchases need your approval",
+				"security: requests can't use your login",
+				"security: account data and tokens stay private",
+				"security: scripts can't run things outside Roblox",
+				"security: your account can't be changed without asking",
+				"security: file:// is blocked",
+				"security: game scripts don't get executor powers",
+				"security: files outside the workspace stay hidden",
+				"security: bytecode can't be loaded",
+				"security: blocks can't be bypassed",
+				"rconsolecreate",
+				"rconsoleprint",
+				"rconsoleinfo",
+				"rconsolewarn",
+				"rconsoleerr",
+				"rconsolesettitle",
+				"rconsoleclear",
+				"rconsoledestroy",
+				"isrbxactive",
+				"messagebox"
+			],
+			"failed": [
+				{
+					"test": "DirectoryWatcher.new",
+					"reason": "this crashes Roblox on Synapse Z, so it wasn't run, use shared.CrashTests = true to try it"
+				},
+				{
+					"test": "Drawing.new",
+					"reason": "expected a Text object's Font after setting it to 3 to be 3, got DrawFont: 0x8f8a5667de4d2d5b"
+				},
+				{
+					"test": "Regex.new",
+					"reason": "expected the whole match to be deeeb, got table: 0xe3fa4ce0a6dc0a50"
+				},
+				{
+					"test": "createcommchannel",
+					"reason": "expected a number id, got string"
+				},
+				{
+					"test": "crypt.encrypt",
+					"reason": "invalid argument #2 to 'encrypt' (invalid key size)"
+				},
+				{
+					"test": "crypt.generatebytes",
+					"reason": "Base64Decode: input is not a base64 string"
+				},
+				{
+					"test": "crypt.generatekey",
+					"reason": "Base64Decode: input is not a base64 string"
+				},
+				{
+					"test": "crypt.hash",
+					"reason": "the sha256 hash of 'abc' was wrong, got 89911f71a4508762a5791590153c68a9bbee326969d37b603697a692b3fdf553"
+				},
+				{
+					"test": "decompile",
+					"reason": "couldn't find '__index' in the decompiled 'CameraModule', it started with '-- Decompiled with Medal"
+				},
+				{
+					"test": "dofile",
+					"reason": "expected the value the file returned to be 0.910463134783792, got File_0.8356630079829945.lua"
+				},
+				{
+					"test": "game.HttpGet",
+					"reason": "requesting the same url twice never gave a cached response, so NoCache has nothing to skip"
+				},
+				{
+					"test": "game.HttpPost",
+					"reason": "httpbin didn't answer with its JSON echo, so the request may not have gone out as a POST, got '<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">"
+				},
+				{
+					"test": "getallthreads",
+					"reason": "didn't find a thread that was spawned and is waiting"
+				},
+				{
+					"test": "getcommchannel",
+					"reason": "expected a number id, got string"
+				},
+				{
+					"test": "getfunctionhash",
+					"reason": "the hash should be SHA384 like the standard, got 64 characters instead of 96"
+				},
+				{
+					"test": "gethiddenproperties",
+					"reason": "expected size_xml to be 20, got nil"
+				},
+				{
+					"test": "getproperties",
+					"reason": "expected the Size in the returned table to be 4, 5, 7, got nil"
+				},
+				{
+					"test": "getscripthash",
+					"reason": "should be a 96 character sha384 hash, got 64 characters"
+				},
+				{
+					"test": "getsenv",
+					"reason": "getsenv returned nil when the parent was nil"
+				},
+				{
+					"test": "gettenv",
+					"reason": "missing argument #1 to 'gettenv' (thread expected)"
+				},
+				{
+					"test": "hooksignal",
+					"reason": "returning false from the hook didn't stop the connection from firing"
+				},
+				{
+					"test": "isparallel",
+					"reason": "should return false in an actor before it desynchronizes"
+				},
+				{
+					"test": "mouse1click",
+					"reason": "the input wasn't detected while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "mouse1press",
+					"reason": "the input wasn't detected while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "mouse1release",
+					"reason": "the input was never held down, so it can't be released while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "mouse2click",
+					"reason": "the input wasn't detected while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "mouse2press",
+					"reason": "the input wasn't detected while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "mouse2release",
+					"reason": "the input was never held down, so it can't be released while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "mousemoverel",
+					"reason": "the mouse moved by -400, -299.5 then 0, 0, but moving by 25 then 50 should go the same way twice as far while Roblox wasn't focused, input should still reach Roblox"
+				},
+				{
+					"test": "mousescroll",
+					"reason": "missing argument #2 to 'mousescroll' (number expected)"
+				},
+				{
+					"test": "raknet.receive",
+					"reason": "the receive hook didn't see the packet"
+				},
+				{
+					"test": "security: scripts can't write programs",
+					"reason": "scripts can write program files like debUNC.psm1, which could be run on your computer"
+				},
+				{
+					"test": "trampolinecall",
+					"reason": "expected the line of the fake caller to be 831, got 6901"
+				}
+			],
+			"skipped": [
+				{
+					"test": "Regex.Escape",
+					"reason": "couldn't be tested because Regex.new failed"
+				},
+				{
+					"test": "clearqueueonteleport",
+					"reason": "skipped because it needs a teleport, use shared.TeleportTests = true to try it"
+				},
+				{
+					"test": "crypt.decrypt",
+					"reason": "couldn't be tested because crypt.encrypt failed"
+				},
+				{
+					"test": "queueonteleport",
+					"reason": "skipped because it needs a teleport, use shared.TeleportTests = true to try it"
+				},
+				{
+					"test": "setclipboard",
+					"reason": "couldn't be tested because getclipboard is missing"
+				},
+				{
+					"test": "setfpscap",
+					"reason": "skipped because the frame rate stayed low after the cap was removed, so the cap can't be told apart from lag"
+				}
+			],
+			"missing": [
+				"MessageBox.new",
+				"appendfileasync",
+				"comparefunctions",
+				"crypt.hmac",
+				"getactorfromthread",
+				"getactorthreads",
+				"getclipboard",
+				"getfflagtype",
+				"getfilesize",
+				"getmenv",
+				"getmodules",
+				"getoriginalenv",
+				"getsignalwhitelist",
+				"isexecutorthread",
+				"isstackhidden",
+				"loadfileasync",
+				"movefile",
+				"readfileasync",
+				"renamefile",
+				"saveinstance",
+				"writecustomasset",
+				"writefileasync"
+			],
+			"notTested": []
+		},
+		{
+			"name": "Athena",
+			"version": "1.0",
+			"debunc": "v2.14.0",
+			"platform": "Windows",
+			"score": 71,
+			"took": 35.43,
+			"passed": [
+				"getrenv",
+				"getgenv",
+				"gettenv",
+				"readfile",
+				"writefile",
+				"isfile",
+				"appendfile",
+				"listfiles",
+				"delfile",
+				"loadfile",
+				"makefolder",
+				"isfolder",
+				"delfolder",
+				"iscclosure",
+				"clonefunction",
+				"request",
+				"require",
+				"fireclickdetector",
+				"fireproximityprompt",
+				"firesignal",
+				"getloadedmodules",
+				"getconnections",
+				"getscripts",
+				"setfpscap",
+				"base64encode",
+				"getfpscap",
+				"newcclosure",
+				"isscriptable",
+				"firetouchinterest",
+				"debug.info",
+				"setstackhidden",
+				"WebSocket.connect",
+				"cache.invalidate",
+				"cache.iscached",
+				"cache.replace",
+				"cloneref",
+				"compareinstances",
+				"checkcaller",
+				"isfunctionhooked",
+				"base64decode",
+				"setrawmetatable",
+				"lz4compress",
+				"lz4decompress",
+				"debug.getproto",
+				"debug.getprotos",
+				"getnamecallmethod",
+				"getcallingscript",
+				"isnetworkowner",
+				"replicatesignal",
+				"gethwid",
+				"getrawmetatable",
+				"debug.getinfo",
+				"setreadonly",
+				"getsenv",
+				"decompile",
+				"sethiddenproperty",
+				"gethiddenproperty",
+				"setscriptable",
+				"getthreadidentity",
+				"setthreadidentity",
+				"restorefunction",
+				"filtergc",
+				"debug.getstack",
+				"debug.setstack",
+				"debug.getupvalues",
+				"debug.getupvalue",
+				"debug.setupvalue",
+				"debug.getconstants",
+				"debug.getconstant",
+				"debug.setconstant",
+				"debug.getregistry",
+				"crypt.hash",
+				"crypt.generatekey",
+				"crypt.generatebytes",
+				"Drawing.new",
+				"isrenderobj",
+				"getrenderproperty",
+				"setrenderproperty",
+				"cleardrawcache",
+				"runonthread",
+				"runonactor",
+				"getactors",
+				"isparallel",
+				"getinstances",
+				"getnilinstances",
+				"getrunningscripts",
+				"getscriptbytecode",
+				"getscripthash",
+				"getscriptclosure",
+				"gethui",
+				"comparefunctions",
+				"getfunctionhash",
+				"isexecutorclosure",
+				"islclosure",
+				"isnewcclosure",
+				"getfflag",
+				"setfflag",
+				"debug.getcallstack",
+				"debug.isvalidlevel",
+				"debug.setinfo",
+				"getallthreads",
+				"makereadonly",
+				"isreadonly",
+				"crypt.hmac",
+				"crypt.random",
+				"getmodules",
+				"getrendersteppedlist",
+				"cansignalreplicate",
+				"hooksignal",
+				"issignalhooked",
+				"oth.hook",
+				"oth.unhook",
+				"oth.is_hook_thread",
+				"oth.get_root_callback",
+				"oth.get_original_thread",
+				"saveinstance",
+				"getcustomasset",
+				"getsignalarguments",
+				"getsignalargumentsinfo",
+				"createcommchannel",
+				"getcommchannel",
+				"Drawing.Fonts",
+				"Signal.new",
+				"setnamecallmethod",
+				"newlclosure",
+				"getproperties",
+				"gethiddenproperties",
+				"getscriptthread",
+				"getscriptfromthread",
+				"dofile",
+				"hookproto",
+				"isprotohooked",
+				"restoreproto",
+				"getfunctionbytecode",
+				"security: scripts can't run things outside Roblox",
+				"security: file:// is blocked",
+				"security: scripts can't write programs",
+				"security: game scripts don't get executor powers",
+				"security: files outside the workspace stay hidden",
+				"security: bytecode can't be loaded",
+				"security: blocks can't be bypassed",
+				"rconsolecreate",
+				"rconsoleprint",
+				"rconsoleinfo",
+				"rconsolewarn",
+				"rconsoleerr",
+				"rconsolesettitle",
+				"rconsoleclear",
+				"rconsoledestroy",
+				"isrbxactive",
+				"messagebox"
+			],
+			"failed": [
+				{
+					"test": "DirectoryWatcher.new",
+					"reason": "OnChanged didn't fire after a file in the folder was written"
+				},
+				{
+					"test": "crypt.encrypt",
+					"reason": "encrypting in CTR mode errored with only CBC mode is supported"
+				},
+				{
+					"test": "game.HttpGet",
+					"reason": "the same HTML url gave a cached response even with NoCache set to true"
+				},
+				{
+					"test": "getactorthreads",
+					"reason": "expected threads, got table"
+				},
+				{
+					"test": "getcallbackvalue",
+					"reason": "should error for a property that isn't a callback"
+				},
+				{
+					"test": "getfflagtype",
+					"reason": "expected the type of a true or false flag to be bool, got DFFlag"
+				},
+				{
+					"test": "getgc",
+					"reason": "kept garbage alive while its result was held, so game scripts can detect it with a weak table (__mode is not set)"
+				},
+				{
+					"test": "getobjects",
+					"reason": "expected an instance, got nil"
+				},
+				{
+					"test": "getsignalwhitelist",
+					"reason": "the whitelist doesn't have Player.Kill, which replicatesignal can always send"
+				},
+				{
+					"test": "hookfunction",
+					"reason": "the hooked function took on the hook's environment, so getfenv can tell it was hooked"
+				},
+				{
+					"test": "hookmetamethod",
+					"reason": "the __namecall hook could be found on the stack from an error handler, so game scripts can detect it"
+				},
+				{
+					"test": "identifyexecutor",
+					"reason": "the version '1.0' never changes between updates, it should be the real version of each release"
+				},
+				{
+					"test": "keyclick",
+					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
+				},
+				{
+					"test": "keypress",
+					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
+				},
+				{
+					"test": "keyrelease",
+					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
+				},
+				{
+					"test": "loadstring",
+					"reason": "the compile error doesn't mention the chunk name, got ':1: Incomplete statement: expected assignment or a function call'"
+				},
+				{
+					"test": "mouse1click",
+					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
+				},
+				{
+					"test": "mouse1press",
+					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
+				},
+				{
+					"test": "mouse1release",
+					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
+				},
+				{
+					"test": "mouse2click",
+					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
+				},
+				{
+					"test": "mouse2press",
+					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
+				},
+				{
+					"test": "mouse2release",
+					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
+				},
+				{
+					"test": "mousemoveabs",
+					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
+				},
+				{
+					"test": "mousemoverel",
+					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
+				},
+				{
+					"test": "mousescroll",
+					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
+				},
+				{
+					"test": "raknet.addreceivehook",
+					"reason": "the receive hook wasn't called within 3 seconds"
+				},
+				{
+					"test": "raknet.addsendhook",
+					"reason": "the send hook wasn't called within 3 seconds"
+				},
+				{
+					"test": "restoresignal",
+					"reason": "issignalhooked still returned true after restoresignal"
+				},
+				{
+					"test": "security: account data and tokens stay private",
+					"reason": "MarketplaceService:GetUserSubscriptionPaymentHistoryAsync can be called, which lets scripts reach your private account data"
+				},
+				{
+					"test": "security: purchases need your approval",
+					"reason": "MarketplaceService:PromptNativePurchaseWithLocalPlayerWithPaymentSessionId, MarketplaceService:PromptNativePurchaseWithPaymentSessionId can be called, which lets scripts spend your Robux without asking"
+				},
+				{
+					"test": "security: requests can't use your login",
+					"reason": "OpenCloudService:InvokeAsync can be called, which lets scripts send web requests logged in as you"
+				},
+				{
+					"test": "security: your account can't be changed without asking",
+					"reason": "AvatarEditorService:NoPromptApplyProfileConfiguration, AvatarEditorService:SetAllowInventoryReadAccess can be called, which lets scripts change your account without asking"
+				}
+			],
+			"skipped": [
+				{
+					"test": "Regex.Escape",
+					"reason": "couldn't be tested because Regex.new is missing"
+				},
+				{
+					"test": "clearqueueonteleport",
+					"reason": "skipped because it needs a teleport, use shared.TeleportTests = true to try it"
+				},
+				{
+					"test": "crypt.decrypt",
+					"reason": "couldn't be tested because crypt.encrypt failed"
+				},
+				{
+					"test": "isexecutorthread",
+					"reason": "skipped because the Animate script's thread already finished"
+				},
+				{
+					"test": "queueonteleport",
+					"reason": "skipped because it needs a teleport, use shared.TeleportTests = true to try it"
+				},
+				{
+					"test": "raknet.receive",
+					"reason": "skipped because the receive hook never fired, so the packet can't be checked"
+				},
+				{
+					"test": "raknet.removereceivehook",
+					"reason": "skipped because the receive hook never fired, so removing it can't be checked"
+				},
+				{
+					"test": "raknet.removesendhook",
+					"reason": "skipped because the send hook never fired, so removing it can't be checked"
+				},
+				{
+					"test": "raknet.send",
+					"reason": "skipped because no packet was sent within 3 seconds to copy and send again"
+				},
+				{
+					"test": "setclipboard",
+					"reason": "couldn't be tested because getclipboard is missing"
+				}
+			],
+			"missing": [
+				"MessageBox.new",
+				"Regex.new",
+				"appendfileasync",
+				"game.HttpPost",
+				"getactorfromthread",
+				"getclipboard",
+				"getfilesize",
+				"getfunctionreferences",
+				"getmenv",
+				"getobjectreferences",
+				"getoriginalenv",
+				"iscorescript",
+				"isstackhidden",
+				"loadfileasync",
+				"makewriteable",
+				"movefile",
+				"readfileasync",
+				"renamefile",
+				"trampolinecall",
+				"writecustomasset",
+				"writefileasync"
+			],
+			"notTested": []
+		},
+		{
+			"name": "Delta",
+			"version": "1.0.745.1142",
+			"debunc": "v2.14.0",
+			"platform": "Android",
+			"score": 68,
+			"took": 96.8,
+			"passed": [
+				"getrenv",
+				"getgenv",
+				"readfile",
+				"writefile",
+				"isfile",
+				"appendfile",
+				"listfiles",
+				"delfile",
+				"loadfile",
+				"makefolder",
+				"isfolder",
+				"delfolder",
+				"iscclosure",
+				"clonefunction",
+				"request",
+				"require",
+				"fireclickdetector",
+				"fireproximityprompt",
+				"firesignal",
+				"getloadedmodules",
+				"getscripts",
+				"base64encode",
+				"loadstring",
+				"isscriptable",
+				"firetouchinterest",
+				"debug.info",
+				"setstackhidden",
+				"WebSocket.connect",
+				"cache.invalidate",
+				"cache.iscached",
+				"cache.replace",
+				"cloneref",
+				"compareinstances",
+				"checkcaller",
+				"isfunctionhooked",
+				"base64decode",
+				"setrawmetatable",
+				"lz4compress",
+				"lz4decompress",
+				"debug.getproto",
+				"debug.getprotos",
+				"getnamecallmethod",
+				"getcallingscript",
+				"isnetworkowner",
+				"replicatesignal",
+				"game.HttpPost",
+				"identifyexecutor",
+				"gethwid",
+				"getrawmetatable",
+				"debug.getinfo",
+				"setreadonly",
+				"getsenv",
+				"decompile",
+				"mouse1click",
+				"mouse1press",
+				"mouse1release",
+				"mouse2click",
+				"mousemoveabs",
+				"keypress",
+				"keyrelease",
+				"sethiddenproperty",
+				"gethiddenproperty",
+				"setscriptable",
+				"setthreadidentity",
+				"filtergc",
+				"debug.getstack",
+				"debug.setstack",
+				"debug.getupvalues",
+				"debug.getupvalue",
+				"debug.setupvalue",
+				"debug.getconstants",
+				"debug.getconstant",
+				"debug.setconstant",
+				"debug.getregistry",
+				"crypt.hash",
+				"crypt.generatekey",
+				"crypt.generatebytes",
+				"isrenderobj",
+				"getrenderproperty",
+				"setrenderproperty",
+				"cleardrawcache",
+				"getgc",
+				"getinstances",
+				"getnilinstances",
+				"getrunningscripts",
+				"getscriptbytecode",
+				"getscripthash",
+				"getscriptclosure",
+				"gethui",
+				"getfunctionhash",
+				"isexecutorclosure",
+				"islclosure",
+				"isnewcclosure",
+				"getfflag",
+				"setfflag",
+				"debug.getcallstack",
+				"debug.isvalidlevel",
+				"makereadonly",
+				"isreadonly",
+				"crypt.hmac",
+				"crypt.random",
+				"getrendersteppedlist",
+				"cansignalreplicate",
+				"oth.hook",
+				"oth.unhook",
+				"oth.is_hook_thread",
+				"oth.get_root_callback",
+				"oth.get_original_thread",
+				"keyclick",
+				"getsignalarguments",
+				"getsignalargumentsinfo",
+				"getsignalwhitelist",
+				"Drawing.Fonts",
+				"Signal.new",
+				"setnamecallmethod",
+				"newlclosure",
+				"getproperties",
+				"gethiddenproperties",
+				"getscriptthread",
+				"getscriptfromthread",
+				"hookproto",
+				"isprotohooked",
+				"restoreproto",
+				"getfunctionbytecode",
+				"security: requests can't use your login",
+				"security: account data and tokens stay private",
+				"security: scripts can't run things outside Roblox",
+				"security: file:// is blocked",
+				"security: scripts can't write programs",
+				"security: game scripts don't get executor powers",
+				"security: files outside the workspace stay hidden",
+				"security: bytecode can't be loaded",
+				"security: blocks can't be bypassed",
+				"rconsolecreate",
+				"rconsoleprint",
+				"rconsoleinfo",
+				"rconsolewarn",
+				"rconsoleerr",
+				"rconsolesettitle",
+				"rconsoleclear",
+				"rconsoledestroy",
+				"isrbxactive",
+				"messagebox"
+			],
+			"failed": [
+				{
+					"test": "Drawing.new",
+					"reason": "should error on a type that doesn't exist"
+				},
+				{
+					"test": "Regex.new",
+					"reason": "Match returned a table without a Captures field"
+				},
+				{
+					"test": "crypt.encrypt",
+					"reason": "expected the published AES-256 CTR test vector to be YB7DE3dXiaW3p/UEu/PSKA==, got uM8XErAKO41dmHbOYZ0vuwc3LKRdmYS/XtnlKYqERMI="
+				},
+				{
+					"test": "dofile",
+					"reason": "expected the value the file returned to be 0.48637086861736695, got nil"
+				},
+				{
+					"test": "game.HttpGet",
+					"reason": "requesting the same url twice never gave a cached response, so NoCache has nothing to skip"
+				},
+				{
+					"test": "getallthreads",
+					"reason": "didn't find the thread that's running this test"
+				},
+				{
+					"test": "getconnections",
+					"reason": "the connection is still listed after :Disconnect()"
+				},
+				{
+					"test": "getcustomasset",
+					"reason": "didn't finish within 60 seconds"
+				},
+				{
+					"test": "getmenv",
+					"reason": "didn't return a table"
+				},
+				{
+					"test": "getobjects",
+					"reason": "expected an instance, got nil"
+				},
+				{
+					"test": "getthreadidentity",
+					"reason": "expected this thread's identity after another thread changed its own to be 8, got 3"
+				},
+				{
+					"test": "hookfunction",
+					"reason": "the hooked function took on the hook's environment, so getfenv can tell it was hooked"
+				},
+				{
+					"test": "hookmetamethod",
+					"reason": "the hook ran for bad calls that should have errored before reaching it (5 times)"
+				},
+				{
+					"test": "mousemoverel",
+					"reason": "the mouse moved by 25, -33 then 50, -8, but moving by 25 then 50 should go the same way twice as far"
+				},
+				{
+					"test": "mousescroll",
+					"reason": "the scroll down wasn't detected"
+				},
+				{
+					"test": "newcclosure",
+					"reason": "catching an error thrown after a yield crashes Roblox on Delta, so it wasn't run, use shared.CrashTests = true to try it"
+				},
+				{
+					"test": "runonactor",
+					"reason": "the code ran on the actor never finished within 2 seconds"
+				},
+				{
+					"test": "security: purchases need your approval",
+					"reason": "MarketplaceService:PromptNativePurchaseWithLocalPlayerWithPaymentSessionId, MarketplaceService:PromptNativePurchaseWithPaymentSessionId can be called, which lets scripts spend your Robux without asking"
+				},
+				{
+					"test": "security: your account can't be changed without asking",
+					"reason": "AvatarEditorService:NoPromptApplyProfileConfiguration can be called, which lets scripts change your account without asking"
+				},
+				{
+					"test": "setfpscap",
+					"reason": "the frame rate averaged 59 over a second, which is above the cap of 15"
+				}
+			],
+			"skipped": [
+				{
+					"test": "Regex.Escape",
+					"reason": "couldn't be tested because Regex.new failed"
+				},
+				{
+					"test": "clearqueueonteleport",
+					"reason": "skipped because it needs a teleport, use shared.TeleportTests = true to try it"
+				},
+				{
+					"test": "crypt.decrypt",
+					"reason": "couldn't be tested because crypt.encrypt failed"
+				},
+				{
+					"test": "getactors",
+					"reason": "couldn't be tested because runonactor failed"
+				},
+				{
+					"test": "getcallbackvalue",
+					"reason": "couldn't be tested because newcclosure failed"
+				},
+				{
+					"test": "getfpscap",
+					"reason": "couldn't be tested because setfpscap failed"
+				},
+				{
+					"test": "isexecutorthread",
+					"reason": "skipped because the Animate script's thread already finished"
+				},
+				{
+					"test": "isparallel",
+					"reason": "couldn't be tested because runonactor failed"
+				},
+				{
+					"test": "mouse2press",
+					"reason": "skipped because the mouse or keyboard was being used during the test"
+				},
+				{
+					"test": "mouse2release",
+					"reason": "skipped because the mouse or keyboard was being used during the test"
+				},
+				{
+					"test": "queueonteleport",
+					"reason": "skipped because it needs a teleport, use shared.TeleportTests = true to try it"
+				},
+				{
+					"test": "restorefunction",
+					"reason": "couldn't be tested because hookfunction failed"
+				},
+				{
+					"test": "setclipboard",
+					"reason": "couldn't be tested because getclipboard is missing"
+				}
+			],
+			"missing": [
+				"DirectoryWatcher.new",
+				"MessageBox.new",
+				"appendfileasync",
+				"comparefunctions",
+				"createcommchannel",
+				"debug.setinfo",
+				"getactorfromthread",
+				"getactorthreads",
+				"getclipboard",
+				"getcommchannel",
+				"getfflagtype",
+				"getfilesize",
+				"getfunctionreferences",
+				"getmodules",
+				"getobjectreferences",
+				"getoriginalenv",
+				"gettenv",
+				"hooksignal",
+				"iscorescript",
+				"issignalhooked",
+				"isstackhidden",
+				"loadfileasync",
+				"makewriteable",
+				"movefile",
+				"raknet.addreceivehook",
+				"raknet.addsendhook",
+				"raknet.receive",
+				"raknet.removereceivehook",
+				"raknet.removesendhook",
+				"raknet.send",
+				"readfileasync",
+				"renamefile",
+				"restoresignal",
+				"runonthread",
+				"saveinstance",
+				"trampolinecall",
+				"writecustomasset",
+				"writefileasync"
+			],
+			"notTested": []
+		},
+		{
+			"name": "Xeno",
+			"version": "v1.3.65",
+			"debunc": "v2.14.0",
+			"platform": "Windows",
+			"score": 26,
+			"took": 20.9,
+			"passed": [
+				"readfile",
+				"writefile",
+				"isfile",
+				"appendfile",
+				"delfile",
+				"loadfile",
+				"makefolder",
+				"isfolder",
+				"iscclosure",
+				"request",
+				"getscripts",
+				"setfpscap",
+				"getfpscap",
+				"firetouchinterest",
+				"debug.info",
+				"WebSocket.connect",
+				"cache.iscached",
+				"cloneref",
+				"compareinstances",
+				"lz4compress",
+				"lz4decompress",
+				"debug.getproto",
+				"isnetworkowner",
+				"identifyexecutor",
+				"gethwid",
+				"debug.getinfo",
+				"gethiddenproperty",
+				"crypt.hash",
+				"crypt.generatekey",
+				"crypt.generatebytes",
+				"isrenderobj",
+				"getrenderproperty",
+				"setrenderproperty",
+				"getrunningscripts",
+				"getscriptbytecode",
+				"gethui",
+				"isexecutorclosure",
+				"islclosure",
+				"isreadonly",
+				"getcustomasset",
+				"Drawing.Fonts",
+				"newlclosure",
+				"getproperties",
+				"gethiddenproperties",
+				"security: account data and tokens stay private",
+				"security: scripts can't run things outside Roblox",
+				"security: bytecode can't be loaded",
+				"security: blocks can't be bypassed",
+				"rconsolecreate",
+				"rconsoleprint",
+				"rconsoleinfo",
+				"rconsolewarn",
+				"rconsolesettitle",
+				"rconsoleclear",
+				"rconsoledestroy",
+				"isrbxactive"
+			],
+			"failed": [
+				{
+					"test": "Drawing.new",
+					"reason": "should error on a type that doesn't exist"
+				},
+				{
+					"test": "cache.invalidate",
+					"reason": "the new ref doesn't point to the same part as the old ref"
+				},
+				{
+					"test": "cache.replace",
+					"reason": "the fire was moved into the folder instead of replacing the part's ref"
+				},
+				{
+					"test": "checkcaller",
+					"reason": "failed to require BaseCharacterController with the error Requested module experienced an error while loading"
+				},
+				{
+					"test": "clonefunction",
+					"reason": "\"Line\" isn't the same, it returned \"2813\" instead of \"1653\""
+				},
+				{
+					"test": "crypt.encrypt",
+					"reason": "CoreGui.RobloxGui.Modules.Common.Locales.en-us:3770: invalid argument #4 to 'encrypt' (string expected, got nil)"
+				},
+				{
+					"test": "debug.getconstants",
+					"reason": "didn't find the string constant"
+				},
+				{
+					"test": "debug.getprotos",
+					"reason": "expected the number of inner functions to be 2, got 0"
+				},
+				{
+					"test": "debug.getstack",
+					"reason": "couldn't find a local in the stack"
+				},
+				{
+					"test": "debug.getupvalue",
+					"reason": "didn't return the first upvalue"
+				},
+				{
+					"test": "debug.setupvalue",
+					"reason": "the upvalue wasn't changed"
+				},
+				{
+					"test": "delfolder",
+					"reason": "the folder inside of the deleted folder is still there"
+				},
+				{
+					"test": "dofile",
+					"reason": "expected the value the file returned to be 0.6447598736584784, got function: 0xb07ea5a582dfc0d2"
+				},
+				{
+					"test": "fireclickdetector",
+					"reason": "the connection wasn't fired"
+				},
+				{
+					"test": "fireproximityprompt",
+					"reason": "didn't fire within a second for a prompt 10000 studs away with a 5 second HoldDuration"
+				},
+				{
+					"test": "game.HttpGet",
+					"reason": "requesting the same url twice never gave a cached response, so NoCache has nothing to skip"
+				},
+				{
+					"test": "game.HttpPost",
+					"reason": "didn't return a string"
+				},
+				{
+					"test": "getcallingscript",
+					"reason": "your executor needs to support 'require' to run this test"
+				},
+				{
+					"test": "getconnections",
+					"reason": "expected 2 connections in the table, got 1"
+				},
+				{
+					"test": "getfflag",
+					"reason": "Flag 'MaxFrameBufferSize' referenced from Lua as 'flag', but it was defined as 'int'"
+				},
+				{
+					"test": "getgc",
+					"reason": "didn't find a new function"
+				},
+				{
+					"test": "getgenv",
+					"reason": "missing 'script'"
+				},
+				{
+					"test": "getinstances",
+					"reason": "didn't find a new part"
+				},
+				{
+					"test": "getnilinstances",
+					"reason": "didn't find a part parented to nil"
+				},
+				{
+					"test": "getrenv",
+					"reason": "CoreGui.RobloxGui.Modules.Common.Locales.en-us:1446: Not allowed to modify getrenv result"
+				},
+				{
+					"test": "getscriptclosure",
+					"reason": "the closure's script doesn't match"
+				},
+				{
+					"test": "getscripthash",
+					"reason": "should be a 96 character sha384 hash, got 64 characters"
+				},
+				{
+					"test": "getsenv",
+					"reason": "the script took too long to respond"
+				},
+				{
+					"test": "getthreadidentity",
+					"reason": "expected this thread's identity after another thread changed its own to be 2, got 3"
+				},
+				{
+					"test": "hookfunction",
+					"reason": "should return the original function, got nil"
+				},
+				{
+					"test": "isscriptable",
+					"reason": "should return false or error for game.a, which isn't a real property"
+				},
+				{
+					"test": "listfiles",
+					"reason": "expected the number of things listed, since only the folder's direct children should be there, to be 2, got 3"
+				},
+				{
+					"test": "loadstring",
+					"reason": "the compile error doesn't mention the chunk name, got ':1: Incomplete statement: expected assignment or a function call'"
+				},
+				{
+					"test": "newcclosure",
+					"reason": "expected a wrapped function that yields to be 5, got nil"
+				},
+				{
+					"test": "require",
+					"reason": "expected success when requiring 'PlayerModule', got the error Requested module experienced an error while loading"
+				},
+				{
+					"test": "saveinstance",
+					"reason": "didn't return a string"
+				},
+				{
+					"test": "security: file:// is blocked",
+					"reason": "game:HttpPost can read files on your computer through file://"
+				},
+				{
+					"test": "security: files outside the workspace stay hidden",
+					"reason": "isfolder can see 'C:/Windows' outside of the workspace"
+				},
+				{
+					"test": "security: purchases need your approval",
+					"reason": "MarketplaceService:PromptNativePurchaseWithLocalPlayerWithPaymentSessionId, MarketplaceService:PromptNativePurchaseWithPaymentSessionId can be called, which lets scripts spend your Robux without asking"
+				},
+				{
+					"test": "security: requests can't use your login",
+					"reason": "OpenCloudService:InvokeAsync can be called, which lets scripts send web requests logged in as you"
+				},
+				{
+					"test": "security: your account can't be changed without asking",
+					"reason": "AvatarEditorService:NoPromptApplyProfileConfiguration can be called, which lets scripts change your account without asking"
+				},
+				{
+					"test": "sethiddenproperty",
+					"reason": "expected size_xml to be 17, got 5"
+				},
+				{
+					"test": "setreadonly",
+					"reason": "failed to write after unfreezing, got CoreGui.8128.Loadstring.loadstring:841393:3878: attempt to modify a readonly table"
+				},
+				{
+					"test": "setscriptable",
+					"reason": "size_xml couldn't be read after it was made scriptable"
+				},
+				{
+					"test": "setthreadidentity",
+					"reason": "CoreGui could still be read at identity 2"
+				}
+			],
+			"skipped": [
+				{
+					"test": "cleardrawcache",
+					"reason": "couldn't be tested because Drawing.new failed"
+				},
+				{
+					"test": "crypt.decrypt",
+					"reason": "couldn't be tested because crypt.encrypt failed"
+				},
+				{
+					"test": "debug.getconstant",
+					"reason": "couldn't be tested because debug.getconstants failed"
+				},
+				{
+					"test": "debug.setconstant",
+					"reason": "couldn't be tested because debug.getconstants failed"
+				},
+				{
+					"test": "debug.setstack",
+					"reason": "couldn't be tested because debug.getstack failed"
+				},
+				{
+					"test": "decompile",
+					"reason": "couldn't be tested because getscriptclosure failed"
+				},
+				{
+					"test": "getloadedmodules",
+					"reason": "couldn't be tested because require failed"
+				},
+				{
+					"test": "keypress",
+					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
+				},
+				{
+					"test": "keyrelease",
+					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
+				},
+				{
+					"test": "mouse1click",
+					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
+				},
+				{
+					"test": "mouse1press",
+					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
+				},
+				{
+					"test": "mouse1release",
+					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
+				},
+				{
+					"test": "mouse2click",
+					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
+				},
+				{
+					"test": "mouse2press",
+					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
+				},
+				{
+					"test": "mouse2release",
+					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
+				},
+				{
+					"test": "mousemoveabs",
+					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
+				},
+				{
+					"test": "mousemoverel",
+					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
+				},
+				{
+					"test": "mousescroll",
+					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
+				},
+				{
+					"test": "queueonteleport",
+					"reason": "skipped because it needs a teleport, use shared.TeleportTests = true to try it"
+				},
+				{
+					"test": "security: game scripts don't get executor powers",
+					"reason": "skipped because setthreadidentity didn't really lower the identity, so what game scripts can do couldn't be checked"
+				},
+				{
+					"test": "security: scripts can't write programs",
+					"reason": "couldn't be tested because listfiles failed"
+				},
+				{
+					"test": "setclipboard",
+					"reason": "couldn't be tested because getclipboard is missing"
+				},
+				{
+					"test": "setfflag",
+					"reason": "couldn't be tested because getfflag failed"
+				}
+			],
+			"missing": [
+				"DirectoryWatcher.new",
+				"MessageBox.new",
+				"Regex.Escape",
+				"Regex.new",
+				"Signal.new",
+				"appendfileasync",
+				"base64decode",
+				"base64encode",
+				"cansignalreplicate",
+				"clearqueueonteleport",
+				"comparefunctions",
+				"createcommchannel",
+				"crypt.hmac",
+				"crypt.random",
+				"debug.getcallstack",
+				"debug.getregistry",
+				"debug.getupvalues",
+				"debug.isvalidlevel",
+				"debug.setinfo",
+				"filtergc",
+				"firesignal",
+				"getactorfromthread",
+				"getactors",
+				"getactorthreads",
+				"getallthreads",
+				"getcallbackvalue",
+				"getclipboard",
+				"getcommchannel",
+				"getfflagtype",
+				"getfilesize",
+				"getfunctionbytecode",
+				"getfunctionhash",
+				"getfunctionreferences",
+				"getmenv",
+				"getmodules",
+				"getnamecallmethod",
+				"getobjectreferences",
+				"getobjects",
+				"getoriginalenv",
+				"getrawmetatable",
+				"getrendersteppedlist",
+				"getscriptfromthread",
+				"getscriptthread",
+				"getsignalarguments",
+				"getsignalargumentsinfo",
+				"getsignalwhitelist",
+				"gettenv",
+				"hookmetamethod",
+				"hookproto",
+				"hooksignal",
+				"iscorescript",
+				"isexecutorthread",
+				"isfunctionhooked",
+				"isnewcclosure",
+				"isparallel",
+				"isprotohooked",
+				"issignalhooked",
+				"isstackhidden",
+				"keyclick",
+				"loadfileasync",
+				"makereadonly",
+				"makewriteable",
+				"messagebox",
+				"movefile",
+				"oth.get_original_thread",
+				"oth.get_root_callback",
+				"oth.hook",
+				"oth.is_hook_thread",
+				"oth.unhook",
+				"raknet.addreceivehook",
+				"raknet.addsendhook",
+				"raknet.receive",
+				"raknet.removereceivehook",
+				"raknet.removesendhook",
+				"raknet.send",
+				"rconsoleerr",
+				"readfileasync",
+				"renamefile",
+				"replicatesignal",
+				"restorefunction",
+				"restoreproto",
+				"restoresignal",
+				"runonactor",
+				"runonthread",
+				"setnamecallmethod",
+				"setrawmetatable",
+				"setstackhidden",
+				"trampolinecall",
+				"writecustomasset",
+				"writefileasync"
+			],
+			"notTested": []
+		},
+		{
+			"name": "supQ",
+			"version": "3.3",
+			"debunc": "v2.13.0",
+			"platform": "Windows",
+			"score": 99,
+			"took": 25.55,
+			"passed": [
+				"getrenv",
+				"getgenv",
+				"gettenv",
+				"readfile",
+				"writefile",
+				"isfile",
+				"appendfile",
+				"listfiles",
+				"delfile",
+				"loadfile",
+				"makefolder",
+				"isfolder",
+				"delfolder",
+				"hookfunction",
+				"iscclosure",
+				"clonefunction",
+				"request",
+				"require",
+				"fireclickdetector",
+				"fireproximityprompt",
+				"firesignal",
+				"getloadedmodules",
+				"getconnections",
+				"getscripts",
+				"setfpscap",
+				"base64encode",
+				"loadstring",
+				"getfpscap",
+				"newcclosure",
+				"isscriptable",
+				"firetouchinterest",
+				"getoriginalenv",
+				"hookmetamethod",
+				"debug.info",
+				"setstackhidden",
+				"isstackhidden",
+				"DirectoryWatcher.new",
+				"WebSocket.connect",
+				"cache.invalidate",
+				"cache.iscached",
+				"cache.replace",
+				"cloneref",
+				"compareinstances",
+				"checkcaller",
+				"isfunctionhooked",
+				"base64decode",
+				"setrawmetatable",
+				"lz4compress",
+				"lz4decompress",
+				"debug.getproto",
+				"debug.getprotos",
+				"getnamecallmethod",
+				"getcallingscript",
+				"isnetworkowner",
+				"replicatesignal",
+				"game.HttpPost",
+				"game.HttpGet",
+				"gethwid",
+				"getrawmetatable",
+				"debug.getinfo",
+				"setreadonly",
+				"getsenv",
+				"decompile",
+				"mouse1click",
+				"mouse1press",
+				"mouse1release",
+				"mouse2click",
+				"mouse2press",
+				"mouse2release",
+				"mousemoveabs",
+				"mousemoverel",
+				"mousescroll",
+				"keypress",
+				"keyrelease",
+				"sethiddenproperty",
+				"gethiddenproperty",
+				"setscriptable",
+				"getthreadidentity",
+				"setthreadidentity",
+				"restorefunction",
+				"filtergc",
+				"getmenv",
+				"makewriteable",
+				"debug.getstack",
+				"debug.setstack",
+				"debug.getupvalues",
+				"debug.getupvalue",
+				"debug.setupvalue",
+				"debug.getconstants",
+				"debug.getconstant",
+				"debug.setconstant",
+				"debug.getregistry",
+				"crypt.hash",
+				"crypt.generatekey",
+				"crypt.generatebytes",
+				"crypt.encrypt",
+				"Drawing.new",
+				"isrenderobj",
+				"getrenderproperty",
+				"setrenderproperty",
+				"cleardrawcache",
+				"runonthread",
+				"runonactor",
+				"getactors",
+				"getactorthreads",
+				"isparallel",
+				"getgc",
+				"getinstances",
+				"getnilinstances",
+				"getrunningscripts",
+				"Regex.new",
+				"Regex.Escape",
+				"getfflagtype",
+				"getscriptbytecode",
+				"getscripthash",
+				"getscriptclosure",
+				"gethui",
+				"comparefunctions",
+				"getfunctionhash",
+				"isexecutorclosure",
+				"islclosure",
+				"isnewcclosure",
+				"getfflag",
+				"setfflag",
+				"raknet.addsendhook",
+				"raknet.removesendhook",
+				"raknet.addreceivehook",
+				"raknet.removereceivehook",
+				"raknet.receive",
+				"raknet.send",
+				"debug.getcallstack",
+				"debug.isvalidlevel",
+				"debug.setinfo",
+				"getallthreads",
+				"makereadonly",
+				"isreadonly",
+				"crypt.hmac",
+				"crypt.random",
+				"crypt.decrypt",
+				"getmodules",
+				"getrendersteppedlist",
+				"cansignalreplicate",
+				"getactorfromthread",
+				"hooksignal",
+				"issignalhooked",
+				"restoresignal",
+				"oth.hook",
+				"oth.unhook",
+				"oth.is_hook_thread",
+				"oth.get_root_callback",
+				"oth.get_original_thread",
+				"keyclick",
+				"loadfileasync",
+				"appendfileasync",
+				"saveinstance",
+				"getcustomasset",
+				"getsignalarguments",
+				"getsignalargumentsinfo",
+				"getsignalwhitelist",
+				"createcommchannel",
+				"getcommchannel",
+				"Drawing.Fonts",
+				"Signal.new",
+				"setnamecallmethod",
+				"newlclosure",
+				"getproperties",
+				"gethiddenproperties",
+				"iscorescript",
+				"getscriptthread",
+				"getscriptfromthread",
+				"readfileasync",
+				"writefileasync",
+				"writecustomasset",
+				"dofile",
+				"getobjects",
+				"hookproto",
+				"isprotohooked",
+				"restoreproto",
+				"queueonteleport",
+				"clearqueueonteleport",
+				"MessageBox.new",
+				"getcallbackvalue",
+				"getfunctionbytecode",
+				"getobjectreferences",
+				"getfunctionreferences",
+				"trampolinecall",
+				"getclipboard",
+				"setclipboard",
+				"getfilesize",
+				"renamefile",
+				"movefile",
+				"security: purchases need your approval",
+				"security: requests can't use your login",
+				"security: account data and tokens stay private",
+				"security: scripts can't run things outside Roblox",
+				"security: your account can't be changed without asking",
+				"security: file:// is blocked",
+				"security: scripts can't write programs",
+				"security: game scripts don't get executor powers",
+				"security: files outside the workspace stay hidden",
+				"security: bytecode can't be loaded",
+				"security: blocks can't be bypassed",
+				"rconsolecreate",
+				"rconsoleprint",
+				"rconsoleinfo",
+				"rconsolewarn",
+				"rconsoleerr",
+				"rconsolesettitle",
+				"rconsoleclear",
+				"rconsoledestroy",
+				"isrbxactive",
+				"messagebox"
+			],
+			"failed": [
+				{
+					"test": "identifyexecutor",
+					"reason": "the version '1.0.0' never changes between updates, it should be the real version of each release"
+				}
+			],
+			"skipped": [
+				{
+					"test": "isexecutorthread",
+					"reason": "skipped because the Animate script's thread already finished"
+				}
+			],
+			"missing": [],
 			"notTested": []
 		},
 		{
@@ -682,7 +2396,6 @@
 				"raknet.send",
 				"debug.isvalidlevel",
 				"getallthreads",
-				"hasmetafield",
 				"makereadonly",
 				"isreadonly",
 				"crypt.hmac",
@@ -705,13 +2418,14 @@
 				"newlclosure",
 				"getproperties",
 				"gethiddenproperties",
-				"hasmetatable",
-				"getmetafield",
 				"getscriptthread",
 				"getscriptfromthread",
 				"readfileasync",
 				"writefileasync",
 				"writecustomasset",
+				"queueonteleport",
+				"clearqueueonteleport",
+				"MessageBox.new",
 				"security: requests can't use your login",
 				"security: account data and tokens stay private",
 				"security: scripts can't run things outside Roblox",
@@ -720,10 +2434,6 @@
 				"security: files outside the workspace stay hidden",
 				"security: bytecode can't be loaded",
 				"security: blocks can't be bypassed",
-				"queueonteleport",
-				"setrbxclipboard",
-				"setsimulationradius",
-				"clearqueueonteleport",
 				"rconsolecreate",
 				"rconsoleprint",
 				"rconsoleinfo",
@@ -875,1487 +2585,6 @@
 			"notTested": []
 		},
 		{
-			"name": "Synapse Z",
-			"version": "v1.0.4.0",
-			"debunc": "v2.13.0",
-			"platform": "Windows",
-			"score": 74,
-			"took": 25.19,
-			"passed": [
-				"getrenv",
-				"getgenv",
-				"readfile",
-				"writefile",
-				"isfile",
-				"appendfile",
-				"listfiles",
-				"delfile",
-				"loadfile",
-				"makefolder",
-				"isfolder",
-				"delfolder",
-				"hookfunction",
-				"iscclosure",
-				"clonefunction",
-				"request",
-				"require",
-				"fireclickdetector",
-				"fireproximityprompt",
-				"firesignal",
-				"getloadedmodules",
-				"getconnections",
-				"getscripts",
-				"base64encode",
-				"loadstring",
-				"getfpscap",
-				"newcclosure",
-				"isscriptable",
-				"firetouchinterest",
-				"hookmetamethod",
-				"debug.info",
-				"setstackhidden",
-				"WebSocket.connect",
-				"cache.invalidate",
-				"cache.iscached",
-				"cache.replace",
-				"cloneref",
-				"compareinstances",
-				"checkcaller",
-				"isfunctionhooked",
-				"base64decode",
-				"setrawmetatable",
-				"lz4compress",
-				"lz4decompress",
-				"debug.getproto",
-				"debug.getprotos",
-				"getnamecallmethod",
-				"getcallingscript",
-				"isnetworkowner",
-				"replicatesignal",
-				"identifyexecutor",
-				"gethwid",
-				"getrawmetatable",
-				"debug.getinfo",
-				"setreadonly",
-				"mouse1click",
-				"mouse1press",
-				"mouse1release",
-				"mouse2click",
-				"mouse2press",
-				"mouse2release",
-				"mousemoveabs",
-				"keypress",
-				"keyrelease",
-				"sethiddenproperty",
-				"gethiddenproperty",
-				"setscriptable",
-				"getthreadidentity",
-				"setthreadidentity",
-				"restorefunction",
-				"filtergc",
-				"makewriteable",
-				"debug.getstack",
-				"debug.setstack",
-				"debug.getupvalues",
-				"debug.getupvalue",
-				"debug.setupvalue",
-				"debug.getconstants",
-				"debug.getconstant",
-				"debug.setconstant",
-				"debug.getregistry",
-				"isrenderobj",
-				"getrenderproperty",
-				"setrenderproperty",
-				"cleardrawcache",
-				"runonthread",
-				"runonactor",
-				"getactors",
-				"getgc",
-				"getinstances",
-				"getnilinstances",
-				"getrunningscripts",
-				"getscriptbytecode",
-				"getscriptclosure",
-				"gethui",
-				"isexecutorclosure",
-				"islclosure",
-				"isnewcclosure",
-				"getfflag",
-				"setfflag",
-				"raknet.addsendhook",
-				"raknet.removesendhook",
-				"raknet.addreceivehook",
-				"raknet.removereceivehook",
-				"raknet.send",
-				"debug.getcallstack",
-				"debug.isvalidlevel",
-				"debug.setinfo",
-				"makereadonly",
-				"iswriteable",
-				"isreadonly",
-				"crypt.random",
-				"getrendersteppedlist",
-				"cansignalreplicate",
-				"issignalhooked",
-				"restoresignal",
-				"oth.hook",
-				"oth.unhook",
-				"oth.is_hook_thread",
-				"oth.get_root_callback",
-				"oth.get_original_thread",
-				"keyclick",
-				"getcustomasset",
-				"getsignalarguments",
-				"getsignalargumentsinfo",
-				"Drawing.Fonts",
-				"Signal.new",
-				"setnamecallmethod",
-				"newlclosure",
-				"iscorescript",
-				"getscriptthread",
-				"getscriptfromthread",
-				"getobjects",
-				"hookproto",
-				"isprotohooked",
-				"restoreproto",
-				"getcallbackvalue",
-				"getfunctionbytecode",
-				"getobjectreferences",
-				"getfunctionreferences",
-				"security: purchases need your approval",
-				"security: requests can't use your login",
-				"security: account data and tokens stay private",
-				"security: scripts can't run things outside Roblox",
-				"security: your account can't be changed without asking",
-				"security: file:// is blocked",
-				"security: game scripts don't get executor powers",
-				"security: files outside the workspace stay hidden",
-				"security: bytecode can't be loaded",
-				"security: blocks can't be bypassed",
-				"queueonteleport",
-				"setrbxclipboard",
-				"setsimulationradius",
-				"rconsolecreate",
-				"rconsoleprint",
-				"rconsoleinfo",
-				"rconsolewarn",
-				"rconsoleerr",
-				"rconsolesettitle",
-				"rconsoleclear",
-				"rconsoledestroy",
-				"isrbxactive",
-				"messagebox"
-			],
-			"failed": [
-				{
-					"test": "DirectoryWatcher.new",
-					"reason": "this crashes Roblox on Synapse Z, so it wasn't run, use shared.CrashTests = true to try it"
-				},
-				{
-					"test": "Drawing.new",
-					"reason": "expected a Text object's Font after setting it to 3 to be 3, got DrawFont: 0xcf2d68a1e5c6adc9"
-				},
-				{
-					"test": "Regex.new",
-					"reason": "expected the whole match to be deeeb, got table: 0xd8cbea8a0ddcd6bc"
-				},
-				{
-					"test": "createcommchannel",
-					"reason": "expected a number id, got string"
-				},
-				{
-					"test": "crypt.encrypt",
-					"reason": "invalid argument #2 to 'encrypt' (invalid key size)"
-				},
-				{
-					"test": "crypt.generatebytes",
-					"reason": "Base64Decode: input is not a base64 string"
-				},
-				{
-					"test": "crypt.generatekey",
-					"reason": "Base64Decode: input is not a base64 string"
-				},
-				{
-					"test": "crypt.hash",
-					"reason": "the sha256 hash of 'abc' was wrong, got 89911f71a4508762a5791590153c68a9bbee326969d37b603697a692b3fdf553"
-				},
-				{
-					"test": "decompile",
-					"reason": "couldn't find '__index' in the decompiled 'CameraModule', it started with '-- Decompiled with Medal"
-				},
-				{
-					"test": "dofile",
-					"reason": "expected the value the file returned to be 0.14600144489762343, got File_0.8805197120410385.lua"
-				},
-				{
-					"test": "game.HttpGet",
-					"reason": "requesting the same url twice never gave a cached response, so NoCache has nothing to skip"
-				},
-				{
-					"test": "game.HttpPost",
-					"reason": "httpbin didn't answer with its JSON echo, so the request may not have gone out as a POST, got '<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">"
-				},
-				{
-					"test": "getallthreads",
-					"reason": "didn't find a thread that was spawned and is waiting"
-				},
-				{
-					"test": "getcommchannel",
-					"reason": "expected a number id, got string"
-				},
-				{
-					"test": "getfunctionhash",
-					"reason": "the hash should be SHA384 like the standard, got 64 characters instead of 96"
-				},
-				{
-					"test": "gethiddenproperties",
-					"reason": "expected size_xml to be 15, got nil"
-				},
-				{
-					"test": "getproperties",
-					"reason": "expected the Size in the returned table to be 8, 4, 2, got nil"
-				},
-				{
-					"test": "getscripthash",
-					"reason": "should be a 96 character sha384 hash, got 64 characters"
-				},
-				{
-					"test": "getsenv",
-					"reason": "getsenv returned nil when the parent was nil"
-				},
-				{
-					"test": "gettenv",
-					"reason": "missing argument #1 to 'gettenv' (thread expected)"
-				},
-				{
-					"test": "hooksignal",
-					"reason": "returning false from the hook didn't stop the connection from firing"
-				},
-				{
-					"test": "isparallel",
-					"reason": "should return false in an actor before it desynchronizes"
-				},
-				{
-					"test": "mousemoverel",
-					"reason": "the mouse moved by -400, -299.5 then 0, 0, but moving by 25 then 50 should go the same way twice as far while Roblox wasn't focused, input should still reach Roblox"
-				},
-				{
-					"test": "mousescroll",
-					"reason": "missing argument #2 to 'mousescroll' (number expected)"
-				},
-				{
-					"test": "raknet.receive",
-					"reason": "the receive hook didn't see the packet"
-				},
-				{
-					"test": "security: scripts can't write programs",
-					"reason": "scripts can write program files like debUNC.psm1, ../debUNC.exe, ../../debUNC.exe, debUNC.exe, debUNC.bat, debUNC.cmd, debUNC.com, debUNC.scr, debUNC.ps1, debUNC.vbs, debUNC.lnk, debUNC.msi, debUNC.js, debUNC.jse, debUNC.vbe, debUNC.wsf, debUNC.hta, debUNC.dll, debUNC.jar, debUNC.reg, debUNC.cpl, which could be run on your computer"
-				},
-				{
-					"test": "trampolinecall",
-					"reason": "expected the line of the fake caller to be 790, got 6744"
-				}
-			],
-			"skipped": [
-				{
-					"test": "Regex.Escape",
-					"reason": "couldn't be tested because Regex.new failed"
-				},
-				{
-					"test": "crypt.decrypt",
-					"reason": "couldn't be tested because crypt.encrypt failed"
-				},
-				{
-					"test": "setclipboard",
-					"reason": "couldn't be tested because getclipboard is missing"
-				},
-				{
-					"test": "setfpscap",
-					"reason": "skipped because the frame rate stayed low after the cap was removed, so the cap can't be told apart from lag"
-				}
-			],
-			"missing": [
-				"appendfileasync",
-				"clearqueueonteleport",
-				"comparefunctions",
-				"crypt.hmac",
-				"getactorfromthread",
-				"getactorthreads",
-				"getclipboard",
-				"getfflagtype",
-				"getfilesize",
-				"getmenv",
-				"getmetafield",
-				"getmodules",
-				"getoriginalenv",
-				"getsignalwhitelist",
-				"hasmetafield",
-				"hasmetatable",
-				"isexecutorthread",
-				"isstackhidden",
-				"loadfileasync",
-				"movefile",
-				"readfileasync",
-				"renamefile",
-				"saveinstance",
-				"writecustomasset",
-				"writefileasync"
-			],
-			"notTested": []
-		},
-		{
-			"name": "Delta",
-			"version": "1.0.745.1142",
-			"debunc": "v2.13.0",
-			"platform": "Android",
-			"score": 66,
-			"took": 88.59,
-			"passed": [
-				"getrenv",
-				"getgenv",
-				"readfile",
-				"writefile",
-				"isfile",
-				"appendfile",
-				"listfiles",
-				"delfile",
-				"loadfile",
-				"makefolder",
-				"isfolder",
-				"delfolder",
-				"iscclosure",
-				"clonefunction",
-				"request",
-				"require",
-				"fireclickdetector",
-				"fireproximityprompt",
-				"firesignal",
-				"getloadedmodules",
-				"getscripts",
-				"base64encode",
-				"loadstring",
-				"isscriptable",
-				"firetouchinterest",
-				"debug.info",
-				"setstackhidden",
-				"WebSocket.connect",
-				"cache.invalidate",
-				"cache.iscached",
-				"cache.replace",
-				"cloneref",
-				"compareinstances",
-				"checkcaller",
-				"isfunctionhooked",
-				"base64decode",
-				"setrawmetatable",
-				"lz4compress",
-				"lz4decompress",
-				"debug.getproto",
-				"debug.getprotos",
-				"getnamecallmethod",
-				"getcallingscript",
-				"isnetworkowner",
-				"replicatesignal",
-				"game.HttpPost",
-				"identifyexecutor",
-				"gethwid",
-				"getrawmetatable",
-				"debug.getinfo",
-				"setreadonly",
-				"getsenv",
-				"decompile",
-				"mouse1click",
-				"mouse1press",
-				"mouse1release",
-				"mouse2click",
-				"mousemoveabs",
-				"keypress",
-				"keyrelease",
-				"sethiddenproperty",
-				"gethiddenproperty",
-				"setscriptable",
-				"setthreadidentity",
-				"filtergc",
-				"debug.getstack",
-				"debug.setstack",
-				"debug.getupvalues",
-				"debug.getupvalue",
-				"debug.setupvalue",
-				"debug.getconstants",
-				"debug.getconstant",
-				"debug.setconstant",
-				"debug.getregistry",
-				"crypt.hash",
-				"crypt.generatekey",
-				"crypt.generatebytes",
-				"isrenderobj",
-				"getrenderproperty",
-				"setrenderproperty",
-				"cleardrawcache",
-				"getgc",
-				"getinstances",
-				"getnilinstances",
-				"getrunningscripts",
-				"getscriptbytecode",
-				"getscripthash",
-				"getscriptclosure",
-				"gethui",
-				"getfunctionhash",
-				"isexecutorclosure",
-				"islclosure",
-				"isnewcclosure",
-				"getfflag",
-				"setfflag",
-				"debug.getcallstack",
-				"debug.isvalidlevel",
-				"makereadonly",
-				"isreadonly",
-				"crypt.hmac",
-				"crypt.random",
-				"getrendersteppedlist",
-				"cansignalreplicate",
-				"oth.hook",
-				"oth.unhook",
-				"oth.is_hook_thread",
-				"oth.get_root_callback",
-				"oth.get_original_thread",
-				"keyclick",
-				"getsignalarguments",
-				"getsignalargumentsinfo",
-				"getsignalwhitelist",
-				"Drawing.Fonts",
-				"Signal.new",
-				"setnamecallmethod",
-				"newlclosure",
-				"getproperties",
-				"gethiddenproperties",
-				"getscriptthread",
-				"getscriptfromthread",
-				"hookproto",
-				"isprotohooked",
-				"restoreproto",
-				"getfunctionbytecode",
-				"security: requests can't use your login",
-				"security: account data and tokens stay private",
-				"security: scripts can't run things outside Roblox",
-				"security: file:// is blocked",
-				"security: game scripts don't get executor powers",
-				"security: files outside the workspace stay hidden",
-				"security: bytecode can't be loaded",
-				"security: blocks can't be bypassed",
-				"queueonteleport",
-				"setrbxclipboard",
-				"setsimulationradius",
-				"clearqueueonteleport",
-				"rconsolecreate",
-				"rconsoleprint",
-				"rconsoleinfo",
-				"rconsolewarn",
-				"rconsoleerr",
-				"rconsolesettitle",
-				"rconsoleclear",
-				"rconsoledestroy",
-				"isrbxactive",
-				"messagebox"
-			],
-			"failed": [
-				{
-					"test": "Drawing.new",
-					"reason": "should error on a type that doesn't exist"
-				},
-				{
-					"test": "Regex.new",
-					"reason": "Match returned a table without a Captures field"
-				},
-				{
-					"test": "crypt.encrypt",
-					"reason": "expected the published AES-256 CTR test vector to be YB7DE3dXiaW3p/UEu/PSKA==, got uM8XErAKO41dmHbOYZ0vuwc3LKRdmYS/XtnlKYqERMI="
-				},
-				{
-					"test": "dofile",
-					"reason": "expected the value the file returned to be 0.6972868403565554, got nil"
-				},
-				{
-					"test": "game.HttpGet",
-					"reason": "requesting the same url twice never gave a cached response, so NoCache has nothing to skip"
-				},
-				{
-					"test": "getallthreads",
-					"reason": "didn't find the thread that's running this test"
-				},
-				{
-					"test": "getconnections",
-					"reason": "the connection is still listed after :Disconnect()"
-				},
-				{
-					"test": "getcustomasset",
-					"reason": "didn't finish within 60 seconds"
-				},
-				{
-					"test": "getmenv",
-					"reason": "didn't return a table"
-				},
-				{
-					"test": "getobjects",
-					"reason": "expected an instance, got nil"
-				},
-				{
-					"test": "getthreadidentity",
-					"reason": "expected this thread's identity after another thread changed its own to be 8, got 3"
-				},
-				{
-					"test": "hookfunction",
-					"reason": "the hooked function took on the hook's environment, so getfenv can tell it was hooked"
-				},
-				{
-					"test": "hookmetamethod",
-					"reason": "the hook ran for bad calls that should have errored before reaching it (5 times)"
-				},
-				{
-					"test": "mouse2press",
-					"reason": "the input wasn't detected"
-				},
-				{
-					"test": "mouse2release",
-					"reason": "the input was never held down, so it can't be released"
-				},
-				{
-					"test": "mousemoverel",
-					"reason": "the mouse moved by 25, -33 then 50, -8, but moving by 25 then 50 should go the same way twice as far"
-				},
-				{
-					"test": "mousescroll",
-					"reason": "the scroll down wasn't detected"
-				},
-				{
-					"test": "newcclosure",
-					"reason": "catching an error thrown after a yield crashes Roblox on Delta, so it wasn't run, use shared.CrashTests = true to try it"
-				},
-				{
-					"test": "runonactor",
-					"reason": "the code ran on the actor never finished within 2 seconds"
-				},
-				{
-					"test": "security: purchases need your approval",
-					"reason": "MarketplaceService:PromptNativePurchaseWithLocalPlayerWithPaymentSessionId, MarketplaceService:PromptNativePurchaseWithPaymentSessionId can be called, which lets scripts spend your Robux without asking"
-				},
-				{
-					"test": "security: scripts can't write programs",
-					"reason": "scripts can write program files like ../debUNC.exe, ../../debUNC.exe, which could be run on your computer"
-				},
-				{
-					"test": "security: your account can't be changed without asking",
-					"reason": "AvatarEditorService:NoPromptApplyProfileConfiguration can be called, which lets scripts change your account without asking"
-				},
-				{
-					"test": "setfpscap",
-					"reason": "the frame rate averaged 59 over a second, which is above the cap of 13"
-				}
-			],
-			"skipped": [
-				{
-					"test": "isexecutorthread",
-					"reason": "skipped because the Animate script's thread already finished"
-				},
-				{
-					"test": "Regex.Escape",
-					"reason": "couldn't be tested because Regex.new failed"
-				},
-				{
-					"test": "crypt.decrypt",
-					"reason": "couldn't be tested because crypt.encrypt failed"
-				},
-				{
-					"test": "getactors",
-					"reason": "couldn't be tested because runonactor failed"
-				},
-				{
-					"test": "getcallbackvalue",
-					"reason": "couldn't be tested because newcclosure failed"
-				},
-				{
-					"test": "getfpscap",
-					"reason": "couldn't be tested because setfpscap failed"
-				},
-				{
-					"test": "isparallel",
-					"reason": "couldn't be tested because runonactor failed"
-				},
-				{
-					"test": "restorefunction",
-					"reason": "couldn't be tested because hookfunction failed"
-				},
-				{
-					"test": "setclipboard",
-					"reason": "couldn't be tested because getclipboard is missing"
-				}
-			],
-			"missing": [
-				"trampolinecall",
-				"issignalhooked",
-				"raknet.addreceivehook",
-				"hasmetafield",
-				"getmodules",
-				"raknet.removereceivehook",
-				"appendfileasync",
-				"gettenv",
-				"makewriteable",
-				"DirectoryWatcher.new",
-				"readfileasync",
-				"renamefile",
-				"getfilesize",
-				"isstackhidden",
-				"getobjectreferences",
-				"raknet.addsendhook",
-				"writecustomasset",
-				"iscorescript",
-				"getmetafield",
-				"hasmetatable",
-				"loadfileasync",
-				"getcommchannel",
-				"createcommchannel",
-				"getactorfromthread",
-				"hooksignal",
-				"getoriginalenv",
-				"writefileasync",
-				"restoresignal",
-				"runonthread",
-				"iswriteable",
-				"raknet.send",
-				"raknet.receive",
-				"getfflagtype",
-				"getactorthreads",
-				"movefile",
-				"comparefunctions",
-				"debug.setinfo",
-				"raknet.removesendhook",
-				"getfunctionreferences",
-				"getclipboard",
-				"saveinstance"
-			],
-			"notTested": []
-		},
-		{
-			"name": "Athena",
-			"version": "1.0",
-			"debunc": "v2.13.0",
-			"platform": "Windows",
-			"score": 66,
-			"took": 29.19,
-			"passed": [
-				"getgenv",
-				"gettenv",
-				"readfile",
-				"writefile",
-				"isfile",
-				"appendfile",
-				"listfiles",
-				"delfile",
-				"loadfile",
-				"makefolder",
-				"isfolder",
-				"delfolder",
-				"iscclosure",
-				"request",
-				"require",
-				"fireclickdetector",
-				"fireproximityprompt",
-				"firesignal",
-				"getloadedmodules",
-				"getconnections",
-				"getscripts",
-				"setfpscap",
-				"base64encode",
-				"getfpscap",
-				"isscriptable",
-				"firetouchinterest",
-				"DirectoryWatcher.new",
-				"WebSocket.connect",
-				"cache.invalidate",
-				"cache.iscached",
-				"cache.replace",
-				"cloneref",
-				"compareinstances",
-				"checkcaller",
-				"isfunctionhooked",
-				"base64decode",
-				"setrawmetatable",
-				"lz4compress",
-				"lz4decompress",
-				"getnamecallmethod",
-				"getcallingscript",
-				"isnetworkowner",
-				"replicatesignal",
-				"gethwid",
-				"debug.getinfo",
-				"setreadonly",
-				"getsenv",
-				"decompile",
-				"sethiddenproperty",
-				"gethiddenproperty",
-				"setscriptable",
-				"getthreadidentity",
-				"setthreadidentity",
-				"filtergc",
-				"debug.getstack",
-				"debug.setstack",
-				"debug.getupvalues",
-				"debug.getupvalue",
-				"debug.setupvalue",
-				"debug.getconstants",
-				"debug.getconstant",
-				"debug.setconstant",
-				"debug.getregistry",
-				"crypt.hash",
-				"crypt.generatekey",
-				"crypt.generatebytes",
-				"Drawing.new",
-				"isrenderobj",
-				"getrenderproperty",
-				"setrenderproperty",
-				"cleardrawcache",
-				"runonactor",
-				"getactors",
-				"isparallel",
-				"getinstances",
-				"getnilinstances",
-				"getrunningscripts",
-				"getscriptbytecode",
-				"getscripthash",
-				"getscriptclosure",
-				"gethui",
-				"comparefunctions",
-				"getfunctionhash",
-				"isexecutorclosure",
-				"islclosure",
-				"isnewcclosure",
-				"getfflag",
-				"setfflag",
-				"raknet.send",
-				"debug.getcallstack",
-				"getallthreads",
-				"makereadonly",
-				"isreadonly",
-				"crypt.hmac",
-				"crypt.random",
-				"getmodules",
-				"getrendersteppedlist",
-				"cansignalreplicate",
-				"hooksignal",
-				"issignalhooked",
-				"restoresignal",
-				"oth.hook",
-				"oth.unhook",
-				"oth.is_hook_thread",
-				"oth.get_root_callback",
-				"oth.get_original_thread",
-				"getcustomasset",
-				"getsignalarguments",
-				"getsignalargumentsinfo",
-				"createcommchannel",
-				"getcommchannel",
-				"Drawing.Fonts",
-				"Signal.new",
-				"setnamecallmethod",
-				"newlclosure",
-				"getproperties",
-				"gethiddenproperties",
-				"getscriptthread",
-				"getscriptfromthread",
-				"dofile",
-				"hookproto",
-				"isprotohooked",
-				"restoreproto",
-				"getfunctionbytecode",
-				"security: scripts can't run things outside Roblox",
-				"security: file:// is blocked",
-				"security: scripts can't write programs",
-				"security: game scripts don't get executor powers",
-				"security: files outside the workspace stay hidden",
-				"security: bytecode can't be loaded",
-				"security: blocks can't be bypassed",
-				"queueonteleport",
-				"setrbxclipboard",
-				"setsimulationradius",
-				"clearqueueonteleport",
-				"rconsolecreate",
-				"rconsoleprint",
-				"rconsoleinfo",
-				"rconsolewarn",
-				"rconsoleerr",
-				"rconsolesettitle",
-				"rconsoleclear",
-				"rconsoledestroy",
-				"isrbxactive",
-				"messagebox"
-			],
-			"failed": [
-				{
-					"test": "crypt.encrypt",
-					"reason": "encrypting in CTR mode errored with only CBC mode is supported"
-				},
-				{
-					"test": "game.HttpGet",
-					"reason": "the same JSON url gave a cached response even with NoCache set to true"
-				},
-				{
-					"test": "getactorthreads",
-					"reason": "actor threads require a serial engine thread"
-				},
-				{
-					"test": "getfflagtype",
-					"reason": "expected the type of a true or false flag to be bool, got DFFlag"
-				},
-				{
-					"test": "getgc",
-					"reason": "kept garbage alive while its result was held, so game scripts can detect it with a weak table (__mode is not set)"
-				},
-				{
-					"test": "getobjects",
-					"reason": "expected an instance, got nil"
-				},
-				{
-					"test": "getrenv",
-					"reason": "its 'print' isn't the real print"
-				},
-				{
-					"test": "getsignalwhitelist",
-					"reason": "the whitelist doesn't have Player.Kill, which replicatesignal can always send"
-				},
-				{
-					"test": "hookfunction",
-					"reason": "the hooked function took on the hook's environment, so getfenv can tell it was hooked"
-				},
-				{
-					"test": "hookmetamethod",
-					"reason": "couldn't capture the game's __index and __namecall the way game scripts do"
-				},
-				{
-					"test": "identifyexecutor",
-					"reason": "the version '1.0' never changes between updates, it should be the real version of each release"
-				},
-				{
-					"test": "keyclick",
-					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
-				},
-				{
-					"test": "keypress",
-					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
-				},
-				{
-					"test": "keyrelease",
-					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
-				},
-				{
-					"test": "loadstring",
-					"reason": "the compile error doesn't mention the chunk name, got ':1: Incomplete statement: expected assignment or a function call'"
-				},
-				{
-					"test": "mouse1click",
-					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
-				},
-				{
-					"test": "mouse1press",
-					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
-				},
-				{
-					"test": "mouse1release",
-					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
-				},
-				{
-					"test": "mouse2click",
-					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
-				},
-				{
-					"test": "mouse2press",
-					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
-				},
-				{
-					"test": "mouse2release",
-					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
-				},
-				{
-					"test": "mousemoveabs",
-					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
-				},
-				{
-					"test": "mousemoverel",
-					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
-				},
-				{
-					"test": "mousescroll",
-					"reason": "input only works while Roblox is focused, athena sends it to whatever window is focused instead"
-				},
-				{
-					"test": "raknet.addreceivehook",
-					"reason": "the receive hook wasn't called within 3 seconds"
-				},
-				{
-					"test": "raknet.addsendhook",
-					"reason": "the send hook wasn't called within 3 seconds"
-				},
-				{
-					"test": "runonthread",
-					"reason": "the code didn't run on the thread"
-				},
-				{
-					"test": "security: account data and tokens stay private",
-					"reason": "MarketplaceService:GetUserSubscriptionPaymentHistoryAsync can be called, which lets scripts reach your private account data"
-				},
-				{
-					"test": "security: purchases need your approval",
-					"reason": "MarketplaceService:PromptNativePurchaseWithLocalPlayerWithPaymentSessionId, MarketplaceService:PromptNativePurchaseWithPaymentSessionId can be called, which lets scripts spend your Robux without asking"
-				},
-				{
-					"test": "security: requests can't use your login",
-					"reason": "OpenCloudService:InvokeAsync can be called, which lets scripts send web requests logged in as you"
-				},
-				{
-					"test": "security: your account can't be changed without asking",
-					"reason": "AvatarEditorService:NoPromptApplyProfileConfiguration, AvatarEditorService:SetAllowInventoryReadAccess can be called, which lets scripts change your account without asking"
-				}
-			],
-			"skipped": [
-				{
-					"test": "Regex.Escape",
-					"reason": "couldn't be tested because Regex.new is missing"
-				},
-				{
-					"test": "clonefunction",
-					"reason": "couldn't be tested because debug.info is missing"
-				},
-				{
-					"test": "crypt.decrypt",
-					"reason": "couldn't be tested because crypt.encrypt failed"
-				},
-				{
-					"test": "debug.getproto",
-					"reason": "couldn't be tested because debug.info is missing"
-				},
-				{
-					"test": "debug.getprotos",
-					"reason": "couldn't be tested because debug.info is missing"
-				},
-				{
-					"test": "debug.isvalidlevel",
-					"reason": "couldn't be tested because debug.info is missing"
-				},
-				{
-					"test": "debug.setinfo",
-					"reason": "couldn't be tested because debug.info is missing"
-				},
-				{
-					"test": "getcallbackvalue",
-					"reason": "couldn't be tested because newcclosure failed"
-				},
-				{
-					"test": "getrawmetatable",
-					"reason": "couldn't be tested because debug.info is missing"
-				},
-				{
-					"test": "isexecutorthread",
-					"reason": "skipped because the Animate script's thread already finished"
-				},
-				{
-					"test": "newcclosure",
-					"reason": "couldn't be tested because debug.info is missing"
-				},
-				{
-					"test": "raknet.receive",
-					"reason": "skipped because the receive hook never fired, so the packet can't be checked"
-				},
-				{
-					"test": "raknet.removereceivehook",
-					"reason": "skipped because the receive hook never fired, so removing it can't be checked"
-				},
-				{
-					"test": "raknet.removesendhook",
-					"reason": "skipped because the send hook never fired, so removing it can't be checked"
-				},
-				{
-					"test": "restorefunction",
-					"reason": "couldn't be tested because hookfunction failed"
-				},
-				{
-					"test": "setclipboard",
-					"reason": "couldn't be tested because getclipboard is missing"
-				},
-				{
-					"test": "setstackhidden",
-					"reason": "couldn't be tested because debug.info is missing"
-				}
-			],
-			"missing": [
-				"Regex.new",
-				"appendfileasync",
-				"debug.info",
-				"game.HttpPost",
-				"getactorfromthread",
-				"getclipboard",
-				"getfilesize",
-				"getfunctionreferences",
-				"getmenv",
-				"getmetafield",
-				"getobjectreferences",
-				"getoriginalenv",
-				"hasmetafield",
-				"hasmetatable",
-				"iscorescript",
-				"isstackhidden",
-				"iswriteable",
-				"loadfileasync",
-				"makewriteable",
-				"movefile",
-				"readfileasync",
-				"renamefile",
-				"saveinstance",
-				"trampolinecall",
-				"writecustomasset",
-				"writefileasync"
-			],
-			"notTested": []
-		},
-		{
-			"name": "Xeno",
-			"version": "v1.3.65",
-			"debunc": "v2.13.0",
-			"platform": "Windows",
-			"score": 26,
-			"took": 24.32,
-			"passed": [
-				"readfile",
-				"writefile",
-				"isfile",
-				"appendfile",
-				"delfile",
-				"loadfile",
-				"makefolder",
-				"isfolder",
-				"iscclosure",
-				"request",
-				"getscripts",
-				"setfpscap",
-				"getfpscap",
-				"firetouchinterest",
-				"debug.info",
-				"WebSocket.connect",
-				"cache.iscached",
-				"cloneref",
-				"compareinstances",
-				"lz4compress",
-				"lz4decompress",
-				"isnetworkowner",
-				"identifyexecutor",
-				"gethwid",
-				"debug.getinfo",
-				"gethiddenproperty",
-				"crypt.hash",
-				"crypt.generatekey",
-				"crypt.generatebytes",
-				"isrenderobj",
-				"getrenderproperty",
-				"setrenderproperty",
-				"getrunningscripts",
-				"getscriptbytecode",
-				"gethui",
-				"isexecutorclosure",
-				"islclosure",
-				"isreadonly",
-				"getcustomasset",
-				"Drawing.Fonts",
-				"newlclosure",
-				"getproperties",
-				"gethiddenproperties",
-				"security: account data and tokens stay private",
-				"security: scripts can't run things outside Roblox",
-				"security: bytecode can't be loaded",
-				"security: blocks can't be bypassed",
-				"queueonteleport",
-				"setrbxclipboard",
-				"setsimulationradius",
-				"rconsolecreate",
-				"rconsoleprint",
-				"rconsoleinfo",
-				"rconsolewarn",
-				"rconsolesettitle",
-				"rconsoleclear",
-				"rconsoledestroy",
-				"isrbxactive"
-			],
-			"failed": [
-				{
-					"test": "Drawing.new",
-					"reason": "should error on a type that doesn't exist"
-				},
-				{
-					"test": "cache.invalidate",
-					"reason": "the new ref doesn't point to the same part as the old ref"
-				},
-				{
-					"test": "cache.replace",
-					"reason": "the fire was moved into the folder instead of replacing the part's ref"
-				},
-				{
-					"test": "checkcaller",
-					"reason": "failed to require BaseCharacterController with the error Requested module experienced an error while loading"
-				},
-				{
-					"test": "clonefunction",
-					"reason": "\"Line\" isn't the same, it returned \"2813\" instead of \"1616\""
-				},
-				{
-					"test": "crypt.encrypt",
-					"reason": "CoreGui.RobloxGui.Modules.Common.Locales.en-us:3770: invalid argument #4 to 'encrypt' (string expected, got nil)"
-				},
-				{
-					"test": "debug.getconstants",
-					"reason": "didn't find the string constant"
-				},
-				{
-					"test": "debug.getproto",
-					"reason": "expected a function for the first inner function, got table"
-				},
-				{
-					"test": "debug.getprotos",
-					"reason": "expected the number of inner functions to be 2, got 0"
-				},
-				{
-					"test": "debug.getstack",
-					"reason": "couldn't find a local in the stack"
-				},
-				{
-					"test": "debug.getupvalue",
-					"reason": "didn't return the first upvalue"
-				},
-				{
-					"test": "debug.setupvalue",
-					"reason": "the upvalue wasn't changed"
-				},
-				{
-					"test": "decompile",
-					"reason": "couldn't find '__index' in the decompiled 'CameraModule', it started with '-- api request error"
-				},
-				{
-					"test": "delfolder",
-					"reason": "the folder inside of the deleted folder is still there"
-				},
-				{
-					"test": "dofile",
-					"reason": "expected the value the file returned to be 0.6592871513209142, got function: 0x3984cc57ff7a59ac"
-				},
-				{
-					"test": "fireclickdetector",
-					"reason": "the connection wasn't fired"
-				},
-				{
-					"test": "fireproximityprompt",
-					"reason": "didn't fire within a second for a prompt 10000 studs away with a 5 second HoldDuration"
-				},
-				{
-					"test": "game.HttpGet",
-					"reason": "requesting the same url twice never gave a cached response, so NoCache has nothing to skip"
-				},
-				{
-					"test": "game.HttpPost",
-					"reason": "didn't return a string"
-				},
-				{
-					"test": "getcallingscript",
-					"reason": "your executor needs to support 'require' to run this test"
-				},
-				{
-					"test": "getconnections",
-					"reason": "expected 2 connections in the table, got 1"
-				},
-				{
-					"test": "getfflag",
-					"reason": "Flag 'MaxFrameBufferSize' referenced from Lua as 'flag', but it was defined as 'int'"
-				},
-				{
-					"test": "getgc",
-					"reason": "didn't find a new function"
-				},
-				{
-					"test": "getgenv",
-					"reason": "missing 'script'"
-				},
-				{
-					"test": "getinstances",
-					"reason": "didn't find a new part"
-				},
-				{
-					"test": "getnilinstances",
-					"reason": "didn't find a part parented to nil"
-				},
-				{
-					"test": "getrenv",
-					"reason": "CoreGui.RobloxGui.Modules.Common.Locales.en-us:1446: Not allowed to modify getrenv result"
-				},
-				{
-					"test": "getscriptclosure",
-					"reason": "the closure's script doesn't match"
-				},
-				{
-					"test": "getscripthash",
-					"reason": "should be a 96 character sha384 hash, got 64 characters"
-				},
-				{
-					"test": "getsenv",
-					"reason": "the script took too long to respond"
-				},
-				{
-					"test": "getthreadidentity",
-					"reason": "expected this thread's identity after another thread changed its own to be 2, got 3"
-				},
-				{
-					"test": "hookfunction",
-					"reason": "should return the original function, got nil"
-				},
-				{
-					"test": "isscriptable",
-					"reason": "should return false or error for game.a, which isn't a real property"
-				},
-				{
-					"test": "listfiles",
-					"reason": "expected the number of things listed, since only the folder's direct children should be there, to be 2, got 3"
-				},
-				{
-					"test": "loadstring",
-					"reason": "the compile error doesn't mention the chunk name, got ':1: Incomplete statement: expected assignment or a function call'"
-				},
-				{
-					"test": "newcclosure",
-					"reason": "expected a wrapped function that yields to be 5, got nil"
-				},
-				{
-					"test": "require",
-					"reason": "expected success when requiring 'PlayerModule', got the error Requested module experienced an error while loading"
-				},
-				{
-					"test": "saveinstance",
-					"reason": "didn't return a string"
-				},
-				{
-					"test": "security: file:// is blocked",
-					"reason": "game:HttpPost can read files on your computer through file://"
-				},
-				{
-					"test": "security: files outside the workspace stay hidden",
-					"reason": "isfolder can see 'C:/Windows' outside of the workspace"
-				},
-				{
-					"test": "security: purchases need your approval",
-					"reason": "MarketplaceService:PromptNativePurchaseWithLocalPlayerWithPaymentSessionId, MarketplaceService:PromptNativePurchaseWithPaymentSessionId can be called, which lets scripts spend your Robux without asking"
-				},
-				{
-					"test": "security: requests can't use your login",
-					"reason": "OpenCloudService:InvokeAsync can be called, which lets scripts send web requests logged in as you"
-				},
-				{
-					"test": "security: your account can't be changed without asking",
-					"reason": "AvatarEditorService:NoPromptApplyProfileConfiguration can be called, which lets scripts change your account without asking"
-				},
-				{
-					"test": "sethiddenproperty",
-					"reason": "expected size_xml to be 9, got 5"
-				},
-				{
-					"test": "setreadonly",
-					"reason": "failed to write after unfreezing, got CoreGui.3212.Loadstring.loadstring:142611:3839: attempt to modify a readonly table"
-				},
-				{
-					"test": "setscriptable",
-					"reason": "size_xml couldn't be read after it was made scriptable"
-				},
-				{
-					"test": "setthreadidentity",
-					"reason": "CoreGui could still be read at identity 2"
-				}
-			],
-			"skipped": [
-				{
-					"test": "cleardrawcache",
-					"reason": "couldn't be tested because Drawing.new failed"
-				},
-				{
-					"test": "crypt.decrypt",
-					"reason": "couldn't be tested because crypt.encrypt failed"
-				},
-				{
-					"test": "debug.getconstant",
-					"reason": "couldn't be tested because debug.getconstants failed"
-				},
-				{
-					"test": "debug.setconstant",
-					"reason": "couldn't be tested because debug.getconstants failed"
-				},
-				{
-					"test": "debug.setstack",
-					"reason": "couldn't be tested because debug.getstack failed"
-				},
-				{
-					"test": "getloadedmodules",
-					"reason": "couldn't be tested because require failed"
-				},
-				{
-					"test": "keypress",
-					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
-				},
-				{
-					"test": "keyrelease",
-					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
-				},
-				{
-					"test": "mouse1click",
-					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
-				},
-				{
-					"test": "mouse1press",
-					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
-				},
-				{
-					"test": "mouse1release",
-					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
-				},
-				{
-					"test": "mouse2click",
-					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
-				},
-				{
-					"test": "mouse2press",
-					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
-				},
-				{
-					"test": "mouse2release",
-					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
-				},
-				{
-					"test": "mousemoveabs",
-					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
-				},
-				{
-					"test": "mousemoverel",
-					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
-				},
-				{
-					"test": "mousescroll",
-					"reason": "skipped because rconsolecreate and messagebox aren't able to capture focus, so you'll have to run debUNC with roblox unfocused yourself"
-				},
-				{
-					"test": "security: game scripts don't get executor powers",
-					"reason": "skipped because setthreadidentity didn't really lower the identity, so what game scripts can do couldn't be checked"
-				},
-				{
-					"test": "security: scripts can't write programs",
-					"reason": "couldn't be tested because listfiles failed"
-				},
-				{
-					"test": "setclipboard",
-					"reason": "couldn't be tested because getclipboard is missing"
-				},
-				{
-					"test": "setfflag",
-					"reason": "couldn't be tested because getfflag failed"
-				}
-			],
-			"missing": [
-				"DirectoryWatcher.new",
-				"Regex.Escape",
-				"Regex.new",
-				"Signal.new",
-				"appendfileasync",
-				"base64decode",
-				"base64encode",
-				"cansignalreplicate",
-				"clearqueueonteleport",
-				"comparefunctions",
-				"createcommchannel",
-				"crypt.hmac",
-				"crypt.random",
-				"debug.getcallstack",
-				"debug.getregistry",
-				"debug.getupvalues",
-				"debug.isvalidlevel",
-				"debug.setinfo",
-				"filtergc",
-				"firesignal",
-				"getactorfromthread",
-				"getactors",
-				"getactorthreads",
-				"getallthreads",
-				"getcallbackvalue",
-				"getclipboard",
-				"getcommchannel",
-				"getfflagtype",
-				"getfilesize",
-				"getfunctionbytecode",
-				"getfunctionhash",
-				"getfunctionreferences",
-				"getmenv",
-				"getmetafield",
-				"getmodules",
-				"getnamecallmethod",
-				"getobjectreferences",
-				"getobjects",
-				"getoriginalenv",
-				"getrawmetatable",
-				"getrendersteppedlist",
-				"getscriptfromthread",
-				"getscriptthread",
-				"getsignalarguments",
-				"getsignalargumentsinfo",
-				"getsignalwhitelist",
-				"gettenv",
-				"hasmetafield",
-				"hasmetatable",
-				"hookmetamethod",
-				"hookproto",
-				"hooksignal",
-				"iscorescript",
-				"isexecutorthread",
-				"isfunctionhooked",
-				"isnewcclosure",
-				"isparallel",
-				"isprotohooked",
-				"issignalhooked",
-				"isstackhidden",
-				"iswriteable",
-				"keyclick",
-				"loadfileasync",
-				"makereadonly",
-				"makewriteable",
-				"messagebox",
-				"movefile",
-				"oth.get_original_thread",
-				"oth.get_root_callback",
-				"oth.hook",
-				"oth.is_hook_thread",
-				"oth.unhook",
-				"raknet.addreceivehook",
-				"raknet.addsendhook",
-				"raknet.receive",
-				"raknet.removereceivehook",
-				"raknet.removesendhook",
-				"raknet.send",
-				"rconsoleerr",
-				"readfileasync",
-				"renamefile",
-				"replicatesignal",
-				"restorefunction",
-				"restoreproto",
-				"restoresignal",
-				"runonactor",
-				"runonthread",
-				"setnamecallmethod",
-				"setrawmetatable",
-				"setstackhidden",
-				"trampolinecall",
-				"writecustomasset",
-				"writefileasync"
-			],
-			"notTested": []
-		},
-		{
 			"name": "Opiumware",
 			"version": "v2.6.0",
 			"debunc": "v2.12.0",
@@ -2493,6 +2722,9 @@
 				"getscriptthread",
 				"getscriptfromthread",
 				"dofile",
+				"queueonteleport",
+				"clearqueueonteleport",
+				"MessageBox.new",
 				"getfunctionbytecode",
 				"trampolinecall",
 				"setclipboard",
@@ -2503,10 +2735,6 @@
 				"security: files outside the workspace stay hidden",
 				"security: bytecode can't be loaded",
 				"security: blocks can't be bypassed",
-				"queueonteleport",
-				"setrbxclipboard",
-				"setsimulationradius",
-				"clearqueueonteleport",
 				"isrbxactive"
 			],
 			"failed": [
@@ -2774,6 +3002,7 @@
 				"newcclosure",
 				"isscriptable",
 				"firetouchinterest",
+				"getoriginalenv",
 				"hookmetamethod",
 				"debug.info",
 				"setstackhidden",
@@ -2878,9 +3107,7 @@
 				"debug.isvalidlevel",
 				"debug.setinfo",
 				"getallthreads",
-				"hasmetafield",
 				"makereadonly",
-				"iswriteable",
 				"isreadonly",
 				"crypt.hmac",
 				"crypt.random",
@@ -2913,8 +3140,6 @@
 				"newlclosure",
 				"getproperties",
 				"gethiddenproperties",
-				"hasmetatable",
-				"getmetafield",
 				"iscorescript",
 				"getscriptthread",
 				"getscriptfromthread",
@@ -2926,6 +3151,9 @@
 				"hookproto",
 				"isprotohooked",
 				"restoreproto",
+				"queueonteleport",
+				"clearqueueonteleport",
+				"MessageBox.new",
 				"getcallbackvalue",
 				"getfunctionbytecode",
 				"getobjectreferences",
@@ -2947,10 +3175,6 @@
 				"security: files outside the workspace stay hidden",
 				"security: bytecode can't be loaded",
 				"security: blocks can't be bypassed",
-				"queueonteleport",
-				"setrbxclipboard",
-				"setsimulationradius",
-				"clearqueueonteleport",
 				"rconsolecreate",
 				"rconsoleprint",
 				"rconsoleinfo",
@@ -2965,9 +3189,7 @@
 			"failed": [],
 			"skipped": [],
 			"missing": [],
-			"notTested": [
-				"getoriginalenv"
-			]
+			"notTested": []
 		},
 		{
 			"name": "Yuari",
@@ -3008,6 +3230,7 @@
 				"newcclosure",
 				"isscriptable",
 				"firetouchinterest",
+				"getoriginalenv",
 				"hookmetamethod",
 				"debug.info",
 				"setstackhidden",
@@ -3102,17 +3325,13 @@
 				"isnewcclosure",
 				"getfflag",
 				"setfflag",
-				"raknet.removesendhook",
-				"raknet.removereceivehook",
 				"raknet.receive",
 				"raknet.send",
 				"debug.getcallstack",
 				"debug.isvalidlevel",
 				"debug.setinfo",
 				"getallthreads",
-				"hasmetafield",
 				"makereadonly",
-				"iswriteable",
 				"isreadonly",
 				"crypt.hmac",
 				"crypt.random",
@@ -3145,8 +3364,6 @@
 				"newlclosure",
 				"getproperties",
 				"gethiddenproperties",
-				"hasmetatable",
-				"getmetafield",
 				"iscorescript",
 				"getscriptthread",
 				"getscriptfromthread",
@@ -3155,7 +3372,9 @@
 				"writecustomasset",
 				"dofile",
 				"getobjects",
-				"restoreproto",
+				"queueonteleport",
+				"clearqueueonteleport",
+				"MessageBox.new",
 				"getcallbackvalue",
 				"getfunctionbytecode",
 				"getobjectreferences",
@@ -3177,10 +3396,6 @@
 				"security: files outside the workspace stay hidden",
 				"security: bytecode can't be loaded",
 				"security: blocks can't be bypassed",
-				"queueonteleport",
-				"setrbxclipboard",
-				"setsimulationradius",
-				"clearqueueonteleport",
 				"rconsolecreate",
 				"rconsoleprint",
 				"rconsoleinfo",
@@ -3194,26 +3409,33 @@
 			],
 			"failed": [
 				{
-					"test": "raknet.addsendhook",
-					"reason": "the send hook wasn't called within 3 seconds"
-				},
-				{
 					"test": "raknet.addreceivehook",
 					"reason": "the receive hook wasn't called within 3 seconds"
+				},
+				{
+					"test": "raknet.addsendhook",
+					"reason": "the send hook wasn't called within 3 seconds"
 				}
 			],
 			"skipped": [
 				{
 					"test": "isprotohooked",
 					"reason": "couldn't be tested because hookproto is missing"
+				},
+				{
+					"test": "raknet.removereceivehook",
+					"reason": "skipped because the receive hook never fired, so removing it can't be checked"
+				},
+				{
+					"test": "raknet.removesendhook",
+					"reason": "skipped because the send hook never fired, so removing it can't be checked"
 				}
 			],
 			"missing": [
-				"hookproto"
+				"hookproto",
+				"restoreproto"
 			],
-			"notTested": [
-				"getoriginalenv"
-			]
+			"notTested": []
 		},
 		{
 			"name": "Bunni",
@@ -3250,6 +3472,7 @@
 				"newcclosure",
 				"isscriptable",
 				"firetouchinterest",
+				"getoriginalenv",
 				"debug.info",
 				"setstackhidden",
 				"isstackhidden",
@@ -3323,9 +3546,7 @@
 				"getfflag",
 				"setfflag",
 				"getallthreads",
-				"hasmetafield",
 				"makereadonly",
-				"iswriteable",
 				"isreadonly",
 				"crypt.hmac",
 				"crypt.random",
@@ -3344,11 +3565,12 @@
 				"newlclosure",
 				"getproperties",
 				"gethiddenproperties",
-				"hasmetatable",
-				"getmetafield",
 				"getscriptthread",
 				"getscriptfromthread",
 				"getobjects",
+				"queueonteleport",
+				"clearqueueonteleport",
+				"MessageBox.new",
 				"getclipboard",
 				"setclipboard",
 				"getfilesize",
@@ -3362,10 +3584,6 @@
 				"security: files outside the workspace stay hidden",
 				"security: bytecode can't be loaded",
 				"security: blocks can't be bypassed",
-				"queueonteleport",
-				"setrbxclipboard",
-				"setsimulationradius",
-				"clearqueueonteleport",
 				"rconsolecreate",
 				"rconsoleprint",
 				"rconsoleinfo",
@@ -3562,9 +3780,7 @@
 				"writecustomasset",
 				"writefileasync"
 			],
-			"notTested": [
-				"getoriginalenv"
-			]
+			"notTested": []
 		}
 	]
 }

@@ -9,8 +9,9 @@ print(Name, Version)
 | :- |
 | identify_executor |
 # Returns
-| [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The executor's name.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [string](https://create.roblox.com/docs/luau/strings) | The executor's name. |
 | [string](https://create.roblox.com/docs/luau/strings) | The executor's version. |
 # Test requirements
 To pass the identifyexecutor test, the function must:

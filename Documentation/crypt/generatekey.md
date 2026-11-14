@@ -5,8 +5,9 @@ local Key = crypt.generatekey()
 print(#base64decode(Key)) --> 32
 ```
 # Returns
-| [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The key encoded in Base64.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [string](https://create.roblox.com/docs/luau/strings) | The key encoded in Base64. |
 # Test requirements
 To pass the crypt.generatekey test, the function must:
 - Return a base64 string that decodes to 32 bytes.

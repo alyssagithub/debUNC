@@ -16,12 +16,14 @@ print(getcallbackvalue(BindableFunction, "OnInvoke")()) --> Hello world!
 | get_callback_value |
 | getcallbackmember |
 # Parameters
-| Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Instance with the callback.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance) | The Instance with the callback. |
 | Callback: [string](https://create.roblox.com/docs/luau/strings) | The name of the callback. |
 # Returns
-| [function?](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The assigned function, or nil if there isn't one.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [function?](https://create.roblox.com/docs/luau/functions) | The assigned function, or nil if there isn't one. |
 
 # Test requirements
 To pass the getcallbackvalue test, the function must:

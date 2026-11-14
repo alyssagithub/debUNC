@@ -14,8 +14,9 @@ Target()
 | :- | :- |
 | oth | getoriginalthread |
 # Returns
-| [thread](https://create.roblox.com/docs/reference/engine/libraries/coroutine)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The thread that called the hook.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [thread](https://create.roblox.com/docs/reference/engine/libraries/coroutine) | The thread that called the hook. |
 
 # Test requirements
 To pass the oth.get_original_thread test, the function must:

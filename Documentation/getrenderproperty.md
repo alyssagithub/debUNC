@@ -10,12 +10,14 @@ print(getrenderproperty(Line, "Thickness")) --> 5
 | :- |
 | get_render_property |
 # Parameters
-| Object: DrawingObject&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Drawing object.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Object: DrawingObject | The Drawing object. |
 | Property: [string](https://create.roblox.com/docs/luau/strings) | The name of the property. |
 # Returns
-| any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The property's value.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| any | The property's value. |
 # Test requirements
 To pass the getrenderproperty test, the function must:
 - Return the current value of a Drawing object's property, such as a Line's `Thickness`.

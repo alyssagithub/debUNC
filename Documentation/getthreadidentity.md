@@ -13,8 +13,9 @@ print(getthreadidentity()) --> 2
 | getidentity |
 | getthreadcontext |
 # Returns
-| [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The thread's identity.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [number](https://create.roblox.com/docs/luau/numbers) | The thread's identity. |
 # Test requirements
 To pass the getthreadidentity test, the function must:
 - Keep the current thread's identity when another thread changes its own.

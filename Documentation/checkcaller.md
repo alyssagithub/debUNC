@@ -8,8 +8,9 @@ print(checkcaller()) --> true
 | :- |
 | check_caller |
 # Returns
-| [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not the caller is the executor.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [boolean](https://create.roblox.com/docs/luau/booleans) | Whether or not the caller is the executor. |
 # Test requirements
 To pass the checkcaller test, the function must:
 - Return true when it's called from the executor.

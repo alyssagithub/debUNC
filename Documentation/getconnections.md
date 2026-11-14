@@ -14,11 +14,13 @@ Connection:Disconnect()
 | :- |
 | get_connections |
 # Parameters
-| Signal: [RBXScriptSignal](https://create.roblox.com/docs/reference/engine/datatypes/RBXScriptSignal)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The signal to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Signal: [RBXScriptSignal](https://create.roblox.com/docs/reference/engine/datatypes/RBXScriptSignal) | The signal to read. |
 # Returns
-| {[Connection](Connection.md)}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of every [Connection](Connection.md) on the signal.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {[Connection](Connection.md)} | An array of every [Connection](Connection.md) on the signal. |
 
 # Test requirements
 To pass the getconnections test, the function must:

@@ -21,8 +21,9 @@ print(Greet()) --> Hello
 | unhook_function |
 | unhookfunction |
 # Parameters
-| Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The hooked function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Function: [function](https://create.roblox.com/docs/luau/functions) | The hooked function. |
 # Test requirements
 To pass the restorefunction test, the function must:
 - Return the original result after a LuaClosure, NewCClosure, or C function is restored, whether it was hooked with a LuaClosure, NewCClosure, or C function.

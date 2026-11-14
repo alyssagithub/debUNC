@@ -13,11 +13,13 @@ print(Wrapped()) --> Hello world!
 | :- |
 | new_c_closure |
 # Parameters
-| Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to wrap.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Function: [function](https://create.roblox.com/docs/luau/functions) | The function to wrap. |
 # Returns
-| [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The wrapped function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [function](https://create.roblox.com/docs/luau/functions) | The wrapped function. |
 
 # Test requirements
 To pass the newcclosure test, the function must:

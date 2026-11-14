@@ -9,8 +9,9 @@ print(getfflag("TaskSchedulerTargetFps")) --> 144
 | :- |
 | set_fflag |
 # Parameters
-| Flag: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The name of the flag.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Flag: [string](https://create.roblox.com/docs/luau/strings) | The name of the flag. |
 | Value: [string](https://create.roblox.com/docs/luau/strings) | The new value. |
 
 # Test requirements

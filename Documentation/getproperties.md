@@ -9,11 +9,13 @@ print(getproperties(Part).Size == Part.Size) --> true
 | :- |
 | get_properties |
 # Parameters
-| Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Instance to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance) | The Instance to read. |
 # Returns
-| {[string]: any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The properties, with each name set to its value.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {[string]: any} | The properties, with each name set to its value. |
 # Test requirements
 To pass the getproperties test, the function must:
 - Return a table.

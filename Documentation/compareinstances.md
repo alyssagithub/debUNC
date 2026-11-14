@@ -9,12 +9,14 @@ print(compareinstances(Part, cloneref(Part))) --> true
 | :- |
 | compare_instances |
 # Parameters
-| First: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The first Instance.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| First: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance) | The first Instance. |
 | Second: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance) | The second Instance. |
 # Returns
-| [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not they're the same Instance.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [boolean](https://create.roblox.com/docs/luau/booleans) | Whether or not they're the same Instance. |
 # Test requirements
 To pass the compareinstances test, the function must:
 - Return false for two different parts.

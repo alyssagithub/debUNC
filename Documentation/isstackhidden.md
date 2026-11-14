@@ -1,4 +1,9 @@
 # isstackhidden: (Function: function) -> boolean
+> [!NOTE]
+> **Niche**
+>
+> This function is not widely implemented by executors, so scripts should implement proper handling in the case of an executor being unable to use this.
+
 Returns whether a function was hidden from the call stack with [setstackhidden](setstackhidden.md).
 ```lua
 local function Hook() end
@@ -11,11 +16,13 @@ print(isstackhidden(Hook)) --> true
 | :- |
 | ishiddenstack |
 # Parameters
-| Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Function: [function](https://create.roblox.com/docs/luau/functions) | The function to check. |
 # Returns
-| [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether the function is hidden.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [boolean](https://create.roblox.com/docs/luau/booleans) | Whether the function is hidden. |
 
 # Test requirements
 To pass the isstackhidden test, the function must:

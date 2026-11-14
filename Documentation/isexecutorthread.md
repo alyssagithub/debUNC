@@ -4,11 +4,13 @@ Returns whether a thread was made by the executor, and not by one of the game's 
 print(isexecutorthread(coroutine.running())) --> true
 ```
 # Parameters
-| Thread: [thread](https://create.roblox.com/docs/reference/engine/libraries/coroutine)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The thread to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Thread: [thread](https://create.roblox.com/docs/reference/engine/libraries/coroutine) | The thread to check. |
 # Returns
-| [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether the executor made the thread.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [boolean](https://create.roblox.com/docs/luau/booleans) | Whether the executor made the thread. |
 # Test requirements
 To pass the isexecutorthread test, the function must:
 - Return true for the thread that's running the executor's code.

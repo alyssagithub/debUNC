@@ -17,12 +17,14 @@ runonactor(Actor, `getcommchannel({ChannelId}):Fire("Hello world!")`)
 | :- |
 | create_comm_channel |
 # Returns
-| [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The id of the channel.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [number](https://create.roblox.com/docs/luau/numbers) | The id of the channel. |
 | Channel | The channel, with the properties and methods below. |
 # Properties
-| Event: Signal&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | A signal that fires with the values sent through the channel.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Property&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Event: Signal | A signal that fires with the values sent through the channel. |
 # Methods
 ## Fire: (...: any) -> ()
 Sends the given values through the channel.
@@ -30,8 +32,9 @@ Sends the given values through the channel.
 Channel:Fire("Hello world!")
 ```
 ### Parameters
-| ...: any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The values to send.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| ...: any | The values to send. |
 # Test requirements
 To pass the createcommchannel test, the function must:
 - Return a number id along with the channel.

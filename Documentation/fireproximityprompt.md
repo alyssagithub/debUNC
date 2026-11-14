@@ -9,8 +9,9 @@ fireproximityprompt(ProximityPrompt)
 | :- |
 | fire_proximity_prompt |
 # Parameters
-| ProximityPrompt: [ProximityPrompt](https://create.roblox.com/docs/reference/engine/classes/ProximityPrompt)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The ProximityPrompt to trigger.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| ProximityPrompt: [ProximityPrompt](https://create.roblox.com/docs/reference/engine/classes/ProximityPrompt) | The ProximityPrompt to trigger. |
 
 # Test requirements
 To pass the fireproximityprompt test, the function must:

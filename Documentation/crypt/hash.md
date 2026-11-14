@@ -4,12 +4,14 @@ Hashes text with the given algorithm.
 print(crypt.hash("abc", "sha256")) --> ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
 ```
 # Parameters
-| Text: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The text to hash.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Text: [string](https://create.roblox.com/docs/luau/strings) | The text to hash. |
 | Algorithm: [string](https://create.roblox.com/docs/luau/strings) | The algorithm to use, such as sha256 or sha384. |
 # Returns
-| [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The hash in hexadecimal.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [string](https://create.roblox.com/docs/luau/strings) | The hash in hexadecimal. |
 # Test requirements
 To pass the crypt.hash test, the function must:
 - Match the published SHA-256 value for "abc".

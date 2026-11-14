@@ -12,8 +12,9 @@ end)
 | :- |
 | get_namecall_method |
 # Returns
-| [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The method's name.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [string](https://create.roblox.com/docs/luau/strings) | The method's name. |
 # Test requirements
 To pass the getnamecallmethod test, the function must:
 - Return the method name used in a namecall, from inside the `__namecall` metamethod.

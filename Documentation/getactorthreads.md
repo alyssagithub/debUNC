@@ -4,8 +4,9 @@ Returns the threads that code can run on inside of Actors.
 print(#getactorthreads())
 ```
 # Returns
-| {thread}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of threads.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {thread} | An array of threads. |
 
 # Test requirements
 To pass the getactorthreads test, the function must:

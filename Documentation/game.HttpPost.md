@@ -5,13 +5,15 @@ local Body = game:HttpPost("https://httpbin.org/post", "hello", "text/plain")
 print(Body)
 ```
 # Parameters
-| Url: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The url to send to.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Url: [string](https://create.roblox.com/docs/luau/strings) | The url to send to. |
 | Data: [string](https://create.roblox.com/docs/luau/strings) | The body to send. |
 | ContentType: [string](https://create.roblox.com/docs/luau/strings)? | The Content-Type header to send with it. |
 # Returns
-| [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The body of the response.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [string](https://create.roblox.com/docs/luau/strings) | The body of the response. |
 
 # Test requirements
 To pass the game.HttpPost test, the function must:

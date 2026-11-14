@@ -9,8 +9,9 @@ print(getfpscap()) --> 60
 | :- |
 | get_fps_cap |
 # Returns
-| [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The frame rate cap.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [number](https://create.roblox.com/docs/luau/numbers) | The frame rate cap. |
 
 # Test requirements
 To pass the getfpscap test, the function must:

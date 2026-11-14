@@ -11,8 +11,9 @@ raknet.removesendhook(OnSend)
 | :- | :- |
 | raknet | remove_send_hook |
 # Parameters
-| Hook: (Packet: [Packet](Packet.md)) -> ()&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to remove.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Hook: (Packet: [Packet](Packet.md)) -> () | The function to remove. |
 
 # Test requirements
 To pass the raknet.removesendhook test, the function must:

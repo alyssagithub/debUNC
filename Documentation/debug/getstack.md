@@ -15,12 +15,14 @@ Greet()
 | | get_stack |
 | | getstack |
 # Parameters
-| Level: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The stack level to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Level: [number](https://create.roblox.com/docs/luau/numbers) | The stack level to read. |
 | Index: [number?](https://create.roblox.com/docs/luau/numbers) | The index of a single value. |
 # Returns
-| any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The stack values, or the single value.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| any | The stack values, or the single value. |
 # Test requirements
 To pass the debug.getstack test, the function must:
 - Include the locals of the function at the given level.

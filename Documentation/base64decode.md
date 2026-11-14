@@ -1,9 +1,4 @@
 # base64decode: (Encoded: string) -> string
-> [!WARNING]
-> **Deprecated**
->
-> This function has been superseded by [EncodingService:Base64Decode](https://create.roblox.com/docs/reference/engine/classes/EncodingService#Base64Decode) which should be used in all new work.
-
 Decodes a string that is encoded in Base64.
 ```lua
 print(base64decode("SGVsbG8gd29ybGQh")) --> Hello world!
@@ -17,11 +12,13 @@ print(base64decode("SGVsbG8gd29ybGQh")) --> Hello world!
 | crypt | base64_decode |
 | crypt | base64decode |
 # Parameters
-| Encoded: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The encoded string to decode.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Encoded: [string](https://create.roblox.com/docs/luau/strings) | The encoded string to decode. |
 # Returns
-| [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The decoded string.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [string](https://create.roblox.com/docs/luau/strings) | The decoded string. |
 # Test requirements
 To pass the base64decode test, the function must:
 - Decode a random string the same way `EncodingService:Base64Decode` does.

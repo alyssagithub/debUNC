@@ -22,24 +22,28 @@ print(trampolinecall(Target, {}, {thread = getscriptthread(Animate)}, "Hello"))
 | | trampoline_call |
 | syn | trampoline_call |
 # Parameters
-| Target: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to call. C functions work too.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Target: [function](https://create.roblox.com/docs/luau/functions) | The function to call. C functions work too. |
 | CallStack: [table](https://create.roblox.com/docs/luau/tables) | An array of stack entries, starting from the closest caller. Can be empty. |
 | ThreadOptions: [table](https://create.roblox.com/docs/luau/tables) | Details for the call. Can be empty. |
 | ...: any | The values to pass to the function. |
 # Stack entries
-| func: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Required. The function to show in the stack.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Field&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| func: [function](https://create.roblox.com/docs/luau/functions) | Required. The function to show in the stack. |
 | currentline: [number](https://create.roblox.com/docs/luau/numbers) | Required. The line to show. |
 # Thread options
-| identity: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The identity to run with.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Field&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| identity: [number](https://create.roblox.com/docs/luau/numbers) | The identity to run with. |
 | script: Instance | The script that `getcallingscript` returns. |
 | env: [table](https://create.roblox.com/docs/luau/tables) | The global environment. |
 | thread: thread | A thread to copy details from, which also makes `checkcaller` return false. Its environment replaces yours, so store executor functions in locals first. |
 # Returns
-| [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether the function ran without erroring.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [boolean](https://create.roblox.com/docs/luau/booleans) | Whether the function ran without erroring. |
 | ...any | What the function returned, or the error message. |
 
 # Test requirements

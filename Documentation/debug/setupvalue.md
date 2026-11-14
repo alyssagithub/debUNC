@@ -17,8 +17,9 @@ print(Greet()) --> Hello
 | | set_upvalue |
 | | setupvalue |
 # Parameters
-| Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to change.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Function: [function](https://create.roblox.com/docs/luau/functions) | The function to change. |
 | Index: [number](https://create.roblox.com/docs/luau/numbers) | The index of the upvalue. |
 | Value: any | The new value. |
 

@@ -18,8 +18,9 @@ print(Outer()()) --> Goodbye
 | :- |
 | hook_proto |
 # Parameters
-| Proto: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The inner function from debug.getproto.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Proto: [function](https://create.roblox.com/docs/luau/functions) | The inner function from debug.getproto. |
 | Hook: (...any) -> ...any | The function to run instead. |
 # Test requirements
 To pass the hookproto test, the function must:

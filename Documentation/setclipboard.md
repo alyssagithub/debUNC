@@ -10,8 +10,9 @@ setclipboard("Hello world!")
 | to_clipboard |
 | toclipboard |
 # Parameters
-| Text: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The text to copy.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Text: [string](https://create.roblox.com/docs/luau/strings) | The text to copy. |
 
 # Test requirements
 To pass the setclipboard test, the function must:

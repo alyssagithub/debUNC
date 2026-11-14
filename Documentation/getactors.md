@@ -10,8 +10,9 @@ end
 | :- |
 | get_actors |
 # Returns
-| {[Actor](https://create.roblox.com/docs/reference/engine/classes/Actor)}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of Actors, or their threads.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {[Actor](https://create.roblox.com/docs/reference/engine/classes/Actor)} | An array of Actors, or their threads. |
 
 # Test requirements
 To pass the getactors test, the function must:

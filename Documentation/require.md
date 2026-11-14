@@ -5,11 +5,13 @@ local PlayerModule = require(game.Players.LocalPlayer.PlayerScripts.PlayerModule
 print(PlayerModule:GetControls()) --> ControlModule's table
 ```
 # Parameters
-| Module: [ModuleScript](https://create.roblox.com/docs/reference/engine/classes/ModuleScript)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The ModuleScript to run.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Module: [ModuleScript](https://create.roblox.com/docs/reference/engine/classes/ModuleScript) | The ModuleScript to run. |
 # Returns
-| any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | What the module returns.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| any | What the module returns. |
 # Test requirements
 To pass the require test, the function must:
 - Return a table for the PlayerModule.

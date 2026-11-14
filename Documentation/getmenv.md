@@ -10,11 +10,13 @@ print(getmenv(PlayerModule).script == PlayerModule) --> true
 | get_module_environment |
 | getmoduleenvironment |
 # Parameters
-| Module: [ModuleScript](https://create.roblox.com/docs/reference/engine/classes/ModuleScript)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The ModuleScript to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Module: [ModuleScript](https://create.roblox.com/docs/reference/engine/classes/ModuleScript) | The ModuleScript to read. |
 # Returns
-| {[string]: any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The module's environment.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {[string]: any} | The module's environment. |
 # Test requirements
 To pass the getmenv test, the function must:
 - Return a table for the PlayerModule's CameraWrapper ModuleScript.

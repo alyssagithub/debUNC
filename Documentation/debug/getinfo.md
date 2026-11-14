@@ -13,14 +13,17 @@ print(Info.what) --> Lua
 | | get_info |
 | | getinfo |
 # Parameters
-| Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Function: [function](https://create.roblox.com/docs/luau/functions) | The function to read. |
 # Returns
-| <pre>{<br>&nbsp;&nbsp;&nbsp;&nbsp;func: function,<br>&nbsp;&nbsp;&nbsp;&nbsp;name: string,<br>&nbsp;&nbsp;&nbsp;&nbsp;what: string,<br>&nbsp;&nbsp;&nbsp;&nbsp;numparams: number,<br>&nbsp;&nbsp;&nbsp;&nbsp;is_vararg: number,<br>&nbsp;&nbsp;&nbsp;&nbsp;nups: number,<br>}</pre>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function's information. Each key is explained below.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| <pre>{<br>&nbsp;&nbsp;&nbsp;&nbsp;func: function,<br>&nbsp;&nbsp;&nbsp;&nbsp;name: string,<br>&nbsp;&nbsp;&nbsp;&nbsp;what: string,<br>&nbsp;&nbsp;&nbsp;&nbsp;numparams: number,<br>&nbsp;&nbsp;&nbsp;&nbsp;is_vararg: number,<br>&nbsp;&nbsp;&nbsp;&nbsp;nups: number,<br>}</pre> | The function's information. Each key is explained below. |
 # Info
-| func: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function itself.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Field&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| func: [function](https://create.roblox.com/docs/luau/functions) | The function itself. |
 | name: [string](https://create.roblox.com/docs/luau/strings) | The function's name. |
 | what: [string](https://create.roblox.com/docs/luau/strings) | Lua for a Lua function and C for a C function. |
 | numparams: [number](https://create.roblox.com/docs/luau/numbers) | How many parameters it has. |

@@ -1,4 +1,9 @@
 # movefile: (Path: string, NewPath: string) -> ()
+> [!NOTE]
+> **Niche**
+>
+> This function is not widely implemented by executors, so scripts should implement proper handling in the case of an executor being unable to use this.
+
 Moves a file or folder in the workspace folder.
 ```lua
 makefolder("Logs")
@@ -7,8 +12,9 @@ movefile("Log.txt", "Logs/Log.txt")
 print(isfile("Logs/Log.txt")) --> true
 ```
 # Parameters
-| Path: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The current path.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Path: [string](https://create.roblox.com/docs/luau/strings) | The current path. |
 | NewPath: [string](https://create.roblox.com/docs/luau/strings) | The new path. |
 
 # Test requirements

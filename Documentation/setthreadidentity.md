@@ -13,8 +13,9 @@ print(getthreadidentity()) --> 2
 | setidentity |
 | setthreadcontext |
 # Parameters
-| Identity: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The new identity.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Identity: [number](https://create.roblox.com/docs/luau/numbers) | The new identity. |
 
 # Test requirements
 To pass the setthreadidentity test, the function must:

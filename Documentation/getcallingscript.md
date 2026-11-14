@@ -12,8 +12,9 @@ end)
 | :- |
 | get_calling_script |
 # Returns
-| [Instance?](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The calling script.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [Instance?](https://create.roblox.com/docs/reference/engine/classes/Instance) | The calling script. |
 
 # Test requirements
 To pass the getcallingscript test, the function must:

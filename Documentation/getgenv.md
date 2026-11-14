@@ -11,8 +11,9 @@ print(Greeting) --> Hello world!
 | get_global_environment |
 | getglobalenvironment |
 # Returns
-| {[string]: any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The executor's global environment.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {[string]: any} | The executor's global environment. |
 
 # Test requirements
 To pass the getgenv test, the function must:

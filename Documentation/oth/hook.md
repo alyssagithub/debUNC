@@ -12,12 +12,14 @@ end)
 print(Target()) --> Goodbye
 ```
 # Parameters
-| Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The C function to hook.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Function: [function](https://create.roblox.com/docs/luau/functions) | The C function to hook. |
 | Hook: (...any) -> ...any | The function to run instead. It's given the same values the original would get, and what it returns is used. |
 # Returns
-| (...any) -> ...any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | A function that runs the original. Call it from inside of the hook, with the same values you'd give the original.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| (...any) -> ...any | A function that runs the original. Call it from inside of the hook, with the same values you'd give the original. |
 
 # Test requirements
 To pass the oth.hook test, the function must:

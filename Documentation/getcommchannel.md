@@ -9,11 +9,13 @@ print(getcommchannel(ChannelId) == Channel) --> true
 | :- |
 | get_comm_channel |
 # Parameters
-| ChannelId: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The id of the channel.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| ChannelId: [number](https://create.roblox.com/docs/luau/numbers) | The id of the channel. |
 # Returns
-| [table?](https://create.roblox.com/docs/luau/tables)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The channel, or nil if it doesn't exist.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [table?](https://create.roblox.com/docs/luau/tables) | The channel, or nil if it doesn't exist. |
 
 # Test requirements
 To pass the getcommchannel test, the function must:

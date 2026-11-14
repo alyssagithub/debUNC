@@ -14,8 +14,9 @@ restoreproto(Proto)
 | :- |
 | restore_proto |
 # Parameters
-| Proto: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The hooked inner function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Proto: [function](https://create.roblox.com/docs/luau/functions) | The hooked inner function. |
 
 # Test requirements
 To pass the restoreproto test, the function must:

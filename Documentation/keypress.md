@@ -10,11 +10,12 @@ keyrelease(0x41)
 | :- |
 | key_press |
 # Parameters
-| KeyCode: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Windows key code, such as 0x41 for A.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| KeyCode: [number](https://create.roblox.com/docs/luau/numbers) | The Windows key code, such as 0x41 for A. |
 
 # Test requirements
 To pass the keypress test, the function must:
-- Press the key for the given key code (`0x4A` is J) so Roblox detects it.
+- Press the key for the given key code (`0x7C` is F13) so Roblox detects it.
 - Hold the key down until [keyrelease](keyrelease.md) releases it.
 - Reach Roblox even when the Roblox window isn't focused, without sending input to other windows.

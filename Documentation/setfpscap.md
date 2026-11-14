@@ -8,8 +8,9 @@ setfpscap(60)
 | :- |
 | set_fps_cap |
 # Parameters
-| FPSCap: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The frame rate cap.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| FPSCap: [number](https://create.roblox.com/docs/luau/numbers) | The frame rate cap. |
 
 # Test requirements
 To pass the setfpscap test, the function must:

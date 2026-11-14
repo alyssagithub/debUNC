@@ -10,8 +10,9 @@ end
 | :- |
 | get_scripts |
 # Returns
-| {[LuaSourceContainer](https://create.roblox.com/docs/reference/engine/classes/LuaSourceContainer)}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of scripts.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {[LuaSourceContainer](https://create.roblox.com/docs/reference/engine/classes/LuaSourceContainer)} | An array of scripts. |
 # Test requirements
 To pass the getscripts test, the function must:
 - Include the PlayerModule.

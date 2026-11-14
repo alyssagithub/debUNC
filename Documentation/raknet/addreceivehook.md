@@ -12,11 +12,13 @@ raknet.addreceivehook(OnReceive)
 | :- | :- |
 | raknet | add_receive_hook |
 # Parameters
-| Hook: (Packet: [Packet](Packet.md)) -> ()&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to run on each packet.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Hook: (Packet: [Packet](Packet.md)) -> () | The function to run on each packet. |
 # Returns
-| (Packet: [Packet](Packet.md)) -> ()&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The same function that was given.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| (Packet: [Packet](Packet.md)) -> () | The same function that was given. |
 
 # Test requirements
 To pass the raknet.addreceivehook test, the function must:

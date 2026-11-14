@@ -5,12 +5,14 @@ local Key = crypt.generatekey()
 local Encrypted, InitializationVector = crypt.encrypt("Hello world!", Key)
 ```
 # Parameters
-| Text: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The text to encrypt.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Text: [string](https://create.roblox.com/docs/luau/strings) | The text to encrypt. |
 | Key: [string](https://create.roblox.com/docs/luau/strings) | The key from crypt.generatekey. |
 # Returns
-| [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The encrypted text.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [string](https://create.roblox.com/docs/luau/strings) | The encrypted text. |
 | [string](https://create.roblox.com/docs/luau/strings) | The initialization vector, which you need to decrypt the text. |
 # Test requirements
 To pass the crypt.encrypt test, the function must:

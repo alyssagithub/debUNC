@@ -10,8 +10,9 @@ fireclickdetector(ClickDetector, 0, "RightMouseClick")
 | :- |
 | fire_click_detector |
 # Parameters
-| ClickDetector: [ClickDetector](https://create.roblox.com/docs/reference/engine/classes/ClickDetector)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The ClickDetector to fire.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| ClickDetector: [ClickDetector](https://create.roblox.com/docs/reference/engine/classes/ClickDetector) | The ClickDetector to fire. |
 | Distance: [number?](https://create.roblox.com/docs/luau/numbers) | How far away the click comes from. |
 | Event: [string?](https://create.roblox.com/docs/luau/strings) | Which event to fire: MouseClick, RightMouseClick, MouseHoverEnter or MouseHoverLeave. Defaults to MouseClick. |
 

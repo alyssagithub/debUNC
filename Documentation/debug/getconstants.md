@@ -16,11 +16,13 @@ end
 | | get_constants |
 | | getconstants |
 # Parameters
-| Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Function: [function](https://create.roblox.com/docs/luau/functions) | The function to read. |
 # Returns
-| {[number]: any}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function's constants by index. Some indexes can be empty.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {[number]: any} | The function's constants by index. Some indexes can be empty. |
 # Test requirements
 To pass the debug.getconstants test, the function must:
 - Return a table.

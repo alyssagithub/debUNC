@@ -17,8 +17,9 @@ Greet()
 | | set_stack |
 | | setstack |
 # Parameters
-| Level: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The stack level to change.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Level: [number](https://create.roblox.com/docs/luau/numbers) | The stack level to change. |
 | Index: [number](https://create.roblox.com/docs/luau/numbers) | The index of the value. |
 | Value: any | The new value. |
 

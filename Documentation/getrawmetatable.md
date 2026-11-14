@@ -9,11 +9,13 @@ print(typeof(Metatable.__index)) --> function
 | :- |
 | get_raw_metatable |
 # Parameters
-| Object: any&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The object to read.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Object: any | The object to read. |
 # Returns
-| [table?](https://create.roblox.com/docs/luau/tables)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The metatable.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [table?](https://create.roblox.com/docs/luau/tables) | The metatable. |
 # Test requirements
 To pass the getrawmetatable test, the function must:
 - Return the same metatable every time it's called on the same object.

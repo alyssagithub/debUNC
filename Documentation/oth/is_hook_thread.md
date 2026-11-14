@@ -8,8 +8,9 @@ print(oth.is_hook_thread()) --> false
 | :- | :- |
 | oth | ishookthread |
 # Returns
-| [boolean](https://create.roblox.com/docs/luau/booleans)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Whether or not it's a hook thread.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [boolean](https://create.roblox.com/docs/luau/booleans) | Whether or not it's a hook thread. |
 
 # Test requirements
 To pass the oth.is_hook_thread test, the function must:

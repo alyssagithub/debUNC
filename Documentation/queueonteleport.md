@@ -10,5 +10,10 @@ queueonteleport("print('Teleported!')")
 | queue_teleport |
 | queueteleport |
 # Parameters
-| Code: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The code to run.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Code: [string](https://create.roblox.com/docs/luau/strings) | The code to run. |
+
+# Test requirements
+To pass the queueonteleport test, the function must:
+- Run the queued code after the player teleports, when debUNC is run with `shared.TeleportTests = true`.

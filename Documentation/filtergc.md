@@ -9,16 +9,19 @@ print(filtergc("table", {Keys = {"Secret"}}, true) == Marker) --> true
 | :- |
 | filter_gc |
 # Parameters
-| Type: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Either table or function.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Type: [string](https://create.roblox.com/docs/luau/strings) | Either table or function. |
 | Options: <pre>{<br>&nbsp;&nbsp;&nbsp;&nbsp;Keys: {any}?,<br>&nbsp;&nbsp;&nbsp;&nbsp;Values: {any}?,<br>&nbsp;&nbsp;&nbsp;&nbsp;KeyValuePairs: {[any]: any}?,<br>&nbsp;&nbsp;&nbsp;&nbsp;Metatable: table?,<br>&nbsp;&nbsp;&nbsp;&nbsp;Name: string?,<br>&nbsp;&nbsp;&nbsp;&nbsp;IgnoreExecutor: boolean?,<br>}</pre> | What to search for, such as Keys or Name. |
 | ReturnOne: [boolean?](https://create.roblox.com/docs/luau/booleans) | Whether to return the first match only. |
 # Returns
-| {function \| table} \| function \| table \| nil&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of matches, or the first match.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {function \| table} \| function \| table \| nil | An array of matches, or the first match. |
 # Options
-| Keys: [table?](https://create.roblox.com/docs/luau/tables)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | For tables, keys that the table has to have.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Option&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Keys: [table?](https://create.roblox.com/docs/luau/tables) | For tables, keys that the table has to have. |
 | Values: [table?](https://create.roblox.com/docs/luau/tables) | For tables, values that the table has to have. |
 | KeyValuePairs: [table?](https://create.roblox.com/docs/luau/tables) | For tables, keys that the table has to have with those exact values. |
 | Metatable: [table?](https://create.roblox.com/docs/luau/tables) | For tables, the metatable that the table has to have. |

@@ -11,8 +11,9 @@ print(getmetatable(Proxy) == Metatable) --> true
 | :- |
 | set_raw_metatable |
 # Parameters
-| Object: userdata \| table&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The object to change.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Object: userdata \| table | The object to change. |
 | Metatable: [table](https://create.roblox.com/docs/luau/tables) | The new metatable. |
 
 # Test requirements

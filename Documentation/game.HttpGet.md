@@ -5,12 +5,14 @@ local Body = game:HttpGet("https://httpbin.org/get")
 print(Body)
 ```
 # Parameters
-| Url: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The url to request.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Url: [string](https://create.roblox.com/docs/luau/strings) | The url to request. |
 | NoCache: [boolean](https://create.roblox.com/docs/luau/booleans)? | Whether to skip a cached response from an earlier request to the same url. |
 # Returns
-| [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The body of the response.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [string](https://create.roblox.com/docs/luau/strings) | The body of the response. |
 
 # Test requirements
 To pass the game.HttpGet test, the function must:

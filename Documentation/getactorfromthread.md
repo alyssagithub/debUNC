@@ -7,11 +7,13 @@ Actor.Parent = workspace
 runonactor(Actor, "print(getactorfromthread(coroutine.running()))")
 ```
 # Parameters
-| Thread: [thread](https://create.roblox.com/docs/reference/engine/libraries/coroutine)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The thread to check.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Thread: [thread](https://create.roblox.com/docs/reference/engine/libraries/coroutine) | The thread to check. |
 # Returns
-| [Actor?](https://create.roblox.com/docs/reference/engine/classes/Actor)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Actor, or nil if it doesn't belong to one.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| [Actor?](https://create.roblox.com/docs/reference/engine/classes/Actor) | The Actor, or nil if it doesn't belong to one. |
 
 # Test requirements
 To pass the getactorfromthread test, the function must:

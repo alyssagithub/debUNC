@@ -1,4 +1,9 @@
 # getoriginalenv: (Object: (userdata | table)?) -> {[string]: any} | userdata | table
+> [!NOTE]
+> **Niche**
+>
+> This function is not widely implemented by executors, so scripts should implement proper handling in the case of an executor being unable to use this.
+
 Returns a frozen environment with every function as it originally was, even if it was hooked or replaced. Passing an object or metatable returns it with its original metatable and methods.
 ```lua
 local Original
@@ -14,11 +19,13 @@ game:HttpGet("https://example.com") --> Spied on https://example.com
 getoriginalenv(game):HttpGet("https://example.com") --> (nothing printed)
 ```
 # Parameters
-| Object: (userdata \| table)?&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An object or table to get with its original metatable and methods. Leave it out to get the original environment.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Object: (userdata \| table)? | An object or table to get with its original metatable and methods. Leave it out to get the original environment. |
 # Returns
-| {[string]: any} \| userdata \| table&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The original environment, or the object with its original metatable and methods.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {[string]: any} \| userdata \| table | The original environment, or the object with its original metatable and methods. |
 
 # Test requirements
 To pass the getoriginalenv test, the function must:

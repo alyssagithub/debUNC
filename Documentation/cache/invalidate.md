@@ -7,8 +7,9 @@ cache.invalidate(Folder:FindFirstChild("Part"))
 print(rawequal(Part, Folder:FindFirstChild("Part"))) --> false
 ```
 # Parameters
-| Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Instance to remove from the cache.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance) | The Instance to remove from the cache. |
 # Test requirements
 To pass the cache.invalidate test, the function must:
 - Remove the instance from the cache, so looking it up again gives a new reference.

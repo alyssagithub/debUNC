@@ -8,8 +8,9 @@ mousemoveabs(100, 100)
 | :- |
 | mouse_move_abs |
 # Parameters
-| X: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The X position.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| X: [number](https://create.roblox.com/docs/luau/numbers) | The X position. |
 | Y: [number](https://create.roblox.com/docs/luau/numbers) | The Y position. |
 
 # Test requirements

@@ -17,8 +17,9 @@ print(Hook() == "Hook") --> false
 | :- |
 | sethiddenstack |
 # Parameters
-| Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to hide or show.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Function: [function](https://create.roblox.com/docs/luau/functions) | The function to hide or show. |
 | Hidden: [boolean](https://create.roblox.com/docs/luau/booleans) | Whether to hide it. |
 
 # Test requirements

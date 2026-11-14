@@ -8,8 +8,9 @@ mousemoverel(25, 25)
 | :- |
 | mouse_move_rel |
 # Parameters
-| X: [number](https://create.roblox.com/docs/luau/numbers)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | How far to move on the X axis.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| X: [number](https://create.roblox.com/docs/luau/numbers) | How far to move on the X axis. |
 | Y: [number](https://create.roblox.com/docs/luau/numbers) | How far to move on the Y axis. |
 
 # Test requirements

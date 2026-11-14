@@ -9,11 +9,13 @@ print(Sword.Name) --> LinkedSword
 | :- |
 | get_objects |
 # Parameters
-| Asset: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The rbxassetid:// id of the asset.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Asset: [string](https://create.roblox.com/docs/luau/strings) | The rbxassetid:// id of the asset. |
 # Returns
-| {[Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of Instances.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {[Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)} | An array of Instances. |
 # Test requirements
 To pass the getobjects test, the function must:
 - Return a table for `rbxassetid://125013769`.

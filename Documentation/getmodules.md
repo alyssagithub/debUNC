@@ -6,8 +6,9 @@ for _, Module in getmodules() do
 end
 ```
 # Returns
-| {[ModuleScript](https://create.roblox.com/docs/reference/engine/classes/ModuleScript)}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | An array of ModuleScripts.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Type&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| {[ModuleScript](https://create.roblox.com/docs/reference/engine/classes/ModuleScript)} | An array of ModuleScripts. |
 # Test requirements
 To pass the getmodules test, the function must:
 - Return a table.

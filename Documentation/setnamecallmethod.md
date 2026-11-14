@@ -15,8 +15,9 @@ Proxy:Original()
 | :- |
 | set_namecall_method |
 # Parameters
-| Method: [string](https://create.roblox.com/docs/luau/strings)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The new method name.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Method: [string](https://create.roblox.com/docs/luau/strings) | The new method name. |
 
 # Test requirements
 To pass the setnamecallmethod test, the function must:

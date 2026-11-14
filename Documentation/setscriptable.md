@@ -11,8 +11,9 @@ setscriptable(Fire, "size_xml", false)
 | :- |
 | set_scriptable |
 # Parameters
-| Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The Instance with the property.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Object: [Instance](https://create.roblox.com/docs/reference/engine/classes/Instance) | The Instance with the property. |
 | Property: [string](https://create.roblox.com/docs/luau/strings) | The name of the property. |
 | Scriptable: [boolean](https://create.roblox.com/docs/luau/booleans) | Whether or not it should be scriptable. |
 

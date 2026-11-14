@@ -10,8 +10,9 @@ print(debug.info(Greet, "n")) --> Hello
 | :- | :- |
 | debug | set_info |
 # Parameters
-| Function: [function](https://create.roblox.com/docs/luau/functions)&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | The function to change.&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
+| Parameter&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; | Description&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |
 | :-------- | :------- |
+| Function: [function](https://create.roblox.com/docs/luau/functions) | The function to change. |
 | Info: <pre>{<br>&nbsp;&nbsp;&nbsp;&nbsp;name: string?,<br>}</pre> | The information to set, such as name. |
 
 # Test requirements
